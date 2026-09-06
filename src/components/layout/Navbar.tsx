@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { Menu, X, ArrowRight, Terminal, Cpu, Layers, ShieldCheck, HelpCircle, BookOpen } from "lucide-react";
+import { Menu, X, ArrowRight, Terminal, Cpu, Layers, ShieldCheck, HelpCircle, BookOpen, Compass } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -29,6 +29,7 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { label: "Products", href: "/products", icon: Layers },
+    { label: "Architectures", href: "/architectures", icon: Compass },
     { label: "Features", href: "/#features", icon: Cpu },
     { label: "How It Works", href: "/how-it-works", icon: Terminal },
     { label: "Themes", href: "/themes", icon: Layers },

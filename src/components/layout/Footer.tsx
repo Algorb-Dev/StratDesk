@@ -49,6 +49,13 @@ export const Footer: React.FC = () => {
               <span className="text-[9px] text-warning/80 font-normal ml-1">Command</span>
             </Link>
             <Link
+              href="/architectures"
+              className="text-text-secondary hover:text-accent transition-colors flex items-center gap-1 group"
+            >
+              <span>20 Architectures</span>
+              <span className="text-[9px] text-accent/80 font-normal ml-1">New</span>
+            </Link>
+            <Link
               href="/themes"
               className="text-text-secondary hover:text-accent transition-colors"
             >

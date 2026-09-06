@@ -3,6 +3,7 @@ import { Hero } from "@/components/hero/Hero";
 import { CredibilityStrip } from "@/components/hero/CredibilityStrip";
 import { TheProblem } from "@/components/home/TheProblem";
 import { ProductCards } from "@/components/products/ProductCards";
+import { ArchitecturesShowcase } from "@/components/home/ArchitecturesShowcase";
 import { FeatureShowcase } from "@/components/features/FeatureShowcase";
 import { BotArchitecture } from "@/components/architecture/BotArchitecture";
 import { HowItWorksSteps } from "@/components/home/HowItWorksSteps";
@@ -21,6 +22,7 @@ export default function HomePage() {
       <CredibilityStrip />
       <TheProblem />
       <ProductCards />
+      <ArchitecturesShowcase />
       <FeatureShowcase />
       <BotArchitecture />
       <HowItWorksSteps />
