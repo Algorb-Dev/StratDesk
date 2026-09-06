@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Link from "next/link";
 import {
   ARCHITECTURES_DATA,
   ARCHITECTURE_CATEGORIES,
@@ -19,6 +20,7 @@ import {
   ChevronRight,
   Layers,
   Sparkles,
+  Sliders,
 } from "lucide-react";
 
 interface ArchitectureMatrixProps {
@@ -249,17 +251,27 @@ export const ArchitectureMatrix: React.FC<ArchitectureMatrixProps> = ({
               {/* Card Footer Actions */}
               <div
                 className={cn(
-                  "p-3.5 border-t flex items-center justify-between gap-2 select-none",
+                  "p-3.5 border-t flex flex-wrap items-center justify-between gap-2 select-none",
                   isLight ? "border-slate-200 bg-slate-50/70" : "border-white/5 bg-black/30"
                 )}
               >
-                <button
-                  onClick={() => setActiveModalBlueprint(blueprint)}
-                  className="px-3 py-1.5 rounded-lg border border-white/10 hover:border-accent text-white font-bold text-[10px] uppercase hover:bg-white/5 transition-all flex items-center gap-1"
-                >
-                  <span>TEST WIDGET</span>
-                  <ChevronRight className="w-3 h-3 text-accent" />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setActiveModalBlueprint(blueprint)}
+                    className="px-2.5 py-1.5 rounded-lg border border-white/10 hover:border-accent text-white font-bold text-[10px] uppercase hover:bg-white/5 transition-all flex items-center gap-1"
+                  >
+                    <span>TEST WIDGET</span>
+                    <ChevronRight className="w-3 h-3 text-accent" />
+                  </button>
+                  <Link
+                    href={`/?archetype=${blueprint.id}&tier=${blueprint.recommendedTier}#dashboard-lab`}
+                    className="px-2.5 py-1.5 rounded-lg border border-accent/30 text-accent hover:bg-accent/10 font-bold text-[10px] uppercase transition-all flex items-center gap-1"
+                    title="Launch in Dashboard Lab"
+                  >
+                    <Sliders className="w-3 h-3" />
+                    <span>LAB</span>
+                  </Link>
+                </div>
 
                 <a
                   href={productTier.whopCheckoutUrl}

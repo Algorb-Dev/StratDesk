@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Layers,
   ChevronRight,
+  Sliders,
 } from "lucide-react";
 
 export const ArchitecturesShowcase: React.FC = () => {
@@ -139,13 +140,22 @@ export const ArchitecturesShowcase: React.FC = () => {
               <h3 className="font-bold text-base text-white">{activeBlueprint.title}</h3>
             </div>
 
-            <Link
-              href="/architectures"
-              className="text-[10px] text-text-muted hover:text-white uppercase font-bold flex items-center gap-1 transition-colors"
-            >
-              <span>Inspect Full Blueprint</span>
-              <ExternalLink className="w-3 h-3" />
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/?archetype=${activeBlueprint.id}&tier=${activeBlueprint.recommendedTier}#dashboard-lab`}
+                className="px-2.5 py-1 rounded text-[10px] text-accent border border-accent/30 hover:bg-accent/10 uppercase font-bold flex items-center gap-1 transition-all"
+              >
+                <Sliders className="w-3 h-3" />
+                <span>Launch in Lab</span>
+              </Link>
+              <Link
+                href="/architectures"
+                className="text-[10px] text-text-muted hover:text-white uppercase font-bold flex items-center gap-1 transition-colors"
+              >
+                <span>Full Blueprint</span>
+                <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
           </div>
 
           {/* Description & Target Persona */}

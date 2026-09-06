@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { THEMES } from "@/data/themes";
 import { DEMO_METRICS } from "@/data/demo-data";
+import { ARCHITECTURES_DATA, ArchitectureBlueprint } from "@/data/architectures-data";
+import { KillerWidgetSimulator } from "@/components/architectures/KillerWidgetSimulator";
 import { MetricCard } from "./MetricCard";
 import { EquityChart } from "./EquityChart";
 import { PositionsTable } from "./PositionsTable";
@@ -9,7 +11,7 @@ import { ControlBar } from "./ControlBar";
 import { TradeLedger } from "@/components/ledger/TradeLedger";
 import { AlgorbSymbol } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
-import { Activity, ShieldAlert, Cpu, Wifi, Power, BookOpen } from "lucide-react";
+import { Activity, ShieldAlert, Cpu, Wifi, Power, BookOpen, Zap, Terminal } from "lucide-react";
 
 export interface DashboardPreviewProps {
   product?: "view" | "control";
@@ -17,6 +19,164 @@ export interface DashboardPreviewProps {
   className?: string;
   isHero?: boolean;
   initialControlTab?: "hud" | "ledger";
+  archetypeId?: string;
+}
+
+const ARCHETYPE_ALIAS_MAP: Record<string, string> = {
+  "prop-firm": "prop-firm-evaluator-console",
+  "crypto-arbitrage": "crypto-arbitrage-matrix",
+  "stat-arb": "pair-trading-statarb-console",
+  "dex-sniper": "on-chain-dex-sniper",
+  "raw-cli": "raw-developer-terminal-cli",
+  "cro-redline": "chief-risk-officer-red-line",
+  "options-cockpit": "options-volatility-surface",
+};
+
+function getArchetypeTelemetry(canonicalId: string, isLight: boolean) {
+  switch (canonicalId) {
+    case "crypto-arbitrage-matrix":
+      return {
+        status: "2 VENUES LIVE",
+        metric1Icon: <Wifi className={cn("w-3 h-3", isLight ? "text-sky-600" : "text-accent")} />,
+        metric1Text: "1.1ms BINANCE / 1.4ms BYBIT",
+        metric2Icon: <Cpu className="w-3 h-3" />,
+        metric2Text: "DUAL-SOCKET ARB",
+        badgeText: "ARB-V3 / SUB-MS",
+      };
+    case "prop-firm-evaluator-console":
+      return {
+        status: "COMPLIANCE OK",
+        metric1Icon: <ShieldAlert className={cn("w-3 h-3", isLight ? "text-amber-600" : "text-warning")} />,
+        metric1Text: "$3,150 CUSHION REMAINING",
+        metric2Icon: <Cpu className="w-3 h-3" />,
+        metric2Text: "FTMO $5K LOSS CEIL",
+        badgeText: "HALO-LOCK v2.1",
+      };
+    case "pair-trading-statarb-console":
+      return {
+        status: "Z-SCORE +2.18σ",
+        metric1Icon: <Activity className={cn("w-3 h-3", isLight ? "text-sky-600" : "text-accent")} />,
+        metric1Text: "0.8ms ATOMIC DISPATCH",
+        metric2Icon: <Cpu className="w-3 h-3" />,
+        metric2Text: "BTC/ETH COINTEGRATED",
+        badgeText: "STATARB-KALMAN v4.0",
+      };
+    case "on-chain-dex-sniper":
+      return {
+        status: "MEMPOOL SCANNING",
+        metric1Icon: <Zap className={cn("w-3 h-3", isLight ? "text-amber-600" : "text-warning")} />,
+        metric1Text: "32 GWEI • 380ms BLOCK",
+        metric2Icon: <Cpu className="w-3 h-3" />,
+        metric2Text: "HONEYPOT GUARD 100/100",
+        badgeText: "JITO-FAST v1.8",
+      };
+    case "raw-developer-terminal-cli":
+      return {
+        status: "CLI TTY ACTIVE",
+        metric1Icon: <Terminal className={cn("w-3 h-3", isLight ? "text-slate-700" : "text-accent")} />,
+        metric1Text: "4.2k LINES • 0.4ms IPC",
+        metric2Icon: <Cpu className="w-3 h-3" />,
+        metric2Text: "HEADLESS DAEMON",
+        badgeText: "C-SHM-PTY v1.0",
+      };
+    case "chief-risk-officer-red-line":
+      return {
+        status: "RED-LINE ARMED",
+        metric1Icon: <ShieldAlert className={cn("w-3 h-3", isLight ? "text-red-600" : "text-danger")} />,
+        metric1Text: "99% VaR: $842.10 (3.4%)",
+        metric2Icon: <Cpu className="w-3 h-3" />,
+        metric2Text: "5 BOTS POOLED",
+        badgeText: "KILL-SWITCH ARMED",
+      };
+    case "options-volatility-surface":
+      return {
+        status: "DELTA-NEUTRAL",
+        metric1Icon: <Activity className={cn("w-3 h-3", isLight ? "text-sky-600" : "text-accent")} />,
+        metric1Text: "Δ: +0.08 • Γ: +0.42",
+        metric2Icon: <Cpu className="w-3 h-3" />,
+        metric2Text: "120Hz BLACK-SCHOLES",
+        badgeText: "VOL-GREEKS v2.4",
+      };
+    default:
+      return {
+        status: `BOT: ${DEMO_METRICS.botStatus}`,
+        metric1Icon: <Wifi className={cn("w-3 h-3", isLight ? "text-sky-600" : "text-accent")} />,
+        metric1Text: `${DEMO_METRICS.heartbeatMs}ms IPC`,
+        metric2Icon: <Cpu className="w-3 h-3" />,
+        metric2Text: DEMO_METRICS.environment,
+        badgeText: DEMO_METRICS.adapterVersion,
+      };
+  }
+}
+
+function getArchetypeMetricCards(canonicalId: string) {
+  switch (canonicalId) {
+    case "prop-firm-evaluator-console":
+      return [
+        { label: "EQUITY (NAV)", value: "$102,450.00", delta: "+2.45%", isPositive: true, subtext: "Starting: $100,000" },
+        { label: "DAILY P&L", value: "-$1,850.00", delta: "-1.85%", isPositive: false, subtext: "Daily Cap: -$5,000.00" },
+        { label: "DRAWDOWN CUSHION", value: "$3,150.00", delta: "63% Buffer", isPositive: true, subtext: "Hard Lockout at -$4.5k" },
+        { label: "PROFIT TARGET", value: "$2,450.00", delta: "24.5% Met", isPositive: true, subtext: "Target: $10,000 (10%)" },
+        { label: "TRADING DAYS", value: "6 / 4 DAYS", delta: "Passed", isPositive: true, subtext: "Min Required: 4 Days" },
+        { label: "COMPLIANCE", value: "SAFE ZONE", badge: "ACTIVE", pulse: true, subtext: "Phase 1 Verified" },
+      ];
+    case "crypto-arbitrage-matrix":
+      return [
+        { label: "NET SPREAD", value: "+18.4 BPS", delta: ">10 bps Min", isPositive: true, subtext: "Peak: 24.2 bps" },
+        { label: "BINANCE (LEG A)", value: "$68,420.50", delta: "14.8 BTC", isPositive: true, subtext: "Ask: $68,421.20" },
+        { label: "BYBIT (LEG B)", value: "$68,340.20", delta: "22.4 BTC", isPositive: true, subtext: "Bid: $68,339.80" },
+        { label: "TODAY'S ARB P&L", value: "+$1,842.20", delta: "+14.2%", isPositive: true, subtext: "Maker Rebates: $412" },
+        { label: "DUAL PING", value: "1.1ms / 1.4ms", delta: "Sync OK", isPositive: true, subtext: "AWS Tokyo Fastpath" },
+        { label: "ARB ENGINE", value: "DUAL-MAKER", badge: "STREAMING", pulse: true, subtext: "Auto-Rebalance On" },
+      ];
+    case "pair-trading-statarb-console":
+      return [
+        { label: "SPREAD Z-SCORE", value: "+2.18σ", delta: "Revert Signal", isPositive: false, subtext: "Threshold: ±2.00σ" },
+        { label: "PAIR RATIO", value: "0.0542", delta: "Beta: 1.24", isPositive: true, subtext: "BTC / ETH Spread" },
+        { label: "HALF-LIFE", value: "14.2 MIN", delta: "Fast Decay", isPositive: true, subtext: "Cointegration p=0.01" },
+        { label: "TODAY'S P&L", value: "+$1,420.00", delta: "18 Fills", isPositive: true, subtext: "Mean Reversion Fills" },
+        { label: "IPC DISPATCH", value: "0.8ms", delta: "Atomic 2-Leg", isPositive: true, subtext: "Zero Leg Imbalance" },
+        { label: "REGIME", value: "MEAN-REV", badge: "ARMED", pulse: true, subtext: "Target: 0.00σ Exit" },
+      ];
+    case "on-chain-dex-sniper":
+      return [
+        { label: "MEMPOOL QUEUE", value: "14 TX PEND", delta: "Block #2894", isPositive: true, subtext: "Solana / EVM RPC" },
+        { label: "GAS PRIORITY", value: "32 GWEI", delta: "0.005 SOL", isPositive: true, subtext: "Slot Target: #1" },
+        { label: "SAFETY AUDIT", value: "100/100", delta: "Passed", isPositive: true, subtext: "Honeypot / Mint Guard" },
+        { label: "BLOCK CONFIRM", value: "380ms", delta: "Sub-Second", isPositive: true, subtext: "Jito MEV Stream" },
+        { label: "SNIPE PROFIT", value: "+4.82 SOL", delta: "72% Win", isPositive: true, subtext: "5 Tokens Scanned" },
+        { label: "SNIPER ENGINE", value: "LISTENING", badge: "ARMED", pulse: true, subtext: "Min Liq: 5.0 SOL" },
+      ];
+    case "raw-developer-terminal-cli":
+      return [
+        { label: "STDOUT BUFFER", value: "4,210 LINES", delta: "Ring 100%", isPositive: true, subtext: "115200 Baud PTY" },
+        { label: "SHM IPC PING", value: "0.4ms", delta: "Zero-Copy", isPositive: true, subtext: "C Shared Memory" },
+        { label: "HEAP ALLOC", value: "18.4 MB", delta: "Zero GC", isPositive: true, subtext: "Resident Set: 24MB" },
+        { label: "SESSION P&L", value: "+$2,480.00", delta: "32 Fills", isPositive: true, subtext: "Peak: +$2,510.00" },
+        { label: "DISPATCH RATE", value: "2,400 MSG/S", delta: "0% Drops", isPositive: true, subtext: "Pinned Core #4" },
+        { label: "CLI RUNTIME", value: "HEADLESS", badge: "DAEMON", pulse: true, subtext: "PID: 49102 Live" },
+      ];
+    case "chief-risk-officer-red-line":
+      return [
+        { label: "PORTFOLIO VaR", value: "$842.10 (3.4%)", delta: "99% Conf 1D", isPositive: true, subtext: "Ceiling: 5.00%" },
+        { label: "GROSS LEVERAGE", value: "3.2x", delta: "Max 5.0x", isPositive: true, subtext: "Liq Dist: 34%" },
+        { label: "FREE MARGIN", value: "65.8%", delta: "Safe Margin", isPositive: true, subtext: "Used: $8,420.00" },
+        { label: "ACTIVE BOTS", value: "5 RUNNING", delta: "Reconciled", isPositive: true, subtext: "Binance, Bybit, OKX" },
+        { label: "DRAWDOWN CEIL", value: "-4.21%", delta: "Max -10%", isPositive: true, subtext: "Buffer: 5.8%" },
+        { label: "RED LINE", value: "ARMED", badge: "RED LINE", pulse: true, subtext: "Slide to Flatten" },
+      ];
+    case "options-volatility-surface":
+      return [
+        { label: "PORTFOLIO DELTA", value: "+0.08 Δ", delta: "Neutral", isPositive: true, subtext: "Band: ±0.15" },
+        { label: "NET GAMMA", value: "+0.42 Γ", delta: "Pos Gamma", isPositive: true, subtext: "Scalp Trigger: 0.50" },
+        { label: "DAILY THETA", value: "+$420.00 Θ", delta: "Harvest", isPositive: true, subtext: "Annual: +$153k" },
+        { label: "VEGA EXPOSURE", value: "-$180.00 ν", delta: "Short Vol", isPositive: true, subtext: "Per 1% IV Drop" },
+        { label: "IMPLIED VOL", value: "54.2% IV", delta: "Skew +4.2%", isPositive: true, subtext: "HV 30D: 48.0%" },
+        { label: "GREEKS ENGINE", value: "ACTIVE", badge: "120Hz", pulse: true, subtext: "Black-Scholes OK" },
+      ];
+    default:
+      return null;
+  }
 }
 
 export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
@@ -25,10 +185,17 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   className,
   isHero = false,
   initialControlTab = "hud",
+  archetypeId = "default",
 }) => {
   const [controlView, setControlView] = useState<"hud" | "ledger">(initialControlTab);
   const activeTheme = THEMES.find((t) => t.id === theme) || THEMES[1]; // fallback to Obsidian
   const isLight = theme === "light";
+
+  const canonicalArchetypeId = ARCHETYPE_ALIAS_MAP[archetypeId] || archetypeId;
+  const activeBlueprint = ARCHITECTURES_DATA.find(
+    (b) => b.id === canonicalArchetypeId || b.id === archetypeId
+  );
+  const isArchetypeActive = Boolean(activeBlueprint && archetypeId !== "default");
 
   const themeStyle = {
     "--theme-bg": activeTheme.colors.bg,
@@ -38,6 +205,9 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     "--theme-text": activeTheme.colors.text,
     "--theme-muted": activeTheme.colors.muted,
   } as React.CSSProperties;
+
+  const telemetry = getArchetypeTelemetry(canonicalArchetypeId, isLight);
+  const archetypeMetricCards = getArchetypeMetricCards(canonicalArchetypeId);
 
   return (
     <div
@@ -97,24 +267,24 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
                 <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", isLight ? "bg-emerald-500" : "bg-success")} />
                 <span className={cn("relative inline-flex rounded-full h-2 w-2", isLight ? "bg-emerald-600" : "bg-success")} />
               </span>
-              <span className="font-bold">BOT: {DEMO_METRICS.botStatus}</span>
+              <span className="font-bold">{telemetry.status}</span>
             </div>
 
             <div className={cn("hidden md:flex items-center gap-1.5", isLight ? "text-slate-600 font-medium" : "text-text-muted")}>
-              <Wifi className={cn("w-3 h-3", isLight ? "text-sky-600" : "text-accent")} />
-              <span>{DEMO_METRICS.heartbeatMs}ms IPC</span>
+              {telemetry.metric1Icon}
+              <span>{telemetry.metric1Text}</span>
             </div>
 
             <div className={cn("hidden lg:flex items-center gap-1.5", isLight ? "text-slate-600 font-medium" : "text-text-secondary")}>
-              <Cpu className="w-3 h-3" />
-              <span>{DEMO_METRICS.environment}</span>
+              {telemetry.metric2Icon}
+              <span>{telemetry.metric2Text}</span>
             </div>
 
             <div className={cn(
               "text-[9px] px-1.5 py-0.5 rounded border font-medium",
               isLight ? "text-slate-700 bg-slate-100 border-slate-200" : "text-text-muted bg-black/20 border-white/5"
             )}>
-              {DEMO_METRICS.adapterVersion}
+              {telemetry.badgeText}
             </div>
           </div>
         </div>
@@ -174,54 +344,72 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           <>
             {/* Metric Cards Row */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-              <MetricCard
-                label="EQUITY (NAV)"
-                value={DEMO_METRICS.equityFormatted}
-                delta={DEMO_METRICS.dailyPnlPercent}
-                isPositive={true}
-                subtext="Peak: $25,120.00"
-                isLight={isLight}
-              />
-              <MetricCard
-                label="TODAY'S P&L"
-                value={DEMO_METRICS.dailyPnlFormatted}
-                delta={DEMO_METRICS.dailyPnlPercent}
-                isPositive={true}
-                subtext="Unrealized: +$882"
-                isLight={isLight}
-              />
-              <MetricCard
-                label="TOTAL RETURN"
-                value={DEMO_METRICS.totalReturn}
-                delta="+14.2%"
-                isPositive={true}
-                subtext="Annualized: 210%"
-                isLight={isLight}
-              />
-              <MetricCard
-                label="MAX DRAWDOWN"
-                value={DEMO_METRICS.drawdown}
-                delta="Safe"
-                isPositive={true}
-                subtext={`Ceiling: ${DEMO_METRICS.maxDrawdown}`}
-                isLight={isLight}
-              />
-              <MetricCard
-                label="WIN RATE"
-                value={DEMO_METRICS.winRate}
-                delta="72/100"
-                isPositive={true}
-                subtext={`Profit Factor: ${DEMO_METRICS.profitFactor}`}
-                isLight={isLight}
-              />
-              <MetricCard
-                label="BOT STATUS"
-                value={DEMO_METRICS.botStatus}
-                badge="ACTIVE"
-                pulse={true}
-                subtext={`Uptime: ${DEMO_METRICS.uptime}`}
-                isLight={isLight}
-              />
+              {archetypeMetricCards ? (
+                archetypeMetricCards.map((card, idx) => (
+                  <MetricCard
+                    key={idx}
+                    label={card.label}
+                    value={card.value}
+                    delta={card.delta}
+                    isPositive={card.isPositive ?? true}
+                    subtext={card.subtext}
+                    badge={card.badge}
+                    pulse={card.pulse}
+                    isLight={isLight}
+                  />
+                ))
+              ) : (
+                <>
+                  <MetricCard
+                    label="EQUITY (NAV)"
+                    value={DEMO_METRICS.equityFormatted}
+                    delta={DEMO_METRICS.dailyPnlPercent}
+                    isPositive={true}
+                    subtext="Peak: $25,120.00"
+                    isLight={isLight}
+                  />
+                  <MetricCard
+                    label="TODAY'S P&L"
+                    value={DEMO_METRICS.dailyPnlFormatted}
+                    delta={DEMO_METRICS.dailyPnlPercent}
+                    isPositive={true}
+                    subtext="Unrealized: +$882"
+                    isLight={isLight}
+                  />
+                  <MetricCard
+                    label="TOTAL RETURN"
+                    value={DEMO_METRICS.totalReturn}
+                    delta="+14.2%"
+                    isPositive={true}
+                    subtext="Annualized: 210%"
+                    isLight={isLight}
+                  />
+                  <MetricCard
+                    label="MAX DRAWDOWN"
+                    value={DEMO_METRICS.drawdown}
+                    delta="Safe"
+                    isPositive={true}
+                    subtext={`Ceiling: ${DEMO_METRICS.maxDrawdown}`}
+                    isLight={isLight}
+                  />
+                  <MetricCard
+                    label="WIN RATE"
+                    value={DEMO_METRICS.winRate}
+                    delta="72/100"
+                    isPositive={true}
+                    subtext={`Profit Factor: ${DEMO_METRICS.profitFactor}`}
+                    isLight={isLight}
+                  />
+                  <MetricCard
+                    label="BOT STATUS"
+                    value={DEMO_METRICS.botStatus}
+                    badge="ACTIVE"
+                    pulse={true}
+                    subtext={`Uptime: ${DEMO_METRICS.uptime}`}
+                    isLight={isLight}
+                  />
+                </>
+              )}
             </div>
 
             {/* If Control Mode: Render Interactive Control Bus */}
@@ -229,12 +417,35 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
             {/* Middle Section: Equity Chart & Risk / Allocation Gauges */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
-              {/* Main Interactive Chart */}
+              {/* Main Interactive Chart OR Killer Widget Simulator */}
               <div className={cn(
                 "lg:col-span-2 p-3 sm:p-4 rounded-lg flex flex-col border transition-colors",
                 isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
               )}>
-                <EquityChart accentColor={isLight ? "#0284c7" : activeTheme.colors.accent} isLight={isLight} />
+                {isArchetypeActive && activeBlueprint ? (
+                  <div className="flex flex-col gap-3">
+                    <div className={cn(
+                      "flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b",
+                      isLight ? "border-slate-200" : "border-white/10"
+                    )}>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                        <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
+                          {activeBlueprint.killerWidget.badge}
+                        </span>
+                        <span className={cn("text-xs font-bold uppercase", isLight ? "text-slate-900" : "text-white")}>
+                          {activeBlueprint.title}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-text-muted font-bold font-mono">
+                        LIVE INTERACTIVE SIMULATION
+                      </span>
+                    </div>
+                    <KillerWidgetSimulator blueprint={activeBlueprint} isLight={isLight} />
+                  </div>
+                ) : (
+                  <EquityChart accentColor={isLight ? "#0284c7" : activeTheme.colors.accent} isLight={isLight} />
+                )}
               </div>
 
               {/* Realtime Risk & Margin Radar */}

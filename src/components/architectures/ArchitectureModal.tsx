@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect } from "react";
+import Link from "next/link";
 import { ArchitectureBlueprint } from "@/data/architectures-data";
 import { PRODUCTS } from "@/data/products";
 import { KillerWidgetSimulator } from "./KillerWidgetSimulator";
 import { AlgorbSymbol } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { X, ShieldCheck, ArrowRight, Zap, ExternalLink, Activity, Terminal } from "lucide-react";
+import { X, ShieldCheck, ArrowRight, Zap, ExternalLink, Activity, Terminal, Sliders } from "lucide-react";
 
 interface ArchitectureModalProps {
   blueprint: ArchitectureBlueprint | null;
@@ -188,13 +189,21 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
             <span>Ready-to-use template in {productTier.name}. Compatible with all 6 themes.</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={onClose}
               className="px-3 py-2 rounded text-xs text-text-muted hover:text-white transition-colors"
             >
               Back to Explorer
             </button>
+            <Link
+              href={`/?archetype=${blueprint.id}&tier=${blueprint.recommendedTier}#dashboard-lab`}
+              onClick={onClose}
+              className="px-3.5 py-2 rounded-lg border border-accent/40 text-accent hover:bg-accent/10 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              <span>LAUNCH IN DASHBOARD LAB</span>
+            </Link>
             <a
               href={productTier.whopCheckoutUrl}
               target="_blank"
