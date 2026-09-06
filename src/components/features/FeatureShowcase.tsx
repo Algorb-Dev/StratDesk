@@ -90,20 +90,20 @@ export const FeatureShowcase: React.FC = () => {
 
       case "positions":
         return (
-          <div className="w-full h-32 p-2.5 bg-black/40 rounded-lg border border-white/5 flex flex-col justify-around font-mono text-[10px]">
-            <div className="flex items-center justify-between p-1.5 rounded bg-white/5">
-              <div className="flex items-center gap-1.5">
-                <span className="px-1 text-[8px] bg-success/20 text-success rounded font-bold">L</span>
-                <span className="text-white font-bold">BTC-PERP 5x</span>
+          <div className="w-full h-32 p-2.5 bg-black/40 rounded-lg border border-white/5 flex flex-col justify-around font-mono text-[10px] overflow-hidden">
+            <div className="flex items-center justify-between p-1.5 rounded bg-white/5 min-w-0 gap-1.5">
+              <div className="flex items-center gap-1.5 min-w-0 truncate">
+                <span className="px-1 text-[8px] bg-success/20 text-success rounded font-bold shrink-0">L</span>
+                <span className="text-white font-bold truncate">BTC-PERP 5x</span>
               </div>
-              <span className="text-success font-bold">+$569.92 (+1.07%)</span>
+              <span className="text-success font-bold shrink-0 whitespace-nowrap text-[9px] sm:text-[10px]">+$569.92 (+1.07%)</span>
             </div>
-            <div className="flex items-center justify-between p-1.5 rounded bg-white/5">
-              <div className="flex items-center gap-1.5">
-                <span className="px-1 text-[8px] bg-danger/20 text-danger rounded font-bold">S</span>
-                <span className="text-white font-bold">SOL-PERP 2x</span>
+            <div className="flex items-center justify-between p-1.5 rounded bg-white/5 min-w-0 gap-1.5">
+              <div className="flex items-center gap-1.5 min-w-0 truncate">
+                <span className="px-1 text-[8px] bg-danger/20 text-danger rounded font-bold shrink-0">S</span>
+                <span className="text-white font-bold truncate">SOL-PERP 2x</span>
               </div>
-              <span className="text-success font-bold">+$100.80 (+1.55%)</span>
+              <span className="text-success font-bold shrink-0 whitespace-nowrap text-[9px] sm:text-[10px]">+$100.80 (+1.55%)</span>
             </div>
           </div>
         );

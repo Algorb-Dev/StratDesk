@@ -26,6 +26,7 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   isHero = false,
 }) => {
   const activeTheme = THEMES.find((t) => t.id === theme) || THEMES[1]; // fallback to Obsidian
+  const isLight = theme === "light";
 
   const themeStyle = {
     "--theme-bg": activeTheme.colors.bg,
@@ -41,7 +42,8 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       style={themeStyle}
       className={cn(
         "relative rounded-xl border transition-all duration-300 overflow-hidden shadow-2xl font-mono",
-        isHero ? "shadow-surface ring-1 ring-white/10" : "",
+        isHero ? (isLight ? "ring-1 ring-slate-300 shadow-xl" : "shadow-surface ring-1 ring-white/10") : "",
+        isLight ? "border-slate-300 shadow-xl" : "",
         className
       )}
     >
@@ -50,7 +52,7 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
         className="absolute inset-0 z-0 pointer-events-none transition-colors duration-300"
         style={{
           backgroundColor: activeTheme.colors.bg,
-          borderColor: activeTheme.colors.border,
+          borderColor: isLight ? "#cbd5e1" : activeTheme.colors.border,
         }}
       />
 
@@ -60,50 +62,56 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
       )}
 
       {/* Outer Content Container */}
-      <div className="relative z-10 p-3.5 sm:p-5 flex flex-col gap-4 text-white">
+      <div className={cn("relative z-10 p-3.5 sm:p-5 flex flex-col gap-4 transition-colors", isLight ? "text-slate-900" : "text-white")}>
         {/* Top Telemetry Chrome / Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/10">
+        <div className={cn("flex flex-wrap items-center justify-between gap-3 pb-3 border-b", isLight ? "border-slate-200" : "border-white/10")}>
           {/* Left: Product & Brand Identifier */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <AlgorbSymbol size={22} glow={theme !== "vector"} />
-              <span className="font-bold tracking-widest text-sm uppercase">
+              <AlgorbSymbol size={22} glow={theme !== "vector" && !isLight} />
+              <span className={cn("font-bold tracking-widest text-sm uppercase", isLight ? "text-slate-900" : "text-white")}>
                 ALGORB {product === "control" ? "CONTROL" : "VIEW"}
               </span>
             </div>
             <span
-              className="px-2 py-0.5 text-[9px] font-bold tracking-wider rounded border uppercase"
-              style={{
-                borderColor: activeTheme.colors.border,
-                color: activeTheme.colors.accent,
-                backgroundColor: "rgba(255, 255, 255, 0.03)",
-              }}
+              className={cn(
+                "px-2 py-0.5 text-[9px] font-bold tracking-wider rounded border uppercase",
+                isLight
+                  ? "border-sky-300 text-sky-700 bg-sky-50"
+                  : "border-[var(--theme-border)] text-[var(--theme-accent)] bg-white/[0.03]"
+              )}
             >
               {activeTheme.name}
             </span>
           </div>
 
           {/* Center/Right: Live System Indicators */}
-          <div className="flex items-center gap-2 sm:gap-4 text-[10px] text-text-muted">
-            <div className="flex items-center gap-1.5 bg-white/[0.03] px-2 py-1 rounded border border-white/5">
+          <div className="flex items-center gap-2 sm:gap-4 text-[10px]">
+            <div className={cn(
+              "flex items-center gap-1.5 px-2 py-1 rounded border",
+              isLight ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-white/[0.03] border-white/5 text-success"
+            )}>
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+                <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", isLight ? "bg-emerald-500" : "bg-success")} />
+                <span className={cn("relative inline-flex rounded-full h-2 w-2", isLight ? "bg-emerald-600" : "bg-success")} />
               </span>
-              <span className="font-bold text-success">BOT: {DEMO_METRICS.botStatus}</span>
+              <span className="font-bold">BOT: {DEMO_METRICS.botStatus}</span>
             </div>
 
-            <div className="hidden md:flex items-center gap-1.5">
-              <Wifi className="w-3 h-3 text-accent" />
+            <div className={cn("hidden md:flex items-center gap-1.5", isLight ? "text-slate-600 font-medium" : "text-text-muted")}>
+              <Wifi className={cn("w-3 h-3", isLight ? "text-sky-600" : "text-accent")} />
               <span>{DEMO_METRICS.heartbeatMs}ms IPC</span>
             </div>
 
-            <div className="hidden lg:flex items-center gap-1.5">
-              <Cpu className="w-3 h-3 text-text-secondary" />
+            <div className={cn("hidden lg:flex items-center gap-1.5", isLight ? "text-slate-600 font-medium" : "text-text-secondary")}>
+              <Cpu className="w-3 h-3" />
               <span>{DEMO_METRICS.environment}</span>
             </div>
 
-            <div className="text-[9px] text-text-muted border border-white/5 px-1.5 py-0.5 rounded bg-black/20">
+            <div className={cn(
+              "text-[9px] px-1.5 py-0.5 rounded border font-medium",
+              isLight ? "text-slate-700 bg-slate-100 border-slate-200" : "text-text-muted bg-black/20 border-white/5"
+            )}>
               {DEMO_METRICS.adapterVersion}
             </div>
           </div>
@@ -117,6 +125,7 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             delta={DEMO_METRICS.dailyPnlPercent}
             isPositive={true}
             subtext="Peak: $25,120.00"
+            isLight={isLight}
           />
           <MetricCard
             label="TODAY'S P&L"
@@ -124,13 +133,15 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             delta={DEMO_METRICS.dailyPnlPercent}
             isPositive={true}
             subtext="Unrealized: +$882"
+            isLight={isLight}
           />
           <MetricCard
             label="TOTAL RETURN"
             value={DEMO_METRICS.totalReturn}
-            delta="+14.2% mtd"
+            delta="+14.2%"
             isPositive={true}
             subtext="Annualized: 210%"
+            isLight={isLight}
           />
           <MetricCard
             label="MAX DRAWDOWN"
@@ -138,13 +149,15 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             delta="Safe"
             isPositive={true}
             subtext={`Ceiling: ${DEMO_METRICS.maxDrawdown}`}
+            isLight={isLight}
           />
           <MetricCard
             label="WIN RATE"
             value={DEMO_METRICS.winRate}
-            delta="72 / 100 trades"
+            delta="72/100"
             isPositive={true}
             subtext={`Profit Factor: ${DEMO_METRICS.profitFactor}`}
+            isLight={isLight}
           />
           <MetricCard
             label="BOT STATUS"
@@ -152,39 +165,46 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             badge="ACTIVE"
             pulse={true}
             subtext={`Uptime: ${DEMO_METRICS.uptime}`}
+            isLight={isLight}
           />
         </div>
 
         {/* If Control Mode: Render Interactive Control Bus */}
-        {product === "control" && <ControlBar />}
+        {product === "control" && <ControlBar isLight={isLight} />}
 
         {/* Middle Section: Equity Chart & Risk / Allocation Gauges */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
           {/* Main Interactive Chart */}
-          <div className="lg:col-span-2 p-3 sm:p-4 rounded-lg bg-surface/50 border border-white/5 flex flex-col">
-            <EquityChart accentColor={activeTheme.colors.accent} />
+          <div className={cn(
+            "lg:col-span-2 p-3 sm:p-4 rounded-lg flex flex-col border transition-colors",
+            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+          )}>
+            <EquityChart accentColor={isLight ? "#0284c7" : activeTheme.colors.accent} isLight={isLight} />
           </div>
 
           {/* Realtime Risk & Margin Radar */}
-          <div className="p-3.5 sm:p-4 rounded-lg bg-surface/50 border border-white/5 flex flex-col justify-between gap-3 text-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-white/5">
-              <span className="font-bold text-white uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                <ShieldAlert className="w-3.5 h-3.5 text-warning" />
+          <div className={cn(
+            "p-3.5 sm:p-4 rounded-lg flex flex-col justify-between gap-3 text-xs border transition-colors",
+            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+          )}>
+            <div className={cn("flex items-center justify-between pb-2 border-b", isLight ? "border-slate-200" : "border-white/5")}>
+              <span className={cn("font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5", isLight ? "text-slate-900" : "text-white")}>
+                <ShieldAlert className={cn("w-3.5 h-3.5", isLight ? "text-amber-600" : "text-warning")} />
                 RISK ALLOCATION
               </span>
-              <span className="text-[10px] text-text-muted">PARAM LIMITS</span>
+              <span className={cn("text-[10px]", isLight ? "text-slate-400 font-semibold" : "text-text-muted")}>PARAM LIMITS</span>
             </div>
 
             {/* Gauge 1: Margin Utilization */}
             <div>
               <div className="flex justify-between text-[11px] mb-1">
-                <span className="text-text-muted">Margin Utilization</span>
-                <span className="font-bold text-white">34.2% / 50.0%</span>
+                <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Margin Utilization</span>
+                <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>34.2% / 50.0%</span>
               </div>
-              <div className="w-full h-2 rounded bg-white/5 overflow-hidden">
+              <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
                 <div
                   className="h-full rounded transition-all duration-500"
-                  style={{ width: "34.2%", backgroundColor: activeTheme.colors.accent }}
+                  style={{ width: "34.2%", backgroundColor: isLight ? "#0284c7" : activeTheme.colors.accent }}
                 />
               </div>
             </div>
@@ -192,12 +212,12 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             {/* Gauge 2: Drawdown Tolerance */}
             <div>
               <div className="flex justify-between text-[11px] mb-1">
-                <span className="text-text-muted">Drawdown Cushion</span>
-                <span className="font-bold text-success">4.21% / 10.0%</span>
+                <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Drawdown Cushion</span>
+                <span className={cn("font-bold", isLight ? "text-emerald-700" : "text-success")}>4.21% / 10.0%</span>
               </div>
-              <div className="w-full h-2 rounded bg-white/5 overflow-hidden">
+              <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
                 <div
-                  className="h-full rounded bg-success transition-all duration-500"
+                  className={cn("h-full rounded transition-all duration-500", isLight ? "bg-emerald-600" : "bg-success")}
                   style={{ width: "42.1%" }}
                 />
               </div>
@@ -206,27 +226,27 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             {/* Gauge 3: Value at Risk (99% 1D) */}
             <div>
               <div className="flex justify-between text-[11px] mb-1">
-                <span className="text-text-muted">Value at Risk (99% 1D)</span>
-                <span className="font-bold text-white">$842.10 (3.39%)</span>
+                <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Value at Risk (99% 1D)</span>
+                <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>$842.10 (3.39%)</span>
               </div>
-              <div className="w-full h-2 rounded bg-white/5 overflow-hidden">
+              <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
                 <div
-                  className="h-full rounded bg-warning transition-all duration-500"
+                  className={cn("h-full rounded transition-all duration-500", isLight ? "bg-amber-500" : "bg-warning")}
                   style={{ width: "28.5%" }}
                 />
               </div>
             </div>
 
             {/* Strategy Weights Breakdown */}
-            <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-text-muted">
+            <div className={cn("pt-2 border-t flex items-center justify-between text-[10px]", isLight ? "border-slate-200 text-slate-500" : "border-white/5 text-text-muted")}>
               <div>
-                <span className="text-white font-bold">Alpha-V2:</span> 45%
+                <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Alpha-V2:</span> 45%
               </div>
               <div>
-                <span className="text-white font-bold">MeanRev:</span> 35%
+                <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>MeanRev:</span> 35%
               </div>
               <div>
-                <span className="text-white font-bold">Arb:</span> 20%
+                <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Arb:</span> 20%
               </div>
             </div>
           </div>
@@ -234,19 +254,28 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
         {/* Bottom Section: Active Positions Table & Execution Logs */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
-          <div className="p-3 sm:p-4 rounded-lg bg-surface/50 border border-white/5">
-            <PositionsTable />
+          <div className={cn(
+            "p-3 sm:p-4 rounded-lg border transition-colors",
+            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+          )}>
+            <PositionsTable isLight={isLight} />
           </div>
 
-          <div className="p-3 sm:p-4 rounded-lg bg-surface/50 border border-white/5">
-            <ExecutionLogs maxLogs={5} />
+          <div className={cn(
+            "p-3 sm:p-4 rounded-lg border transition-colors",
+            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+          )}>
+            <ExecutionLogs maxLogs={5} isLight={isLight} />
           </div>
         </div>
 
         {/* Footer Disclaimer Strip */}
-        <div className="pt-2 border-t border-white/5 flex flex-wrap items-center justify-between gap-2 text-[10px] text-text-muted select-none">
+        <div className={cn(
+          "pt-2 border-t flex flex-wrap items-center justify-between gap-2 text-[10px] select-none",
+          isLight ? "border-slate-200 text-slate-500" : "border-white/5 text-text-muted"
+        )}>
           <div className="flex items-center gap-2">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent" />
+            <span className={cn("inline-block w-1.5 h-1.5 rounded-full", isLight ? "bg-sky-600" : "bg-accent")} />
             <span>DEMO ENVIRONMENT • LOCAL TELEMETRY MOCK</span>
           </div>
           <span>Algorb Interface Layer v1.0.0 • No live order risk</span>

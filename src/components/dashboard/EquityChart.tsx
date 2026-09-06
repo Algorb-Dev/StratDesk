@@ -8,12 +8,14 @@ interface EquityChartProps {
   className?: string;
   accentColor?: string;
   showTimeframes?: boolean;
+  isLight?: boolean;
 }
 
 export const EquityChart: React.FC<EquityChartProps> = ({
   className,
   accentColor = "#00f0ff",
   showTimeframes = true,
+  isLight = false,
 }) => {
   const [activeTimeframe, setActiveTimeframe] = useState<string>("1D");
   const [hoveredPoint, setHoveredPoint] = useState<ChartPoint | null>(null);
@@ -57,27 +59,35 @@ export const EquityChart: React.FC<EquityChartProps> = ({
   const delta = currentEquity - initialEquity;
   const deltaPct = ((delta / initialEquity) * 100).toFixed(2);
 
+  const gridStroke = isLight ? "rgba(15, 23, 42, 0.08)" : "rgba(255, 255, 255, 0.04)";
+
   return (
     <div className={cn("flex flex-col h-full", className)}>
       {/* Chart Header with Live Values & Timeframes */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/5">
+      <div className={cn("flex flex-wrap items-center justify-between gap-3 pb-3 border-b", isLight ? "border-slate-200" : "border-white/5")}>
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-text-muted uppercase tracking-wider">
+            <span className={cn("text-[10px] font-mono uppercase tracking-wider", isLight ? "text-slate-500 font-semibold" : "text-text-muted")}>
               PORTFOLIO NAV ({activeTimeframe})
             </span>
-            <span className="text-[10px] font-mono text-text-muted">
+            <span className={cn("text-[10px] font-mono", isLight ? "text-slate-400" : "text-text-muted")}>
               • {displayPoint.time}
             </span>
           </div>
-          <div className="flex items-baseline gap-2.5 mt-0.5">
-            <span className="text-xl sm:text-2xl font-mono font-bold text-white">
+          <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 mt-0.5 min-w-0">
+            <span className={cn("text-xl sm:text-2xl font-mono font-bold tracking-tight", isLight ? "text-slate-900" : "text-white")}>
               {formatCurrency(currentEquity)}
             </span>
             <span
               className={cn(
-                "text-xs font-mono font-semibold",
-                delta >= 0 ? "text-success" : "text-danger"
+                "text-xs font-mono font-semibold whitespace-nowrap shrink-0 px-1.5 py-0.5 rounded border",
+                delta >= 0
+                  ? isLight
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : "text-success bg-success/10 border-success/20"
+                  : isLight
+                  ? "bg-rose-50 text-rose-700 border-rose-200"
+                  : "text-danger bg-danger/10 border-danger/20"
               )}
             >
               {delta >= 0 ? `+${formatCurrency(delta)}` : formatCurrency(delta)} ({delta >= 0 ? "+" : ""}{deltaPct}%)
@@ -86,7 +96,7 @@ export const EquityChart: React.FC<EquityChartProps> = ({
         </div>
 
         {showTimeframes && (
-          <div className="flex items-center gap-1 bg-surface-elevated/70 p-0.5 rounded border border-white/5">
+          <div className={cn("flex items-center gap-1 p-0.5 rounded border", isLight ? "bg-slate-100 border-slate-200" : "bg-surface-elevated/70 border-white/5")}>
             {["1D", "1W", "1M", "YTD", "ALL"].map((tf) => (
               <button
                 key={tf}
@@ -97,7 +107,11 @@ export const EquityChart: React.FC<EquityChartProps> = ({
                 className={cn(
                   "px-2 py-1 text-[10px] font-mono font-medium rounded transition-colors",
                   activeTimeframe === tf
-                    ? "bg-accent/20 text-accent border border-accent/40 font-bold"
+                    ? isLight
+                      ? "bg-white text-sky-700 border border-sky-300 font-bold shadow-sm"
+                      : "bg-accent/20 text-accent border border-accent/40 font-bold"
+                    : isLight
+                    ? "text-slate-600 hover:text-slate-900"
                     : "text-text-muted hover:text-text-secondary"
                 )}
               >
@@ -117,7 +131,7 @@ export const EquityChart: React.FC<EquityChartProps> = ({
         >
           <defs>
             <linearGradient id={`equity-gradient-${activeTimeframe}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={accentColor} stopOpacity="0.35" />
+              <stop offset="0%" stopColor={accentColor} stopOpacity={isLight ? "0.2" : "0.35"} />
               <stop offset="85%" stopColor={accentColor} stopOpacity="0.0" />
             </linearGradient>
             <linearGradient id={`line-gradient-${activeTimeframe}`} x1="0" y1="0" x2="1" y2="0">
@@ -127,9 +141,9 @@ export const EquityChart: React.FC<EquityChartProps> = ({
           </defs>
 
           {/* Background Reference Grid Lines */}
-          <line x1="0" y1={height * 0.25} x2={width} y2={height * 0.25} stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
-          <line x1="0" y1={height * 0.5} x2={width} y2={height * 0.5} stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
-          <line x1="0" y1={height * 0.75} x2={width} y2={height * 0.75} stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
+          <line x1="0" y1={height * 0.25} x2={width} y2={height * 0.25} stroke={gridStroke} strokeDasharray="3 3" />
+          <line x1="0" y1={height * 0.5} x2={width} y2={height * 0.5} stroke={gridStroke} strokeDasharray="3 3" />
+          <line x1="0" y1={height * 0.75} x2={width} y2={height * 0.75} stroke={gridStroke} strokeDasharray="3 3" />
 
           {/* Area Fill */}
           <path d={areaPath} fill={`url(#equity-gradient-${activeTimeframe})`} />
@@ -154,7 +168,9 @@ export const EquityChart: React.FC<EquityChartProps> = ({
                 className={cn(
                   "transition-all duration-150",
                   hoveredPoint?.time === c.point.time
-                    ? "fill-accent stroke-white stroke-2 r-6"
+                    ? isLight
+                      ? "fill-sky-600 stroke-slate-900 stroke-2 r-6"
+                      : "fill-accent stroke-white stroke-2 r-6"
                     : "fill-surface stroke-accent stroke-1 opacity-0 hover:opacity-100"
                 )}
                 onMouseEnter={() => setHoveredPoint(c.point)}

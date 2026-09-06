@@ -8,12 +8,14 @@ interface ExecutionLogsProps {
   className?: string;
   maxLogs?: number;
   autoStream?: boolean;
+  isLight?: boolean;
 }
 
 export const ExecutionLogs: React.FC<ExecutionLogsProps> = ({
   className,
   maxLogs = 6,
   autoStream = true,
+  isLight = false,
 }) => {
   const [logs, setLogs] = useState<TradeLog[]>(DEMO_LOGS);
   const [isLive, setIsLive] = useState(true);
@@ -73,54 +75,62 @@ export const ExecutionLogs: React.FC<ExecutionLogsProps> = ({
   }, [autoStream, isLive, maxLogs]);
 
   const levelBadge = {
-    info: "text-text-muted bg-white/5 border-white/10",
-    success: "text-success bg-success/10 border-success/30",
-    warning: "text-warning bg-warning/10 border-warning/30",
-    error: "text-danger bg-danger/10 border-danger/30",
+    info: isLight ? "text-slate-700 bg-slate-100 border-slate-200" : "text-text-muted bg-white/5 border-white/10",
+    success: isLight ? "text-emerald-700 bg-emerald-50 border-emerald-200" : "text-success bg-success/10 border-success/30",
+    warning: isLight ? "text-amber-800 bg-amber-50 border-amber-200" : "text-warning bg-warning/10 border-warning/30",
+    error: isLight ? "text-rose-700 bg-rose-50 border-rose-200" : "text-danger bg-danger/10 border-danger/30",
   };
 
   const typeColor = {
-    FILL: "text-success font-bold",
-    ORDER: "text-accent font-bold",
-    RISK: "text-warning font-semibold",
-    SIGNAL: "text-sky-400 font-semibold",
-    HEARTBEAT: "text-text-muted",
-    CONTROL: "text-amber-400 font-bold",
+    FILL: isLight ? "text-emerald-700 font-bold" : "text-success font-bold",
+    ORDER: isLight ? "text-sky-700 font-bold" : "text-accent font-bold",
+    RISK: isLight ? "text-amber-700 font-semibold" : "text-warning font-semibold",
+    SIGNAL: isLight ? "text-blue-600 font-semibold" : "text-sky-400 font-semibold",
+    HEARTBEAT: isLight ? "text-slate-500" : "text-text-muted",
+    CONTROL: isLight ? "text-orange-700 font-bold" : "text-amber-400 font-bold",
   };
 
   return (
     <div className={cn("flex flex-col h-full font-mono text-xs", className)}>
-      <div className="flex items-center justify-between pb-2.5 border-b border-white/5">
+      <div className={cn("flex items-center justify-between pb-2.5 border-b", isLight ? "border-slate-200" : "border-white/5")}>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-white uppercase tracking-wider">
+          <span className={cn("text-xs font-bold uppercase tracking-wider", isLight ? "text-slate-900" : "text-white")}>
             EXECUTION JOURNAL
           </span>
           <button
             onClick={() => setIsLive(!isLive)}
-            className="flex items-center gap-1.5 px-1.5 py-0.5 text-[9px] bg-white/5 rounded border border-white/5 hover:border-white/20 transition-colors"
+            className={cn(
+              "flex items-center gap-1.5 px-1.5 py-0.5 text-[9px] rounded border transition-colors",
+              isLight
+                ? "bg-slate-100 border-slate-200 hover:bg-slate-200 text-slate-700 font-medium"
+                : "bg-white/5 border-white/5 hover:border-white/20"
+            )}
           >
             <span
               className={cn(
                 "h-1.5 w-1.5 rounded-full",
-                isLive ? "bg-accent animate-pulse" : "bg-text-muted"
+                isLive ? (isLight ? "bg-sky-600 animate-pulse" : "bg-accent animate-pulse") : "bg-text-muted"
               )}
             />
-            <span className="text-text-secondary">{isLive ? "STREAMING" : "PAUSED"}</span>
+            <span className={isLight ? "text-slate-700 font-semibold" : "text-text-secondary"}>{isLive ? "STREAMING" : "PAUSED"}</span>
           </button>
         </div>
-        <span className="text-[10px] text-text-muted hidden sm:inline">
+        <span className={cn("text-[10px] hidden sm:inline", isLight ? "text-slate-500 font-medium" : "text-text-muted")}>
           IPC WS://127.0.0.1:9042
         </span>
       </div>
 
-      <div className="divide-y divide-white/5 overflow-y-auto max-h-[220px] pt-1">
+      <div className={cn("divide-y overflow-y-auto max-h-[220px] pt-1", isLight ? "divide-slate-100" : "divide-white/5")}>
         {logs.map((log) => (
           <div
             key={log.id}
-            className="py-2 px-1 hover:bg-white/[0.02] transition-colors flex items-start justify-between gap-3 text-[11px]"
+            className={cn(
+              "py-2 px-1 transition-colors flex items-start justify-between gap-3 text-[11px]",
+              isLight ? "hover:bg-slate-50" : "hover:bg-white/[0.02]"
+            )}
           >
             <div className="flex items-start gap-2 min-w-0 flex-1">
-              <span className="text-text-muted text-[10px] whitespace-nowrap pt-0.5">
+              <span className={cn("text-[10px] whitespace-nowrap pt-0.5", isLight ? "text-slate-500" : "text-text-muted")}>
                 {log.timestamp}
               </span>
               <span
@@ -131,12 +141,12 @@ export const ExecutionLogs: React.FC<ExecutionLogsProps> = ({
               >
                 <span className={typeColor[log.type]}>{log.type}</span>
               </span>
-              <span className="text-text-primary truncate">
+              <span className={cn("truncate", isLight ? "text-slate-800 font-medium" : "text-text-primary")}>
                 {log.message}
               </span>
             </div>
             {log.latencyMs && (
-              <span className="text-[10px] text-text-muted whitespace-nowrap pl-2">
+              <span className={cn("text-[10px] whitespace-nowrap pl-2", isLight ? "text-slate-500" : "text-text-muted")}>
                 {log.latencyMs}ms
               </span>
             )}

@@ -124,7 +124,7 @@ export const THEMES: ThemeDefinition[] = [
     colors: {
       bg: "#f8fafc",
       surface: "#ffffff",
-      border: "rgba(15, 23, 42, 0.08)",
+      border: "#cbd5e1",
       accent: "#0284c7",
       accentGlow: "rgba(2, 132, 199, 0.2)",
       text: "#0f172a",
