@@ -7,11 +7,13 @@ export interface TradeTelemetry {
 
 export interface TradeLedgerEntry {
   id: string;
+  ticket?: string;
   symbol: string;
   direction: "LONG" | "SHORT";
   leverage: string;
   strategy: string;
   marketRegime: string;
+  regime?: string;
   entryPrice: number;
   exitPrice: number;
   size: string;
@@ -21,14 +23,18 @@ export interface TradeLedgerEntry {
   duration: string;
   pnl: number;
   pnlPercent: number;
+  returnPct?: number;
   rMultiple: number; // in R units (e.g. +3.2, -1.0)
   fees: number; // negative for cost, positive for maker rebate
   slippage: string;
+  slippageBps?: number;
   orderType: "LIMIT_MAKER" | "IOC_CROSS" | "TWAP";
   status: "CLOSED" | "OPEN";
   tags: string[];
   notes: string;
   telemetry: TradeTelemetry;
+  zScore?: number;
+  confidence?: number;
 }
 
 export interface LedgerMacroMetrics {

@@ -29,36 +29,57 @@ export const TradeDetailDrawer: React.FC<TradeDetailDrawerProps> = ({
   onClose,
   isLight = false,
 }) => {
-  const [copied, setCopied] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const isProfit = trade.pnl >= 0;
 
-  const handleCopyReceipt = () => {
+  const handleCopyReceipt = (activeTrade: TradeLedgerEntry = trade) => {
+    const ticketId = activeTrade.ticket || activeTrade.id;
+    const zScoreVal = activeTrade.telemetry?.zScore ?? activeTrade.zScore ?? 0;
+    const confVal = activeTrade.telemetry?.signalConfidence ?? activeTrade.confidence ?? 0;
+    const latencyVal = activeTrade.telemetry?.executionLatencyMs ?? 1.2;
+    const bookDepthVal = activeTrade.telemetry?.bookDepthRatio ?? 2.4;
+    const regimeVal = activeTrade.marketRegime || activeTrade.regime || "Unspecified";
+    const returnVal = activeTrade.pnlPercent ?? activeTrade.returnPct ?? 0;
+    const slippageVal =
+      activeTrade.slippage ||
+      (activeTrade.slippageBps !== undefined ? `${activeTrade.slippageBps} bps` : "0.0 bps");
+
     const receipt = `
---- ALGORB TRADE AUDIT RECEIPT ---
-Trade ID:     ${trade.id}
-Asset:        ${trade.symbol} (${trade.direction} ${trade.leverage})
-Strategy:     ${trade.strategy}
-Regime:       ${trade.marketRegime}
-Entry:        ${formatCurrency(trade.entryPrice, trade.entryPrice < 100 ? 2 : 1)} (${trade.entryTime})
-Exit:         ${formatCurrency(trade.exitPrice, trade.exitPrice < 100 ? 2 : 1)} (${trade.exitTime})
-Duration:     ${trade.duration}
-Realized P&L: ${isProfit ? "+" : ""}${formatCurrency(trade.pnl)} (${trade.pnlPercent.toFixed(2)}%)
-R-Multiple:   ${trade.rMultiple > 0 ? "+" : ""}${trade.rMultiple.toFixed(1)}R
-Order Type:   ${trade.orderType}
-Fees/Rebate:  ${trade.fees >= 0 ? "+" : ""}${formatCurrency(trade.fees)}
-Slippage:     ${trade.slippage}
-Z-Score:      ${trade.telemetry.zScore}σ
-Confidence:   ${(trade.telemetry.signalConfidence * 100).toFixed(0)}%
-Latency:      ${trade.telemetry.executionLatencyMs}ms
-Notes:        ${trade.notes}
-Tags:         ${trade.tags.join(" ")}
+[ ALGORB FORENSIC AUDIT ]
+Ticket:       ${ticketId}
+Symbol:       ${activeTrade.symbol}
+Direction:    ${activeTrade.direction}
+Leverage:     ${activeTrade.leverage}
+Strategy:     ${activeTrade.strategy}
+Regime:       ${regimeVal}
+Size:         ${activeTrade.size}
+Notional:     ${formatCurrency(activeTrade.notionalValue)}
+Entry Price:  ${formatCurrency(activeTrade.entryPrice, activeTrade.entryPrice < 100 ? 2 : 1)}
+Exit Price:   ${formatCurrency(activeTrade.exitPrice, activeTrade.exitPrice < 100 ? 2 : 1)}
+Entry Time:   ${activeTrade.entryTime}
+Exit Time:    ${activeTrade.exitTime}
+Duration:     ${activeTrade.duration}
+Realized P&L: ${activeTrade.pnl >= 0 ? "+" : ""}${formatCurrency(activeTrade.pnl)} (${returnVal >= 0 ? "+" : ""}${returnVal.toFixed(2)}%)
+R-Multiple:   ${activeTrade.rMultiple > 0 ? "+" : ""}${activeTrade.rMultiple.toFixed(1)}R
+Order Type:   ${activeTrade.orderType}
+Slippage:     ${slippageVal}
+Fees/Rebate:  ${activeTrade.fees >= 0 ? "+" : ""}${formatCurrency(activeTrade.fees)}
+Z-Score:      ${zScoreVal}σ
+Confidence:   ${(confVal * 100).toFixed(1)}%
+IPC Latency:  ${latencyVal}ms
+Book Depth:   ${bookDepthVal}x
+Notes:        ${activeTrade.notes}
+Tags:         ${activeTrade.tags?.join(" ") || ""}
 ----------------------------------
 Verified by Algorb Control Telemetry Bus
+Timestamp:    ${new Date().toISOString()}
 `.trim();
 
-    navigator.clipboard.writeText(receipt);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(receipt);
+    }
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   return (
@@ -74,7 +95,7 @@ Verified by Algorb Control Telemetry Bus
       <div className={cn("flex flex-wrap items-center justify-between gap-3 pb-3 border-b", isLight ? "border-slate-200" : "border-white/10")}>
         <div className="flex flex-wrap items-center gap-2">
           <span className={cn("font-bold text-sm tracking-wider", isLight ? "text-slate-900" : "text-white")}>
-            FORENSIC AUDIT: {trade.id}
+            FORENSIC AUDIT: {trade.ticket || trade.id}
           </span>
           <span
             className={cn(
@@ -90,24 +111,24 @@ Verified by Algorb Control Telemetry Bus
             {trade.strategy}
           </span>
           <span className={cn("px-2 py-0.5 text-[10px] rounded font-semibold border", isLight ? "bg-sky-50 text-sky-800 border-sky-200" : "bg-accent/10 text-accent border-accent/20")}>
-            {trade.marketRegime}
+            {trade.marketRegime || trade.regime}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
           <button
-            onClick={handleCopyReceipt}
+            onClick={() => handleCopyReceipt(trade)}
             className={cn(
               "flex items-center gap-1.5 px-3 py-1.5 rounded text-[10px] font-bold uppercase transition-all border",
-              copied
+              isCopied
                 ? "bg-success text-black border-success"
                 : isLight
                 ? "bg-white text-slate-800 border-slate-300 hover:bg-slate-100 shadow-sm"
                 : "bg-white/10 text-white border-white/20 hover:bg-white/15"
             )}
           >
-            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-            <span>{copied ? "COPIED RECEIPT" : "COPY AUDIT RECEIPT"}</span>
+            {isCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+            <span>{isCopied ? "Copied!" : "Copy Audit Receipt"}</span>
           </button>
 
           {onClose && (
