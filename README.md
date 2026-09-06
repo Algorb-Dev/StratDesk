@@ -67,12 +67,12 @@ Located at `src/components/dashboard/DashboardPreview.tsx`:
 - **`src/data/demo-data.ts`**: Fictional telemetry figures (Equity `$24,821.64`, Daily PnL `+$482.17`, Win Rate `72.4%`, active positions, log streams).
 - **`src/data/faq.ts`**: Technical answers and architecture clarifications.
 
-### 3. Payment Provider Integration
-The waitlist / license reservation modal is abstracted in:
-`src/components/products/PurchaseModal.tsx`
-To plug in Stripe, Lemon Squeezy, or Gumroad:
-1. Replace `handleSubmit` with your checkout session redirect or embedded iframe.
-2. Pass the customer session ID to your licensing backend.
+### 3. Payment & Merchant of Record Integration (Whop)
+Payments and fulfillment are handled natively by Whop via direct hosted checkout links:
+- Configure checkout URLs in `src/data/products.ts`:
+  - `PRODUCTS.view.whopCheckoutUrl`
+  - `PRODUCTS.control.whopCheckoutUrl`
+- All buy buttons (`GET ALGORB VIEW` and `GET ALGORB CONTROL`) link directly to your Whop checkout in a new tab (`target="_blank"` with `rel="noopener noreferrer"`), ensuring zero local backend dependency and eliminating checkout abandonment friction.
 
 ---
 
