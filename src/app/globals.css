@@ -18,10 +18,96 @@
   --text-muted: #64748b;
 }
 
+/* 01: Terminal Theme (PHOSPHOR-80) */
+:root.theme-terminal, body.theme-terminal {
+  --bg-primary: #050906;
+  --bg-secondary: #09120b;
+  --surface: #09120b;
+  --surface-elevated: #0f1c12;
+  --border-color: rgba(0, 255, 128, 0.2);
+  --accent-color: #00ff80;
+  --accent-glow: rgba(0, 255, 128, 0.4);
+  --text-primary: #bbf7d0;
+  --text-secondary: #86efac;
+  --text-muted: #4ade80;
+}
+
+/* 02: Obsidian Theme (STEALTH-CORE) */
+:root.theme-obsidian, body.theme-obsidian {
+  --bg-primary: #07090e;
+  --bg-secondary: #0c0f17;
+  --surface: #121622;
+  --surface-elevated: #181e2b;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --accent-color: #00f0ff;
+  --accent-glow: rgba(0, 240, 255, 0.35);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+}
+
+/* 03: Quant Theme (STOCHASTIC-X) */
+:root.theme-quant, body.theme-quant {
+  --bg-primary: #0a0c10;
+  --bg-secondary: #0f131a;
+  --surface: #131821;
+  --surface-elevated: #1a202c;
+  --border-color: rgba(148, 163, 184, 0.15);
+  --accent-color: #38bdf8;
+  --accent-glow: rgba(56, 189, 248, 0.3);
+  --text-primary: #e2e8f0;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+}
+
+/* 04: Command Theme (AEROSPACE-OPS) */
+:root.theme-command, body.theme-command {
+  --bg-primary: #0c0a07;
+  --bg-secondary: #14100b;
+  --surface: #1a140d;
+  --surface-elevated: #241c12;
+  --border-color: rgba(245, 158, 11, 0.2);
+  --accent-color: #f59e0b;
+  --accent-glow: rgba(245, 158, 11, 0.4);
+  --text-primary: #fef3c7;
+  --text-secondary: #fde68a;
+  --text-muted: #d97706;
+}
+
+/* 05: Vector Theme (CLEAN-SLATE) */
+:root.theme-vector, body.theme-vector {
+  --bg-primary: #09090b;
+  --bg-secondary: #111114;
+  --surface: #18181b;
+  --surface-elevated: #222226;
+  --border-color: rgba(255, 255, 255, 0.12);
+  --accent-color: #ffffff;
+  --accent-glow: rgba(255, 255, 255, 0.2);
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+}
+
+/* 06: Light Theme (DAYLIGHT-STUDIO) */
+:root.theme-light, body.theme-light {
+  color-scheme: light;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --surface: #ffffff;
+  --surface-elevated: #f8fafc;
+  --border-color: #cbd5e1;
+  --accent-color: #0284c7;
+  --accent-glow: rgba(2, 132, 199, 0.2);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+}
+
 /* Base Body and Layout Styling */
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 body {

@@ -10,6 +10,8 @@ import { PositionsTable } from "./PositionsTable";
 import { ExecutionLogs } from "./ExecutionLogs";
 import { ControlBar } from "./ControlBar";
 import { TradeLedger } from "@/components/ledger/TradeLedger";
+import { ThemeSwitcher } from "./ThemeSwitcher";
+import { useTheme } from "@/hooks/useTheme";
 import { AlgorbSymbol } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
 import { Activity, ShieldAlert, Cpu, Wifi, Power, BookOpen, Zap, Terminal, Layers, Clock } from "lucide-react";
@@ -21,6 +23,7 @@ export interface DashboardPreviewProps {
   isHero?: boolean;
   initialControlTab?: "hud" | "ledger";
   archetypeId?: string;
+  showThemeSwitcher?: boolean;
 }
 
 const ARCHETYPE_ALIAS_MAP: Record<string, string> = {
@@ -275,14 +278,18 @@ function getDynamicArchetypeCards(blueprint: ArchitectureBlueprint) {
 
 export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   product = "view",
-  theme = "obsidian",
+  theme: propTheme,
   className,
   isHero = false,
   initialControlTab = "hud",
   archetypeId = "default",
+  showThemeSwitcher = true,
 }) => {
   const [controlView, setControlView] = useState<"hud" | "ledger">(initialControlTab);
-  const activeTheme = THEMES.find((t) => t.id === theme) || THEMES[1]; // fallback to Obsidian
+  const { theme: hookTheme } = useTheme();
+  const activeThemeId = propTheme || hookTheme;
+  const activeTheme = THEMES.find((t) => t.id === activeThemeId) || THEMES[0];
+  const theme = activeTheme.id;
   const isLight = theme === "light";
 
   const canonicalArchetypeId = ARCHETYPE_ALIAS_MAP[archetypeId] || archetypeId;
@@ -352,8 +359,8 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             </span>
           </div>
 
-          {/* Center/Right: Live System Indicators */}
-          <div className="flex items-center gap-2 sm:gap-4 text-[10px]">
+          {/* Center/Right: Live System Indicators & Theme Switcher */}
+          <div className="flex items-center gap-2 sm:gap-3 text-[10px]">
             <div className={cn(
               "flex items-center gap-1.5 px-2 py-1 rounded border",
               isLight ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-white/[0.03] border-white/5 text-success"
@@ -381,6 +388,11 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             )}>
               {telemetry.badgeText}
             </div>
+
+            {/* Mount interactive ThemeSwitcher */}
+            {showThemeSwitcher && (
+              <ThemeSwitcher variant="compact" />
+            )}
           </div>
         </div>
 

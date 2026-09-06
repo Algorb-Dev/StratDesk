@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
+import { ThemeSwitcher } from "@/components/dashboard/ThemeSwitcher";
 import { cn } from "@/lib/utils";
 import { Menu, X, ArrowRight, Terminal, Cpu, Layers, ShieldCheck, HelpCircle, BookOpen, Compass } from "lucide-react";
 
@@ -80,8 +81,10 @@ export const Navbar: React.FC = () => {
             })}
           </nav>
 
-          {/* RIGHT: Documentation & Explore CTA */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* RIGHT: Theme Switcher, Documentation & Explore CTA */}
+          <div className="hidden md:flex items-center gap-2.5">
+            <ThemeSwitcher variant="compact" />
+
             <Link
               href="/docs"
               className="flex items-center gap-1.5 px-3 py-1.5 font-mono text-xs text-text-secondary hover:text-white transition-colors"
@@ -161,6 +164,11 @@ export const Navbar: React.FC = () => {
           </nav>
 
           <div className="mt-auto flex flex-col gap-3">
+            <div className="p-2.5 rounded-lg bg-surface/50 border border-white/5 flex items-center justify-between">
+              <span className="text-[11px] font-mono text-text-muted uppercase">THEME:</span>
+              <ThemeSwitcher variant="compact" />
+            </div>
+
             <Button
               href="/#dashboard-lab"
               variant="primary"

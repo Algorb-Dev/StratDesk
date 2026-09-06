@@ -7,6 +7,7 @@ import { PRODUCTS } from "@/data/products";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { DashboardPreview } from "@/components/dashboard/DashboardPreview";
+import { useTheme } from "@/hooks/useTheme";
 import {
   ARCHITECTURES_DATA,
   ARCHITECTURE_CATEGORIES,
@@ -48,6 +49,7 @@ type ValidTheme = (typeof VALID_THEMES)[number];
 
 function DashboardLabContent() {
   const searchParams = useSearchParams();
+  const { theme: persistedTheme, setTheme } = useTheme();
 
   const initialArchetype = searchParams.get("archetype") || "default";
   const initialTierParam = searchParams.get("tier");
@@ -56,7 +58,7 @@ function DashboardLabContent() {
   const initialTheme: ValidTheme =
     initialThemeParam && (VALID_THEMES as readonly string[]).includes(initialThemeParam)
       ? (initialThemeParam as ValidTheme)
-      : "obsidian";
+      : (persistedTheme as ValidTheme) || "obsidian";
 
   const [selectedProduct, setSelectedProduct] = useState<"view" | "control">(initialTier);
   const [selectedTheme, setSelectedTheme] = useState<ValidTheme>(initialTheme);
@@ -110,6 +112,7 @@ function DashboardLabContent() {
 
   const handleThemeSelect = (theme: ValidTheme) => {
     setSelectedTheme(theme);
+    setTheme(theme);
     updateUrl(selectedProduct, theme, selectedArchetype);
   };
 
