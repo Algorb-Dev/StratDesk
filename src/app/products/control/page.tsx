@@ -1,16 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { PRODUCTS } from "@/data/products";
 import { DashboardPreview } from "@/components/dashboard/DashboardPreview";
-import { PurchaseModal } from "@/components/products/PurchaseModal";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Check, ShieldAlert, Power, ArrowRight, Activity, Terminal, Key, ShieldCheck } from "lucide-react";
 
 export default function ProductControlPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const product = PRODUCTS.control;
 
   return (
@@ -49,13 +47,15 @@ export default function ProductControlPage() {
               <div className="text-2xl font-bold text-warning">{product.pricePlaceholder}</div>
             </div>
             <Button
+              href={product.whopCheckoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               variant="control"
               size="lg"
-              onClick={() => setIsModalOpen(true)}
               icon={<ArrowRight className="w-4 h-4" />}
               iconPosition="right"
             >
-              RESERVE ACCESS
+              GET ALGORB CONTROL
             </Button>
           </div>
         </div>
@@ -135,22 +135,19 @@ export default function ProductControlPage() {
             <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between">
               <span className="text-text-muted text-[11px]">Deploy the command bridge:</span>
               <Button
+                href={product.whopCheckoutUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 variant="control"
                 size="sm"
-                onClick={() => setIsModalOpen(true)}
+                icon={<ArrowRight className="w-3.5 h-3.5" />}
+                iconPosition="right"
               >
-                RESERVE LICENSE
+                GET ALGORB CONTROL
               </Button>
             </div>
           </div>
         </div>
-
-        {/* Reservation Modal */}
-        <PurchaseModal
-          product={product}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
       </div>
     </div>
   );

@@ -1,22 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { PRODUCTS, ProductTier } from "@/data/products";
+import { PRODUCTS } from "@/data/products";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { PurchaseModal } from "./PurchaseModal";
-import { Check, ArrowRight, Eye, ShieldAlert, Sliders, Cpu, Activity, Terminal } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Check, ArrowRight, Activity, ShieldAlert } from "lucide-react";
 
 export const ProductCards: React.FC = () => {
-  const [selectedProduct, setSelectedProduct] = useState<ProductTier | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleOpenReserve = (product: ProductTier) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
 
   return (
     <section id="products" className="relative py-28 border-b border-white/10 bg-background">
@@ -114,14 +105,16 @@ export const ProductCards: React.FC = () => {
                   DEEP SPECS
                 </Button>
                 <Button
+                  href={PRODUCTS.view.whopCheckoutUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   variant="primary"
                   size="md"
-                  onClick={() => handleOpenReserve(PRODUCTS.view)}
                   className="flex-1 sm:flex-initial"
                   icon={<ArrowRight className="w-3.5 h-3.5" />}
                   iconPosition="right"
                 >
-                  RESERVE
+                  GET ALGORB VIEW
                 </Button>
               </div>
             </div>
@@ -204,26 +197,21 @@ export const ProductCards: React.FC = () => {
                   DEEP SPECS
                 </Button>
                 <Button
+                  href={PRODUCTS.control.whopCheckoutUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   variant="control"
                   size="md"
-                  onClick={() => handleOpenReserve(PRODUCTS.control)}
                   className="flex-1 sm:flex-initial"
                   icon={<ArrowRight className="w-3.5 h-3.5" />}
                   iconPosition="right"
                 >
-                  RESERVE
+                  GET ALGORB CONTROL
                 </Button>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Purchase Reservation Modal */}
-        <PurchaseModal
-          product={selectedProduct}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
       </div>
     </section>
   );

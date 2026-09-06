@@ -26,6 +26,7 @@ export interface ProductTier {
     selfHosted: boolean;
   };
   suitableFor: string;
+  whopCheckoutUrl: string;
 }
 
 export const PRODUCTS: Record<"view" | "control", ProductTier> = {
@@ -91,6 +92,7 @@ export const PRODUCTS: Record<"view" | "control", ProductTier> = {
       selfHosted: true,
     },
     suitableFor: "Developers who run automated strategies and want pure observational visibility without exposing trade execution logic or secret write-keys to the interface.",
+    whopCheckoutUrl: "https://whop.com/checkout/plan_algorb_view",
   },
   control: {
     id: "control",
@@ -154,6 +156,7 @@ export const PRODUCTS: Record<"view" | "control", ProductTier> = {
       selfHosted: true,
     },
     suitableFor: "Quants and system builders who require hands-on intervention authority, emergency circuit breakers, and active strategy state management over live market capital.",
+    whopCheckoutUrl: "https://whop.com/checkout/plan_algorb_control",
   },
 };
 

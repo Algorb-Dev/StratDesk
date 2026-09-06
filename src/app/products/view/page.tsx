@@ -1,16 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { PRODUCTS } from "@/data/products";
 import { DashboardPreview } from "@/components/dashboard/DashboardPreview";
-import { PurchaseModal } from "@/components/products/PurchaseModal";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { Check, ShieldCheck, ArrowRight, Activity, Terminal, Lock, Download } from "lucide-react";
+import { Check, ShieldCheck, ArrowRight, Activity, Terminal } from "lucide-react";
 
 export default function ProductViewPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const product = PRODUCTS.view;
 
   return (
@@ -49,14 +47,16 @@ export default function ProductViewPage() {
               <div className="text-2xl font-bold text-accent">{product.pricePlaceholder}</div>
             </div>
             <Button
+              href={product.whopCheckoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               variant="primary"
               size="lg"
-              onClick={() => setIsModalOpen(true)}
               icon={<ArrowRight className="w-4 h-4" />}
               iconPosition="right"
               glow={true}
             >
-              RESERVE ACCESS
+              GET ALGORB VIEW
             </Button>
           </div>
         </div>
@@ -136,22 +136,19 @@ export default function ProductViewPage() {
             <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between">
               <span className="text-text-muted text-[11px]">Ready to integrate?</span>
               <Button
+                href={product.whopCheckoutUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 variant="primary"
                 size="sm"
-                onClick={() => setIsModalOpen(true)}
+                icon={<ArrowRight className="w-3.5 h-3.5" />}
+                iconPosition="right"
               >
-                RESERVE LICENSE
+                GET ALGORB VIEW
               </Button>
             </div>
           </div>
         </div>
-
-        {/* Reservation Modal */}
-        <PurchaseModal
-          product={product}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
       </div>
     </div>
   );

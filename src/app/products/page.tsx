@@ -1,22 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { PRODUCTS, COMPARISON_FEATURES, ProductTier } from "@/data/products";
+import { PRODUCTS, COMPARISON_FEATURES } from "@/data/products";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { PurchaseModal } from "@/components/products/PurchaseModal";
-import { Check, X, ArrowRight, ShieldCheck, Activity, Power } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Check, X, ArrowRight } from "lucide-react";
 
 export default function ProductsPage() {
-  const [selectedProduct, setSelectedProduct] = useState<ProductTier | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const handleOpenReserve = (product: ProductTier) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
 
   return (
     <div className="pt-32 pb-24 bg-background min-h-screen">
@@ -76,13 +67,15 @@ export default function ProductsPage() {
                   VIEW SPECS
                 </Button>
                 <Button
+                  href={PRODUCTS.view.whopCheckoutUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   variant="primary"
                   size="md"
-                  onClick={() => handleOpenReserve(PRODUCTS.view)}
                   icon={<ArrowRight className="w-3.5 h-3.5" />}
                   iconPosition="right"
                 >
-                  RESERVE
+                  GET ALGORB VIEW
                 </Button>
               </div>
             </div>
@@ -128,13 +121,15 @@ export default function ProductsPage() {
                   VIEW SPECS
                 </Button>
                 <Button
+                  href={PRODUCTS.control.whopCheckoutUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   variant="control"
                   size="md"
-                  onClick={() => handleOpenReserve(PRODUCTS.control)}
                   icon={<ArrowRight className="w-3.5 h-3.5" />}
                   iconPosition="right"
                 >
-                  RESERVE
+                  GET ALGORB CONTROL
                 </Button>
               </div>
             </div>
@@ -193,13 +188,6 @@ export default function ProductsPage() {
             ))}
           </div>
         </div>
-
-        {/* Reservation Modal */}
-        <PurchaseModal
-          product={selectedProduct}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
       </div>
     </div>
   );
