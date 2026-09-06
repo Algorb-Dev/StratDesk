@@ -1,294 +1,370 @@
-"use client";
-
-import React, { useState } from "react";
+import React from "react";
+import Link from "next/link";
+import { CodeTabs } from "@/components/docs/CodeTabs";
+import { CodeBlock } from "@/components/docs/CodeBlock";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import {
-  BookOpen,
-  Terminal,
-  Server,
   Zap,
-  Shield,
-  Bot,
-  HelpCircle,
-  Copy,
-  Check,
-  ChevronRight,
+  ArrowRight,
+  ShieldCheck,
+  Server,
+  Layers,
+  Cpu,
+  Terminal,
+  Activity,
+  CheckCircle2,
+  AlertTriangle,
+  Lock,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export default function DocsPage() {
-  const [activeSection, setActiveSection] = useState<string>("quickstart");
-  const [copied, setCopied] = useState<string | null>(null);
-
-  const handleCopy = (id: string, text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(id);
-    setTimeout(() => setCopied(null), 2000);
-  };
-
-  const navSections = [
-    { id: "quickstart", title: "Quick Start", icon: Zap },
-    { id: "installation", title: "Installation & Docker", icon: Server },
-    { id: "websocket-api", title: "WebSocket Telemetry Protocol", icon: Terminal },
-    { id: "control-bus", title: "Control Bus & HMAC Auth", icon: Shield },
-    { id: "ai-setup", title: "AI Agent Setup (Codex/Claude)", icon: Bot },
-    { id: "troubleshooting", title: "Troubleshooting & Latency", icon: HelpCircle },
-  ];
-
   return (
-    <div className="pt-32 pb-24 bg-background min-h-screen font-mono">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="pb-10 border-b border-white/10 mb-12">
-          <Badge variant="accent" size="sm" className="mb-3">
-            DEVELOPER DOCUMENTATION
-          </Badge>
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-white font-sans tracking-tight">
-            ALGORB ARCHITECTURE & INTEGRATION SPECIFICATION
-          </h1>
-          <p className="mt-3 text-sm sm:text-base text-text-secondary font-sans max-w-3xl">
-            Reference documentation for embedding Algorb telemetry adapters into custom Python, TypeScript, Go, or Rust automated trading engines.
+    <div className="space-y-12">
+      {/* 1. Architecture Flow Hero Card */}
+      <section id="architecture" className="p-6 sm:p-8 rounded-2xl bg-surface/70 border border-white/10 backdrop-blur-md space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <span className="text-[10px] font-bold text-accent uppercase tracking-wider block mb-1">
+              DATA TOPOLOGY
+            </span>
+            <h2 className="text-xl sm:text-2xl font-bold text-white font-sans">
+              Algorb Pipeline Architecture
+            </h2>
+          </div>
+          <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-white/5 border border-white/10 text-emerald-400">
+            LOCAL IPC • ZERO TELEMETRY TRACKING
+          </span>
+        </div>
+
+        <p className="text-sm text-text-secondary font-sans leading-relaxed">
+          Algorb does not manage your private exchange keys or execute trades on remote cloud servers. Your bot remains fully autonomous on your hardware. It simply pushes fill records and telemetry to the local Algorb dashboard via standard HTTP REST.
+        </p>
+
+        {/* 3-Step Visual Topology Diagram */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          {/* Step 1: Your Bot */}
+          <div className="p-4 rounded-xl border border-white/10 bg-black/30 flex flex-col justify-between gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-accent/20 text-accent uppercase">
+                STEP 01
+              </span>
+              <Cpu className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white mb-1">Your Trading Bot</div>
+              <p className="text-xs text-text-muted font-sans leading-relaxed">
+                Python (CCXT), Node.js, Rust, or Go strategy loop executing orders on Binance, Bybit, or DEXs.
+              </p>
+            </div>
+            <div className="text-[10px] text-text-muted border-t border-white/5 pt-2 font-mono">
+              Fills order → Formats payload
+            </div>
+          </div>
+
+          {/* Step 2: Algorb Ingestion */}
+          <div className="p-4 rounded-xl border border-accent/40 bg-accent/5 flex flex-col justify-between gap-3 shadow-glow-cyan/10">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-accent text-background font-black uppercase">
+                STEP 02
+              </span>
+              <Terminal className="w-4 h-4 text-accent" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white mb-1">Algorb API Ingestion</div>
+              <p className="text-xs text-text-muted font-sans leading-relaxed">
+                Next.js App Router endpoint at <code className="text-accent bg-black/40 px-1 py-0.5 rounded">POST /api/ledger</code> validates and stores execution data.
+              </p>
+            </div>
+            <div className="text-[10px] text-accent border-t border-accent/20 pt-2 font-mono">
+              HTTP/JSON Ingestion • &lt; 2ms latency
+            </div>
+          </div>
+
+          {/* Step 3: React Dashboard */}
+          <div className="p-4 rounded-xl border border-white/10 bg-black/30 flex flex-col justify-between gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-white/10 text-white uppercase">
+                STEP 03
+              </span>
+              <Activity className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white mb-1">Algorb React Dashboard</div>
+              <p className="text-xs text-text-muted font-sans leading-relaxed">
+                Renders real-time telemetry, trade journal, R-multiples, and interactive control HUD.
+              </p>
+            </div>
+            <div className="text-[10px] text-emerald-400 border-t border-white/5 pt-2 font-mono">
+              Interactive HUD & Trade Ledger
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Quick Start Guide */}
+      <section id="quickstart" className="space-y-6">
+        <div>
+          <span className="text-[10px] font-bold text-accent uppercase tracking-wider block mb-1">
+            STEP-BY-STEP INTEGRATION
+          </span>
+          <h2 className="text-2xl font-bold text-white font-sans">
+            Quick Start: Connect Your Bot in 4 Steps
+          </h2>
+          <p className="text-sm text-text-secondary font-sans mt-2 leading-relaxed">
+            Follow this guide to transmit audited execution telemetry from your trading script to the local Algorb dashboard in under five minutes.
           </p>
         </div>
 
-        {/* Documentation Layout: Sidebar + Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
-          {/* Sidebar Navigation */}
-          <aside className="lg:col-span-1 sticky top-24 bg-surface/80 rounded-xl border border-white/10 p-3 space-y-1 text-xs">
-            <span className="text-[10px] text-text-muted uppercase tracking-wider px-3 py-2 block font-bold">
-              DOCUMENTATION INDEX
-            </span>
-            {navSections.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeSection === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveSection(item.id)}
-                  className={cn(
-                    "w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between gap-2 transition-all",
-                    isActive
-                      ? "bg-accent/15 text-accent font-bold border border-accent/30"
-                      : "text-text-secondary hover:text-white hover:bg-white/5"
-                  )}
-                >
-                  <div className="flex items-center gap-2.5 truncate">
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span className="truncate">{item.title}</span>
-                  </div>
-                  {isActive && <ChevronRight className="w-3.5 h-3.5 shrink-0" />}
-                </button>
-              );
-            })}
-          </aside>
+        <div className="space-y-4 font-mono text-xs">
+          {/* Step 1 */}
+          <div className="p-4 rounded-xl bg-surface/50 border border-white/10 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-accent/20 text-accent font-bold text-[10px] flex items-center justify-center">
+                1
+              </span>
+              <span className="font-bold text-white text-sm">Start Your Local Algorb Dashboard</span>
+            </div>
+            <p className="text-text-secondary font-sans text-xs">
+              Make sure your Algorb dashboard instance is running locally on port 3000:
+            </p>
+            <CodeBlock
+              code="npm run dev
+# Dashboard available at http://localhost:3000
+# Ingestion endpoint active at http://localhost:3000/api/ledger"
+              language="bash"
+              filename="Terminal (Algorb Root)"
+              showLineNumbers={false}
+            />
+          </div>
 
-          {/* Main Content Area */}
-          <main className="lg:col-span-3 rounded-2xl bg-surface/60 border border-white/10 p-6 sm:p-10 font-sans text-text-secondary text-sm leading-relaxed space-y-12">
-            {/* Quickstart */}
-            {activeSection === "quickstart" && (
-              <section className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-white font-sans mb-2">
-                    Quick Start Guide
-                  </h2>
-                  <p>
-                    Connecting your bot to Algorb involves running the lightweight local adapter daemon and dispatching telemetry payloads whenever your strategy loops or fills an order.
-                  </p>
-                </div>
+          {/* Step 2 */}
+          <div className="p-4 rounded-xl bg-surface/50 border border-white/10 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-accent/20 text-accent font-bold text-[10px] flex items-center justify-center">
+                2
+              </span>
+              <span className="font-bold text-white text-sm">Install Python Client Dependencies</span>
+            </div>
+            <p className="text-text-secondary font-sans text-xs">
+              Install the required asynchronous networking and exchange libraries in your bot&apos;s virtual environment:
+            </p>
+            <CodeBlock
+              code="pip install ccxt aiohttp pydantic"
+              language="bash"
+              filename="Terminal (Bot Environment)"
+              showLineNumbers={false}
+            />
+          </div>
 
-                <div className="space-y-3 font-mono text-xs">
-                  <span className="text-white font-bold block">1. Install Python Adapter Client</span>
-                  <div className="p-3.5 rounded-lg bg-black/80 border border-white/10 flex items-center justify-between text-text-primary">
-                    <code>pip install algorb-adapter</code>
-                    <button
-                      onClick={() => handleCopy("pip", "pip install algorb-adapter")}
-                      className="text-text-muted hover:text-white"
-                    >
-                      {copied === "pip" ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
-                  </div>
-                </div>
+          {/* Step 3 */}
+          <div className="p-4 rounded-xl bg-surface/50 border border-white/10 space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-accent/20 text-accent font-bold text-[10px] flex items-center justify-center">
+                3
+              </span>
+              <span className="font-bold text-white text-sm">Embed the Bot Adapter Boilerplate</span>
+            </div>
+            <p className="text-text-secondary font-sans text-xs">
+              Choose your preferred runtime below and drop this boilerplate into your trading loop:
+            </p>
 
-                <div className="space-y-3 font-mono text-xs">
-                  <span className="text-white font-bold block">2. Hook Adapter into Strategy Loop</span>
-                  <div className="p-4 rounded-lg bg-black/80 border border-white/10 text-text-secondary overflow-x-auto">
-                    <pre>
-                      <code>{`from algorb import AlgorbAdapter
+            {/* Embedded CodeTabs Widget */}
+            <div id="python-sdk">
+              <CodeTabs />
+            </div>
+          </div>
 
-# Connects to default local telemetry bus
-algorb = AlgorbAdapter(host="127.0.0.1", port=9042)
-
-# Inside your strategy iteration:
-algorb.emit_telemetry(
-    equity=24821.64,
-    daily_pnl=482.17,
-    positions=[
-        {
-            "symbol": "BTC-PERP",
-            "side": "LONG",
-            "size": 0.85,
-            "entryPrice": 62450.0,
-            "markPrice": 63120.5,
-            "unrealizedPnl": 569.92
-        }
-    ]
-)`}</code>
-                    </pre>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-accent/5 border border-accent/20 text-xs">
-                  <span className="text-accent font-bold block mb-1">Architecture Note</span>
-                  The adapter communicates strictly via local loopback sockets. Your market data feeds and exchange order paths remain untouched.
-                </div>
-              </section>
-            )}
-
-            {/* Installation & Docker */}
-            {activeSection === "installation" && (
-              <section className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-white font-sans mb-2">
-                    Installation & Docker Deployment
-                  </h2>
-                  <p>
-                    Algorb can be run as a standalone pre-compiled binary or via Docker Compose on Linux, macOS, and Windows.
-                  </p>
-                </div>
-
-                <div className="space-y-3 font-mono text-xs">
-                  <span className="text-white font-bold block">docker-compose.yml</span>
-                  <div className="p-4 rounded-lg bg-black/80 border border-white/10 text-text-secondary overflow-x-auto">
-                    <pre>
-                      <code>{`version: "3.8"
-services:
-  algorb-ui:
-    image: algorb/storefront:latest
-    container_name: algorb-dashboard
-    restart: unless-stopped
-    ports:
-      - "127.0.0.1:3000:3000"
-      - "127.0.0.1:9042:9042"
-    environment:
-      - BIND_ADDR=127.0.0.1
-      - THEME_DEFAULT=obsidian
-      - HMAC_SECRET=\${ALGORB_TOKEN}`}</code>
-                    </pre>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* WebSocket Protocol */}
-            {activeSection === "websocket-api" && (
-              <section className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-white font-sans mb-2">
-                    WebSocket Telemetry Protocol Specification
-                  </h2>
-                  <p>
-                    The Algorb frontend listens for JSON-RPC 2.0 frames over WebSocket. Below is the specification for the core telemetry frame.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-lg bg-black/80 border border-white/10 font-mono text-xs text-text-secondary overflow-x-auto">
-                  <pre>
-                    <code>{`{
-  "jsonrpc": "2.0",
-  "method": "telemetry.update",
-  "params": {
-    "timestamp": 1725651735821,
-    "equity": 24821.64,
-    "daily_pnl": 482.17,
-    "drawdown": 0.0421,
-    "win_rate": 0.724,
-    "bot_status": "RUNNING",
-    "positions": [ ... ],
-    "recent_logs": [ ... ]
-  }
-}`}</code>
-                  </pre>
-                </div>
-              </section>
-            )}
-
-            {/* Control Bus */}
-            {activeSection === "control-bus" && (
-              <section className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-white font-sans mb-2">
-                    Control Bus & HMAC Authentication
-                  </h2>
-                  <p>
-                    Algorb Control communicates bidirectional commands (e.g. `EMERGENCY_HALT`, `PAUSE_STRATEGY`, `SET_PARAM`) using HMAC-SHA256 authenticated payloads.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-lg bg-black/80 border border-warning/30 font-mono text-xs text-warning overflow-x-auto">
-                  <pre>
-                    <code>{`# Python Command Listener Example
-@algorb.on_command("EMERGENCY_HALT")
-def handle_emergency_halt(signature, nonce):
-    if not algorb.verify_hmac(signature, nonce):
-        raise UnauthorizedCommand("Invalid HMAC token")
-        
-    bot.cancel_all_orders()
-    bot.market_flatten_all()
-    return {"status": "SUCCESS_FLATTENED"}`}</code>
-                  </pre>
-                </div>
-              </section>
-            )}
-
-            {/* AI Setup */}
-            {activeSection === "ai-setup" && (
-              <section className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-white font-sans mb-2">
-                    AI Agent Setup (Codex, Claude, Cursor)
-                  </h2>
-                  <p>
-                    Algorb was built to be easily hooked up using modern AI code assistants.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-surface-elevated border border-accent/30 font-mono text-xs space-y-2">
-                  <span className="text-accent font-bold block">Recommended Prompt:</span>
-                  <p className="text-white">
-                    &quot;Read the provided ALGORB_SPEC.md. Inspect my trading bot codebase and create an adapter class that streams my live account balance and order fill events to ws://127.0.0.1:9042.&quot;
-                  </p>
-                </div>
-              </section>
-            )}
-
-            {/* Troubleshooting */}
-            {activeSection === "troubleshooting" && (
-              <section className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-white font-sans mb-2">
-                    Troubleshooting & Latency Optimization
-                  </h2>
-                  <p>
-                    Optimizing telemetry performance and resolving common socket handshake snags.
-                  </p>
-                </div>
-
-                <div className="space-y-4 text-xs font-mono">
-                  <div className="p-3 rounded bg-white/5 border border-white/5">
-                    <span className="text-white font-bold block mb-1">Issue: Socket connection refused (127.0.0.1:9042)</span>
-                    <span className="text-text-muted">Ensure your bot has initialized the AlgorbAdapter before starting the dashboard. Check firewall permissions for local loopback.</span>
-                  </div>
-                  <div className="p-3 rounded bg-white/5 border border-white/5">
-                    <span className="text-white font-bold block mb-1">Issue: Frame serialization delay over 2ms</span>
-                    <span className="text-text-muted">Avoid serializing deep unindexed trade history on every tick. Emit full snapshots at 1Hz and delta updates at tick frequency.</span>
-                  </div>
-                </div>
-              </section>
-            )}
-          </main>
+          {/* Step 4 */}
+          <div className="p-4 rounded-xl bg-surface/50 border border-white/10 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-[10px] flex items-center justify-center">
+                4
+              </span>
+              <span className="font-bold text-white text-sm">Verify Ingestion in Real Time</span>
+            </div>
+            <p className="text-text-secondary font-sans text-xs">
+              When your script executes a trade, Algorb returns HTTP 201 with the recorded execution ID. Open your dashboard in your browser to inspect the live trade journal, R-multiples, and forensic telemetry.
+            </p>
+            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>API Endpoint: <strong className="text-white">POST http://localhost:3000/api/ledger</strong></span>
+              </div>
+              <span className="font-bold">STATUS 201 CREATED</span>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* 3. Archetype SDK Callout Banner */}
+      <section className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-surface to-surface-elevated border border-accent/30 font-mono space-y-4 relative overflow-hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Layers className="w-5 h-5 text-accent" />
+            <h3 className="text-lg font-bold text-white">Archetype-Specific SDK Adapters</h3>
+          </div>
+          <span className="px-2 py-0.5 text-[9px] font-bold rounded bg-accent/20 text-accent uppercase">
+            SPECIALIZED PAYLOADS
+          </span>
+        </div>
+
+        <p className="text-xs sm:text-sm text-text-secondary font-sans leading-relaxed">
+          Running a Prop-Firm challenge on FTMO, a cross-exchange crypto latency arbitrageur, or a pair-trading stat-arb bot? Inspect the specialized payload schemas for your exact archetype.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <Link
+            href="/docs/archetypes#prop-firm"
+            className="p-3 rounded-lg border border-white/10 bg-black/20 hover:border-accent hover:bg-white/5 transition-all text-xs"
+          >
+            <span className="font-bold text-white block mb-0.5">Prop-Firm Halo</span>
+            <span className="text-[10px] text-text-muted">currentDrawdown & dailyLimit telemetry</span>
+          </Link>
+          <Link
+            href="/docs/archetypes#crypto-arbitrage"
+            className="p-3 rounded-lg border border-white/10 bg-black/20 hover:border-accent hover:bg-white/5 transition-all text-xs"
+          >
+            <span className="font-bold text-white block mb-0.5">Crypto Arbitrage</span>
+            <span className="text-[10px] text-text-muted">binancePing & bybitPing microseconds</span>
+          </Link>
+          <Link
+            href="/docs/archetypes#stat-arb"
+            className="p-3 rounded-lg border border-white/10 bg-black/20 hover:border-accent hover:bg-white/5 transition-all text-xs"
+          >
+            <span className="font-bold text-white block mb-0.5">Stat-Arb Z-Score</span>
+            <span className="text-[10px] text-text-muted">Live 2.0σ divergence & half-life</span>
+          </Link>
+        </div>
+
+        <div className="pt-2">
+          <Link
+            href="/docs/archetypes"
+            className="inline-flex items-center gap-2 text-xs font-bold text-accent hover:underline uppercase"
+          >
+            <span>View All Archetype Payload Specifications</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </section>
+
+      {/* 4. TradeLedgerEntry Schema Contract */}
+      <section id="ingestion-api" className="space-y-4">
+        <div>
+          <span className="text-[10px] font-bold text-accent uppercase tracking-wider block mb-1">
+            DATA CONTRACT
+          </span>
+          <h2 className="text-2xl font-bold text-white font-sans">
+            TradeLedgerEntry Schema Specification
+          </h2>
+          <p className="text-sm text-text-secondary font-sans mt-1">
+            The JSON payload accepted by <code className="text-accent">POST /api/ledger</code> matches the exact TypeScript interface used across Algorb Control.
+          </p>
+        </div>
+
+        <div className="rounded-xl border border-white/10 overflow-hidden font-mono text-xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-white/5 border-b border-white/10 text-[10px] text-text-muted uppercase">
+                  <th className="p-3">Field</th>
+                  <th className="p-3">Type</th>
+                  <th className="p-3">Required</th>
+                  <th className="p-3">Description & Example</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 text-text-secondary">
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-3 font-bold text-accent">id / ticket</td>
+                  <td className="p-3 text-purple-300">string</td>
+                  <td className="p-3 text-emerald-400 font-bold">Yes</td>
+                  <td className="p-3">Unique execution ID or exchange ticket (e.g. <code className="text-white">TRD-2026-0907-143</code>).</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-3 font-bold text-accent">direction</td>
+                  <td className="p-3 text-purple-300">&quot;LONG&quot; | &quot;SHORT&quot;</td>
+                  <td className="p-3 text-emerald-400 font-bold">Yes</td>
+                  <td className="p-3">Order side executed on the exchange.</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-3 font-bold text-accent">entryPrice</td>
+                  <td className="p-3 text-amber-300">number</td>
+                  <td className="p-3 text-emerald-400 font-bold">Yes</td>
+                  <td className="p-3">Average fill price at order entry (e.g. <code className="text-white">67420.50</code>).</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-3 font-bold text-accent">exitPrice</td>
+                  <td className="p-3 text-amber-300">number</td>
+                  <td className="p-3 text-emerald-400 font-bold">Yes</td>
+                  <td className="p-3">Average fill price at order exit (e.g. <code className="text-white">68120.00</code>).</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-3 font-bold text-accent">pnl</td>
+                  <td className="p-3 text-amber-300">number</td>
+                  <td className="p-3 text-emerald-400 font-bold">Yes</td>
+                  <td className="p-3">Realized profit or loss in USD (positive for win, negative for loss).</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-3 font-bold text-white">size</td>
+                  <td className="p-3 text-purple-300">string</td>
+                  <td className="p-3 text-text-muted">Optional</td>
+                  <td className="p-3">Position size with asset denomination (e.g. <code className="text-white">1.50 BTC</code>).</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-3 font-bold text-white">symbol</td>
+                  <td className="p-3 text-purple-300">string</td>
+                  <td className="p-3 text-text-muted">Optional</td>
+                  <td className="p-3">Market symbol (e.g. <code className="text-white">BTC-PERP</code>). Defaults to BTC-PERP.</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-3 font-bold text-white">strategy</td>
+                  <td className="p-3 text-purple-300">string</td>
+                  <td className="p-3 text-text-muted">Optional</td>
+                  <td className="p-3">Executing algorithmic strategy (e.g. <code className="text-white">Mean Reversion Alpha</code>).</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-3 font-bold text-white">zScore</td>
+                  <td className="p-3 text-amber-300">number</td>
+                  <td className="p-3 text-text-muted">Optional</td>
+                  <td className="p-3">Normalized statistical divergence score (e.g. <code className="text-white">2.45</code>).</td>
+                </tr>
+                <tr className="hover:bg-white/[0.02]">
+                  <td className="p-3 font-bold text-white">telemetry</td>
+                  <td className="p-3 text-purple-300">object</td>
+                  <td className="p-3 text-text-muted">Optional</td>
+                  <td className="p-3">Forensic execution object with <code className="text-white">executionLatencyMs</code>, <code className="text-white">signalConfidence</code>, and <code className="text-white">bookDepthRatio</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Control Bus & Bidirectional Emergency Kill-Switch */}
+      <section id="control-bus" className="p-6 sm:p-8 rounded-2xl bg-surface/60 border border-white/10 space-y-4 font-mono text-xs">
+        <div className="flex items-center gap-2">
+          <Lock className="w-4 h-4 text-warning" />
+          <h3 className="text-base font-bold text-white uppercase tracking-wider">
+            Algorb Control: Bidirectional Command Bus & HMAC
+          </h3>
+        </div>
+
+        <p className="text-text-secondary font-sans leading-relaxed">
+          For users running <strong>Algorb Control</strong>, the dashboard can send execution instructions back to your bot (e.g. Emergency Kill-Switch, Flatten All Positions, Pause Alpha). Actions dispatched from the UI are cryptographically signed using HMAC-SHA256:
+        </p>
+
+        <CodeBlock
+          code={`# Verifying inbound command signatures inside your bot:
+import hmac
+import hashlib
+
+def verify_algorb_command(payload_bytes: bytes, received_signature: str, secret_key: str) -> bool:
+    computed = hmac.new(secret_key.encode(), payload_bytes, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(computed, received_signature)`}
+          language="python"
+          filename="security_guard.py"
+          badge="HMAC-SHA256"
+        />
+      </section>
     </div>
   );
 }
