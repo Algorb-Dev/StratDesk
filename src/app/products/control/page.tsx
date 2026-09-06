@@ -99,6 +99,61 @@ export default function ProductControlPage() {
           </div>
         </div>
 
+        {/* Feature Spotlight: Institutional Trade Ledger & Journal */}
+        <div className="my-20 p-6 sm:p-10 rounded-2xl bg-surface/90 border border-accent/30 shadow-2xl relative overflow-hidden">
+          <div className="max-w-3xl mb-8">
+            <Badge variant="accent" size="sm" className="mb-3">
+              EXCLUSIVE TO ALGORB CONTROL
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white font-sans tracking-tight">
+              INSTITUTIONAL TRADE LEDGER & JOURNAL.
+            </h2>
+            <p className="mt-3 text-sm sm:text-base text-text-secondary font-sans leading-relaxed">
+              Stop logging automated trades in spreadsheets or retail journals. Algorb Control includes an institutional trade ledger with forensic execution telemetry, automated R-multiple audits, market regime classification, and screenshot-worthy proof cards.
+            </p>
+          </div>
+
+          {/* Interactive Ledger Preview */}
+          <div className="mb-10">
+            <DashboardPreview product="control" theme="obsidian" initialControlTab="ledger" />
+          </div>
+
+          {/* 4 Feature Pillars */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+            <div className="p-4 rounded-xl bg-background/80 border border-white/10">
+              <div className="text-accent font-bold mb-1.5">01 // R-MULTIPLE AUDITS</div>
+              <div className="font-bold text-white mb-1">Expectancy & Skew</div>
+              <p className="text-text-secondary text-[11px] leading-relaxed font-sans">
+                Normalized risk accounting tracking realized R-multiples, profit factor, and Sharpe ratio automatically.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-background/80 border border-white/10">
+              <div className="text-warning font-bold mb-1.5">02 // FORENSIC TELEMETRY</div>
+              <div className="font-bold text-white mb-1">Microsecond Fills</div>
+              <p className="text-text-secondary text-[11px] leading-relaxed font-sans">
+                Inspect Z-score triggers, book depth imbalance ratios, maker rebates, and execution latency for every trade.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-background/80 border border-white/10">
+              <div className="text-success font-bold mb-1.5">03 // REGIME ANALYSIS</div>
+              <div className="font-bold text-white mb-1">Market Condition Tagging</div>
+              <p className="text-text-secondary text-[11px] leading-relaxed font-sans">
+                Correlate strategy win rates across trend expansion, range compression, and liquidity hunt market regimes.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-background/80 border border-white/10">
+              <div className="text-sky-400 font-bold mb-1.5">04 // PROOF CARDS</div>
+              <div className="font-bold text-white mb-1">Screenshot-Ready Output</div>
+              <p className="text-text-secondary text-[11px] leading-relaxed font-sans">
+                One-click watermarked proof cards formatted for LP reports, trader communities, and social media.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* What's Included & Requirements */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 my-12">
           <div className="p-6 sm:p-8 rounded-2xl bg-surface border border-white/10">

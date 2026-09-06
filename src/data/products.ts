@@ -107,6 +107,7 @@ export const PRODUCTS: Record<"view" | "control", ProductTier> = {
     status: "WAITLIST",
     highlights: [
       "Everything in Algorb View included",
+      "Automated Institutional Trade Ledger & Journal",
       "Bidirectional low-latency control bus",
       "Instant Emergency Kill-Switch (Flatten & Cancel)",
       "Runtime strategy pause, resume, and step-through",
@@ -114,6 +115,16 @@ export const PRODUCTS: Record<"view" | "control", ProductTier> = {
       "Cryptographically signed command verification",
     ],
     features: [
+      {
+        category: "Trade Ledger & Algorithmic Journal",
+        items: [
+          "Automated R-multiple & risk-adjusted expectancy tracking",
+          "Forensic execution telemetry (Z-score, book depth ratio, latency)",
+          "Market regime classification & strategy performance correlation",
+          "Daily, weekly, and monthly performance drilldown analytics",
+          "Screenshot-ready proof cards with cryptographic report watermarks",
+        ],
+      },
       {
         category: "Active Command & Control",
         items: [
@@ -169,6 +180,8 @@ export const COMPARISON_FEATURES = [
   { name: "6 Built-in High-Contrast Themes", view: true, control: true },
   { name: "Read-Only Security Guarantee (No Write Keys)", view: true, control: false },
   { name: "Emergency Kill-Switch (Cancel All & Flatten)", view: false, control: true },
+  { name: "Automated Trade Ledger & Execution Journal", view: false, control: true },
+  { name: "Forensic R-Multiple & Expectancy Analytics", view: false, control: true },
   { name: "Strategy Pause, Resume & Soft-Drain", view: false, control: true },
   { name: "Dynamic Symbol Whitelist / Blacklist Toggle", view: false, control: true },
   { name: "Live Parameter & Risk Cap Hot-Reload", view: false, control: true },

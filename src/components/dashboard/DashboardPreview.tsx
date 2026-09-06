@@ -1,6 +1,4 @@
-"use client";
-
-import React from "react";
+import React, { useState } from "react";
 import { THEMES } from "@/data/themes";
 import { DEMO_METRICS } from "@/data/demo-data";
 import { MetricCard } from "./MetricCard";
@@ -8,15 +6,17 @@ import { EquityChart } from "./EquityChart";
 import { PositionsTable } from "./PositionsTable";
 import { ExecutionLogs } from "./ExecutionLogs";
 import { ControlBar } from "./ControlBar";
+import { TradeLedger } from "@/components/ledger/TradeLedger";
 import { AlgorbSymbol } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
-import { Activity, ShieldAlert, Cpu, Wifi } from "lucide-react";
+import { Activity, ShieldAlert, Cpu, Wifi, Power, BookOpen } from "lucide-react";
 
 export interface DashboardPreviewProps {
   product?: "view" | "control";
   theme?: "terminal" | "obsidian" | "quant" | "command" | "vector" | "light";
   className?: string;
   isHero?: boolean;
+  initialControlTab?: "hud" | "ledger";
 }
 
 export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
@@ -24,7 +24,9 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   theme = "obsidian",
   className,
   isHero = false,
+  initialControlTab = "hud",
 }) => {
+  const [controlView, setControlView] = useState<"hud" | "ledger">(initialControlTab);
   const activeTheme = THEMES.find((t) => t.id === theme) || THEMES[1]; // fallback to Obsidian
   const isLight = theme === "light";
 
@@ -117,157 +119,212 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           </div>
         </div>
 
-        {/* Metric Cards Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-          <MetricCard
-            label="EQUITY (NAV)"
-            value={DEMO_METRICS.equityFormatted}
-            delta={DEMO_METRICS.dailyPnlPercent}
-            isPositive={true}
-            subtext="Peak: $25,120.00"
-            isLight={isLight}
-          />
-          <MetricCard
-            label="TODAY'S P&L"
-            value={DEMO_METRICS.dailyPnlFormatted}
-            delta={DEMO_METRICS.dailyPnlPercent}
-            isPositive={true}
-            subtext="Unrealized: +$882"
-            isLight={isLight}
-          />
-          <MetricCard
-            label="TOTAL RETURN"
-            value={DEMO_METRICS.totalReturn}
-            delta="+14.2%"
-            isPositive={true}
-            subtext="Annualized: 210%"
-            isLight={isLight}
-          />
-          <MetricCard
-            label="MAX DRAWDOWN"
-            value={DEMO_METRICS.drawdown}
-            delta="Safe"
-            isPositive={true}
-            subtext={`Ceiling: ${DEMO_METRICS.maxDrawdown}`}
-            isLight={isLight}
-          />
-          <MetricCard
-            label="WIN RATE"
-            value={DEMO_METRICS.winRate}
-            delta="72/100"
-            isPositive={true}
-            subtext={`Profit Factor: ${DEMO_METRICS.profitFactor}`}
-            isLight={isLight}
-          />
-          <MetricCard
-            label="BOT STATUS"
-            value={DEMO_METRICS.botStatus}
-            badge="ACTIVE"
-            pulse={true}
-            subtext={`Uptime: ${DEMO_METRICS.uptime}`}
-            isLight={isLight}
-          />
-        </div>
+        {/* If Control Mode: View Switcher (Live Command HUD vs Audit & Trade Ledger) */}
+        {product === "control" && (
+          <div className={cn("flex flex-wrap items-center justify-between gap-3 p-1 rounded-lg border", isLight ? "bg-slate-100 border-slate-200" : "bg-surface-elevated/70 border-white/10")}>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setControlView("hud")}
+                className={cn(
+                  "px-3 py-1.5 rounded text-xs font-bold uppercase transition-all flex items-center gap-1.5 border",
+                  controlView === "hud"
+                    ? isLight
+                      ? "bg-white text-amber-900 border-amber-300 shadow-sm font-extrabold"
+                      : "bg-warning text-background border-warning shadow-lg font-extrabold"
+                    : isLight
+                    ? "text-slate-600 hover:text-slate-900 border-transparent"
+                    : "text-text-muted hover:text-white border-transparent"
+                )}
+              >
+                <Power className="w-3.5 h-3.5" />
+                <span>COMMAND BUS & HUD</span>
+              </button>
 
-        {/* If Control Mode: Render Interactive Control Bus */}
-        {product === "control" && <ControlBar isLight={isLight} />}
+              <button
+                onClick={() => setControlView("ledger")}
+                className={cn(
+                  "px-3 py-1.5 rounded text-xs font-bold uppercase transition-all flex items-center gap-1.5 border",
+                  controlView === "ledger"
+                    ? isLight
+                      ? "bg-white text-sky-800 border-sky-300 shadow-sm font-extrabold"
+                      : "bg-accent text-background border-accent shadow-glow-cyan font-extrabold"
+                    : isLight
+                    ? "text-slate-600 hover:text-slate-900 border-transparent"
+                    : "text-text-muted hover:text-white border-transparent"
+                )}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>AUDIT TRADE LEDGER</span>
+                <span className={cn("px-1.5 py-0.2 text-[9px] rounded font-bold", controlView === "ledger" ? (isLight ? "bg-sky-100 text-sky-900" : "bg-black/30 text-background") : "bg-white/10 text-text-secondary")}>
+                  142 TRADES
+                </span>
+              </button>
+            </div>
 
-        {/* Middle Section: Equity Chart & Risk / Allocation Gauges */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
-          {/* Main Interactive Chart */}
-          <div className={cn(
-            "lg:col-span-2 p-3 sm:p-4 rounded-lg flex flex-col border transition-colors",
-            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
-          )}>
-            <EquityChart accentColor={isLight ? "#0284c7" : activeTheme.colors.accent} isLight={isLight} />
+            <span className={cn("text-[10px] hidden md:inline px-2", isLight ? "text-slate-500" : "text-text-muted")}>
+              {controlView === "hud" ? "Live Telemetry & Intervention Bus" : "Forensic Execution History & R-Multiples"}
+            </span>
           </div>
+        )}
 
-          {/* Realtime Risk & Margin Radar */}
-          <div className={cn(
-            "p-3.5 sm:p-4 rounded-lg flex flex-col justify-between gap-3 text-xs border transition-colors",
-            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
-          )}>
-            <div className={cn("flex items-center justify-between pb-2 border-b", isLight ? "border-slate-200" : "border-white/5")}>
-              <span className={cn("font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5", isLight ? "text-slate-900" : "text-white")}>
-                <ShieldAlert className={cn("w-3.5 h-3.5", isLight ? "text-amber-600" : "text-warning")} />
-                RISK ALLOCATION
-              </span>
-              <span className={cn("text-[10px]", isLight ? "text-slate-400 font-semibold" : "text-text-muted")}>PARAM LIMITS</span>
+        {/* If Control Mode & Ledger Tab Active: Render Full Institutional Trade Ledger */}
+        {product === "control" && controlView === "ledger" ? (
+          <TradeLedger theme={theme} isLight={isLight} />
+        ) : (
+          <>
+            {/* Metric Cards Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+              <MetricCard
+                label="EQUITY (NAV)"
+                value={DEMO_METRICS.equityFormatted}
+                delta={DEMO_METRICS.dailyPnlPercent}
+                isPositive={true}
+                subtext="Peak: $25,120.00"
+                isLight={isLight}
+              />
+              <MetricCard
+                label="TODAY'S P&L"
+                value={DEMO_METRICS.dailyPnlFormatted}
+                delta={DEMO_METRICS.dailyPnlPercent}
+                isPositive={true}
+                subtext="Unrealized: +$882"
+                isLight={isLight}
+              />
+              <MetricCard
+                label="TOTAL RETURN"
+                value={DEMO_METRICS.totalReturn}
+                delta="+14.2%"
+                isPositive={true}
+                subtext="Annualized: 210%"
+                isLight={isLight}
+              />
+              <MetricCard
+                label="MAX DRAWDOWN"
+                value={DEMO_METRICS.drawdown}
+                delta="Safe"
+                isPositive={true}
+                subtext={`Ceiling: ${DEMO_METRICS.maxDrawdown}`}
+                isLight={isLight}
+              />
+              <MetricCard
+                label="WIN RATE"
+                value={DEMO_METRICS.winRate}
+                delta="72/100"
+                isPositive={true}
+                subtext={`Profit Factor: ${DEMO_METRICS.profitFactor}`}
+                isLight={isLight}
+              />
+              <MetricCard
+                label="BOT STATUS"
+                value={DEMO_METRICS.botStatus}
+                badge="ACTIVE"
+                pulse={true}
+                subtext={`Uptime: ${DEMO_METRICS.uptime}`}
+                isLight={isLight}
+              />
             </div>
 
-            {/* Gauge 1: Margin Utilization */}
-            <div>
-              <div className="flex justify-between text-[11px] mb-1">
-                <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Margin Utilization</span>
-                <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>34.2% / 50.0%</span>
+            {/* If Control Mode: Render Interactive Control Bus */}
+            {product === "control" && <ControlBar isLight={isLight} />}
+
+            {/* Middle Section: Equity Chart & Risk / Allocation Gauges */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
+              {/* Main Interactive Chart */}
+              <div className={cn(
+                "lg:col-span-2 p-3 sm:p-4 rounded-lg flex flex-col border transition-colors",
+                isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+              )}>
+                <EquityChart accentColor={isLight ? "#0284c7" : activeTheme.colors.accent} isLight={isLight} />
               </div>
-              <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
-                <div
-                  className="h-full rounded transition-all duration-500"
-                  style={{ width: "34.2%", backgroundColor: isLight ? "#0284c7" : activeTheme.colors.accent }}
-                />
+
+              {/* Realtime Risk & Margin Radar */}
+              <div className={cn(
+                "p-3.5 sm:p-4 rounded-lg flex flex-col justify-between gap-3 text-xs border transition-colors",
+                isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+              )}>
+                <div className={cn("flex items-center justify-between pb-2 border-b", isLight ? "border-slate-200" : "border-white/5")}>
+                  <span className={cn("font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5", isLight ? "text-slate-900" : "text-white")}>
+                    <ShieldAlert className={cn("w-3.5 h-3.5", isLight ? "text-amber-600" : "text-warning")} />
+                    RISK ALLOCATION
+                  </span>
+                  <span className={cn("text-[10px]", isLight ? "text-slate-400 font-semibold" : "text-text-muted")}>PARAM LIMITS</span>
+                </div>
+
+                {/* Gauge 1: Margin Utilization */}
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1">
+                    <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Margin Utilization</span>
+                    <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>34.2% / 50.0%</span>
+                  </div>
+                  <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
+                    <div
+                      className="h-full rounded transition-all duration-500"
+                      style={{ width: "34.2%", backgroundColor: isLight ? "#0284c7" : activeTheme.colors.accent }}
+                    />
+                  </div>
+                </div>
+
+                {/* Gauge 2: Drawdown Tolerance */}
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1">
+                    <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Drawdown Cushion</span>
+                    <span className={cn("font-bold", isLight ? "text-emerald-700" : "text-success")}>4.21% / 10.0%</span>
+                  </div>
+                  <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
+                    <div
+                      className={cn("h-full rounded transition-all duration-500", isLight ? "bg-emerald-600" : "bg-success")}
+                      style={{ width: "42.1%" }}
+                    />
+                  </div>
+                </div>
+
+                {/* Gauge 3: Value at Risk (99% 1D) */}
+                <div>
+                  <div className="flex justify-between text-[11px] mb-1">
+                    <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Value at Risk (99% 1D)</span>
+                    <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>$842.10 (3.39%)</span>
+                  </div>
+                  <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
+                    <div
+                      className={cn("h-full rounded transition-all duration-500", isLight ? "bg-amber-500" : "bg-warning")}
+                      style={{ width: "28.5%" }}
+                    />
+                  </div>
+                </div>
+
+                {/* Strategy Weights Breakdown */}
+                <div className={cn("pt-2 border-t flex items-center justify-between text-[10px]", isLight ? "border-slate-200 text-slate-500" : "border-white/5 text-text-muted")}>
+                  <div>
+                    <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Alpha-V2:</span> 45%
+                  </div>
+                  <div>
+                    <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>MeanRev:</span> 35%
+                  </div>
+                  <div>
+                    <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Arb:</span> 20%
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Gauge 2: Drawdown Tolerance */}
-            <div>
-              <div className="flex justify-between text-[11px] mb-1">
-                <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Drawdown Cushion</span>
-                <span className={cn("font-bold", isLight ? "text-emerald-700" : "text-success")}>4.21% / 10.0%</span>
+            {/* Bottom Section: Active Positions Table & Execution Logs */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+              <div className={cn(
+                "p-3 sm:p-4 rounded-lg border transition-colors",
+                isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+              )}>
+                <PositionsTable isLight={isLight} />
               </div>
-              <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
-                <div
-                  className={cn("h-full rounded transition-all duration-500", isLight ? "bg-emerald-600" : "bg-success")}
-                  style={{ width: "42.1%" }}
-                />
+
+              <div className={cn(
+                "p-3 sm:p-4 rounded-lg border transition-colors",
+                isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+              )}>
+                <ExecutionLogs maxLogs={5} isLight={isLight} />
               </div>
             </div>
-
-            {/* Gauge 3: Value at Risk (99% 1D) */}
-            <div>
-              <div className="flex justify-between text-[11px] mb-1">
-                <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Value at Risk (99% 1D)</span>
-                <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>$842.10 (3.39%)</span>
-              </div>
-              <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
-                <div
-                  className={cn("h-full rounded transition-all duration-500", isLight ? "bg-amber-500" : "bg-warning")}
-                  style={{ width: "28.5%" }}
-                />
-              </div>
-            </div>
-
-            {/* Strategy Weights Breakdown */}
-            <div className={cn("pt-2 border-t flex items-center justify-between text-[10px]", isLight ? "border-slate-200 text-slate-500" : "border-white/5 text-text-muted")}>
-              <div>
-                <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Alpha-V2:</span> 45%
-              </div>
-              <div>
-                <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>MeanRev:</span> 35%
-              </div>
-              <div>
-                <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Arb:</span> 20%
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Section: Active Positions Table & Execution Logs */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
-          <div className={cn(
-            "p-3 sm:p-4 rounded-lg border transition-colors",
-            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
-          )}>
-            <PositionsTable isLight={isLight} />
-          </div>
-
-          <div className={cn(
-            "p-3 sm:p-4 rounded-lg border transition-colors",
-            isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
-          )}>
-            <ExecutionLogs maxLogs={5} isLight={isLight} />
-          </div>
-        </div>
+          </>
+        )}
 
         {/* Footer Disclaimer Strip */}
         <div className={cn(
