@@ -10,16 +10,23 @@ interface ThemeSwitcherProps {
   className?: string;
   variant?: "compact" | "detailed" | "navbar";
   showLabel?: boolean;
+  activeThemeId?: ThemeId;
+  onThemeChange?: (theme: ThemeId) => void;
 }
 
 export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   className,
   variant = "detailed",
   showLabel = true,
+  activeThemeId,
+  onThemeChange,
 }) => {
-  const { theme, setTheme, mounted, activeTheme } = useTheme();
+  const { theme: hookTheme, setTheme, mounted, activeTheme: hookActiveTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const currentThemeId = activeThemeId || hookTheme;
+  const currentActiveTheme = THEMES.find((t) => t.id === currentThemeId) || hookActiveTheme;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -50,6 +57,9 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   }, [isOpen]);
 
   const handleSelectTheme = (selectedId: ThemeId) => {
+    if (onThemeChange) {
+      onThemeChange(selectedId);
+    }
     setTheme(selectedId);
     setIsOpen(false);
   };
@@ -69,7 +79,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
     );
   }
 
-  const isLight = theme === "light";
+  const isLight = currentThemeId === "light";
 
   return (
     <div ref={dropdownRef} className={cn("relative inline-block text-left font-mono", className)}>
@@ -93,13 +103,13 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
         <span className="relative flex h-2 w-2 shrink-0">
           <span
             className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
-            style={{ backgroundColor: activeTheme.colors.accent }}
+            style={{ backgroundColor: currentActiveTheme.colors.accent }}
           />
           <span
             className="relative inline-flex rounded-full h-2 w-2"
             style={{
-              backgroundColor: activeTheme.colors.accent,
-              boxShadow: `0 0 8px ${activeTheme.colors.accent}`,
+              backgroundColor: currentActiveTheme.colors.accent,
+              boxShadow: `0 0 8px ${currentActiveTheme.colors.accent}`,
             }}
           />
         </span>
@@ -108,7 +118,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
           <span className="flex items-center gap-1.5">
             <Palette className={cn("w-3.5 h-3.5", isLight ? "text-slate-500" : "text-text-muted group-hover:text-accent transition-colors")} />
             <span className="font-bold tracking-wider uppercase text-[11px]">
-              {variant === "compact" ? activeTheme.name : `${activeTheme.name}`}
+              {variant === "compact" ? currentActiveTheme.name : `${currentActiveTheme.name}`}
             </span>
           </span>
         )}
@@ -144,7 +154,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
           {/* Theme Options */}
           <div className="flex flex-col gap-0.5 pt-1">
             {THEMES.map((item) => {
-              const isSelected = item.id === theme;
+              const isSelected = item.id === currentThemeId;
 
               return (
                 <button

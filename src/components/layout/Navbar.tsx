@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
-import { ThemeSwitcher } from "@/components/dashboard/ThemeSwitcher";
+import { SiteThemeToggle } from "@/components/ui/SiteThemeToggle";
 import { cn } from "@/lib/utils";
 import { Menu, X, ArrowRight, Terminal, Cpu, Layers, ShieldCheck, HelpCircle, BookOpen, Compass } from "lucide-react";
 
@@ -81,9 +81,9 @@ export const Navbar: React.FC = () => {
             })}
           </nav>
 
-          {/* RIGHT: Theme Switcher, Documentation & Explore CTA */}
+          {/* RIGHT: Site Theme Mode (Dark/Light), Documentation & Explore CTA */}
           <div className="hidden md:flex items-center gap-2.5">
-            <ThemeSwitcher variant="compact" />
+            <SiteThemeToggle />
 
             <Link
               href="/docs"
@@ -165,8 +165,8 @@ export const Navbar: React.FC = () => {
 
           <div className="mt-auto flex flex-col gap-3">
             <div className="p-2.5 rounded-lg bg-surface/50 border border-white/5 flex items-center justify-between">
-              <span className="text-[11px] font-mono text-text-muted uppercase">THEME:</span>
-              <ThemeSwitcher variant="compact" />
+              <span className="text-[11px] font-mono text-text-muted uppercase">COLOR MODE:</span>
+              <SiteThemeToggle showLabel={true} />
             </div>
 
             <Button

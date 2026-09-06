@@ -313,6 +313,7 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
   return (
     <div
+      data-dashboard="true"
       style={themeStyle}
       className={cn(
         "relative rounded-xl border transition-all duration-300 overflow-hidden shadow-2xl font-mono",
@@ -391,7 +392,7 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
 
             {/* Mount interactive ThemeSwitcher */}
             {showThemeSwitcher && (
-              <ThemeSwitcher variant="compact" />
+              <ThemeSwitcher variant="compact" activeThemeId={theme} />
             )}
           </div>
         </div>

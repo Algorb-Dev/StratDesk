@@ -14,74 +14,23 @@ export const THEME_IDS: ThemeId[] = [
   "light",
 ];
 
-export const THEME_STORAGE_KEY = "algorb_active_theme";
+export const THEME_STORAGE_KEY = "algorb_dashboard_theme";
 export const DEFAULT_THEME: ThemeId = "terminal";
 
-const THEME_CHANGE_EVENT = "algorb_theme_change";
+const DASHBOARD_THEME_CHANGE_EVENT = "algorb_dashboard_theme_change";
 
 /**
- * Dynamically injects theme class and updates CSS custom properties
- * on both the root document element and body.
- */
-export function applyThemeToDom(themeId: ThemeId): void {
-  if (typeof document === "undefined") return;
-
-  const root = document.documentElement;
-  const body = document.body;
-
-  // Remove existing theme classes
-  THEME_IDS.forEach((id) => {
-    root.classList.remove(`theme-${id}`);
-    body.classList.remove(`theme-${id}`);
-  });
-
-  // Inject current theme class
-  root.classList.add(`theme-${themeId}`);
-  body.classList.add(`theme-${themeId}`);
-
-  // Sync Tailwind dark / light class
-  if (themeId === "light") {
-    root.classList.remove("dark");
-    body.classList.remove("dark");
-  } else {
-    root.classList.add("dark");
-    body.classList.add("dark");
-  }
-
-  // Update theme color variables directly for instant CSS mapping
-  const themeDef = THEMES.find((t) => t.id === themeId);
-  if (themeDef) {
-    const properties: Record<string, string> = {
-      "--bg-primary": themeDef.colors.bg,
-      "--surface": themeDef.colors.surface,
-      "--border-color": themeDef.colors.border,
-      "--accent-color": themeDef.colors.accent,
-      "--accent-glow": themeDef.colors.accentGlow,
-      "--text-primary": themeDef.colors.text,
-      "--text-muted": themeDef.colors.muted,
-      "--theme-bg": themeDef.colors.bg,
-      "--theme-surface": themeDef.colors.surface,
-      "--theme-border": themeDef.colors.border,
-      "--theme-accent": themeDef.colors.accent,
-      "--theme-text": themeDef.colors.text,
-      "--theme-muted": themeDef.colors.muted,
-    };
-
-    Object.entries(properties).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
-  }
-}
-
-/**
- * Custom hook to read and write active theme state with localStorage persistence.
- * Safe from Next.js SSR hydration mismatches using a mounted state flag.
+ * Custom hook to read and write active bot dashboard theme state
+ * ("terminal" | "obsidian" | "quant" | "command" | "vector" | "light")
+ * with localStorage persistence.
+ *
+ * Scoped exclusively to the dashboard HUD / Dashboard Lab preview,
+ * leaving the marketing website to be controlled by the dark/light mode toggle.
  */
 export function useTheme() {
   const [theme, setThemeState] = useState<ThemeId>(DEFAULT_THEME);
   const [mounted, setMounted] = useState<boolean>(false);
 
-  // Client-side hydration and storage sync
   useEffect(() => {
     setMounted(true);
 
@@ -92,11 +41,10 @@ export function useTheme() {
         initialTheme = stored;
       }
     } catch {
-      // Ignore local storage read errors (e.g. strict security or private browsing)
+      // Ignore local storage read errors
     }
 
     setThemeState(initialTheme);
-    applyThemeToDom(initialTheme);
 
     // Synchronize across components in the same window
     const handleCustomThemeChange = (e: Event) => {
@@ -112,16 +60,15 @@ export function useTheme() {
         const nextTheme = e.newValue as ThemeId;
         if (THEME_IDS.includes(nextTheme)) {
           setThemeState(nextTheme);
-          applyThemeToDom(nextTheme);
         }
       }
     };
 
-    window.addEventListener(THEME_CHANGE_EVENT, handleCustomThemeChange);
+    window.addEventListener(DASHBOARD_THEME_CHANGE_EVENT, handleCustomThemeChange);
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      window.removeEventListener(THEME_CHANGE_EVENT, handleCustomThemeChange);
+      window.removeEventListener(DASHBOARD_THEME_CHANGE_EVENT, handleCustomThemeChange);
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
@@ -137,11 +84,9 @@ export function useTheme() {
       // Ignore write errors in restricted environments
     }
 
-    applyThemeToDom(newTheme);
-
     if (typeof window !== "undefined") {
       window.dispatchEvent(
-        new CustomEvent<ThemeId>(THEME_CHANGE_EVENT, { detail: newTheme })
+        new CustomEvent<ThemeId>(DASHBOARD_THEME_CHANGE_EVENT, { detail: newTheme })
       );
     }
   }, []);
