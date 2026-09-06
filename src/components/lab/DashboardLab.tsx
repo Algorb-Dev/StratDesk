@@ -7,18 +7,41 @@ import { PRODUCTS } from "@/data/products";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { DashboardPreview } from "@/components/dashboard/DashboardPreview";
-import { Cpu, Palette, ArrowRight, ShieldCheck, LayoutGrid } from "lucide-react";
+import {
+  ARCHITECTURES_DATA,
+  ARCHITECTURE_CATEGORIES,
+  ArchitectureCategory,
+} from "@/data/architectures-data";
+import {
+  Cpu,
+  Palette,
+  ArrowRight,
+  ShieldCheck,
+  LayoutGrid,
+  RotateCcw,
+  Sparkles,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const ARCHETYPE_OPTIONS = [
-  { id: "default", label: "DEFAULT HUD", canonicalId: "default", tier: "view" as const },
-  { id: "prop-firm", label: "PROP-FIRM HALO", canonicalId: "prop-firm-evaluator-console", tier: "control" as const },
-  { id: "crypto-arbitrage", label: "CRYPTO ARBITRAGE", canonicalId: "crypto-arbitrage-matrix", tier: "control" as const },
-  { id: "stat-arb", label: "STAT-ARB Z-SCORE", canonicalId: "pair-trading-statarb-console", tier: "control" as const },
-  { id: "dex-sniper", label: "DEX SNIPER", canonicalId: "on-chain-dex-sniper", tier: "control" as const },
-  { id: "raw-cli", label: "RAW CLI", canonicalId: "raw-developer-terminal-cli", tier: "view" as const },
-  { id: "cro-redline", label: "CRO RED LINE", canonicalId: "chief-risk-officer-red-line", tier: "control" as const },
-];
+const ARCHETYPE_ALIAS_MAP: Record<string, string> = {
+  "prop-firm": "prop-firm-evaluator-console",
+  "crypto-arbitrage": "crypto-arbitrage-matrix",
+  "stat-arb": "pair-trading-statarb-console",
+  "dex-sniper": "on-chain-dex-sniper",
+  "raw-cli": "raw-developer-terminal-cli",
+  "cro-redline": "chief-risk-officer-red-line",
+  "options-cockpit": "options-volatility-surface",
+};
+
+const INTERACTIVE_SIMULATOR_IDS = new Set([
+  "prop-firm-evaluator-console",
+  "crypto-arbitrage-matrix",
+  "pair-trading-statarb-console",
+  "on-chain-dex-sniper",
+  "raw-developer-terminal-cli",
+  "chief-risk-officer-red-line",
+  "options-volatility-surface",
+]);
 
 const VALID_THEMES = ["terminal", "obsidian", "quant", "command", "vector", "light"] as const;
 type ValidTheme = (typeof VALID_THEMES)[number];
@@ -38,6 +61,7 @@ function DashboardLabContent() {
   const [selectedProduct, setSelectedProduct] = useState<"view" | "control">(initialTier);
   const [selectedTheme, setSelectedTheme] = useState<ValidTheme>(initialTheme);
   const [selectedArchetype, setSelectedArchetype] = useState<string>(initialArchetype);
+  const [selectedCategory, setSelectedCategory] = useState<ArchitectureCategory | "all">("all");
 
   // Sync state if URL query params change (e.g. from deep-link navigation)
   useEffect(() => {
@@ -89,6 +113,16 @@ function DashboardLabContent() {
     updateUrl(selectedProduct, theme, selectedArchetype);
   };
 
+  const canonicalArchetypeId = ARCHETYPE_ALIAS_MAP[selectedArchetype] || selectedArchetype;
+  const activeBlueprint = ARCHITECTURES_DATA.find(
+    (b) => b.id === canonicalArchetypeId || b.id === selectedArchetype
+  );
+  const isDefault = !selectedArchetype || selectedArchetype === "default";
+
+  const filteredBlueprints = selectedCategory === "all"
+    ? ARCHITECTURES_DATA
+    : ARCHITECTURES_DATA.filter((b) => b.category === selectedCategory);
+
   return (
     <section id="dashboard-lab" className="relative py-28 border-b border-white/10 bg-background overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -109,36 +143,149 @@ function DashboardLabContent() {
         {/* Configurator Controls Floating Panel */}
         <div className="max-w-5xl mx-auto mb-8 p-4 sm:p-6 rounded-2xl bg-surface/90 border border-white/15 backdrop-blur-xl shadow-2xl font-mono text-xs flex flex-col gap-5">
           {/* ROW 1: ARCHETYPE BLUEPRINT SELECTOR */}
-          <div className="flex flex-col gap-2.5">
-            <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2 text-text-muted">
                 <LayoutGrid className="w-3.5 h-3.5 text-accent" />
                 <span className="font-bold text-white uppercase tracking-wider">ARCHETYPE BLUEPRINT:</span>
+                <span className="text-[10px] text-accent font-bold px-1.5 py-0.5 rounded bg-accent/10 border border-accent/20">
+                  {isDefault ? "DEFAULT HUD" : `#${activeBlueprint?.number} ${activeBlueprint?.title.slice(0, 26)}...`}
+                </span>
               </div>
-              <span className="text-[10px] text-accent font-bold hidden sm:inline">HOT-SWAP SPECIALIZED TELEMETRY & KILLER WIDGET</span>
+
+              {/* Mobile / Quick Dropdown Selector */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <label htmlFor="blueprint-select" className="text-[10px] text-text-muted uppercase shrink-0 sm:hidden">
+                  Jump to:
+                </label>
+                <select
+                  id="blueprint-select"
+                  aria-label="Select Architecture Blueprint"
+                  value={canonicalArchetypeId}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "default") {
+                      handleArchetypeSelect("default");
+                    } else {
+                      const bp = ARCHITECTURES_DATA.find((b) => b.id === val);
+                      handleArchetypeSelect(val, bp?.recommendedTier);
+                    }
+                  }}
+                  className="w-full sm:w-72 bg-background text-white border border-white/20 rounded-lg px-2.5 py-1.5 text-[11px] font-mono uppercase focus:border-accent focus:outline-none transition-colors"
+                >
+                  <option value="default">00: DEFAULT HUD (STANDARD TERMINAL)</option>
+                  {ARCHITECTURE_CATEGORIES.filter((c) => c.id !== "all").map((cat) => (
+                    <optgroup key={cat.id} label={`── ${cat.label} ──`}>
+                      {ARCHITECTURES_DATA.filter((b) => b.category === cat.id).map((b) => (
+                        <option key={b.id} value={b.id}>
+                          #{b.number} {b.title} [{b.recommendedTier.toUpperCase()}]
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-1.5 bg-background p-1.5 rounded-xl border border-white/10">
-              {ARCHETYPE_OPTIONS.map((opt) => {
-                const isSelected =
-                  selectedArchetype === opt.id ||
-                  selectedArchetype === opt.canonicalId ||
-                  (opt.id === "default" && (!selectedArchetype || selectedArchetype === "default"));
+
+            {/* Category Filter Tabs + Default HUD */}
+            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-background border border-white/10">
+              {/* Default HUD Button */}
+              <button
+                onClick={() => handleArchetypeSelect("default")}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg font-mono text-[11px] uppercase transition-all flex items-center gap-1.5 border",
+                  isDefault
+                    ? "bg-accent text-background border-accent shadow-glow-cyan font-bold"
+                    : "text-text-muted hover:text-white border-transparent hover:bg-white/5"
+                )}
+              >
+                <span>DEFAULT HUD</span>
+              </button>
+
+              <div className="h-4 w-px bg-white/10 mx-1 hidden sm:block" />
+
+              {/* Category Filter Buttons */}
+              {ARCHITECTURE_CATEGORIES.map((cat) => {
+                const isCatActive = selectedCategory === cat.id;
                 return (
                   <button
-                    key={opt.id}
-                    onClick={() => handleArchetypeSelect(opt.id, opt.tier)}
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
                     className={cn(
-                      "px-3 py-1.5 rounded-lg font-mono text-[11px] uppercase transition-all flex items-center gap-1.5 border",
-                      isSelected
-                        ? "bg-accent text-background border-accent shadow-glow-cyan font-bold"
+                      "px-2.5 py-1 rounded-lg text-[10px] uppercase font-bold tracking-wider transition-all border",
+                      isCatActive
+                        ? "bg-white/15 text-white border-white/30"
                         : "text-text-muted hover:text-white border-transparent hover:bg-white/5"
                     )}
                   >
-                    <span>{opt.label}</span>
+                    {cat.label} ({cat.count})
                   </button>
                 );
               })}
             </div>
+
+            {/* Blueprints Grid/Pill List for Selected Category */}
+            <div className="flex flex-wrap items-center gap-1.5 max-h-48 overflow-y-auto pr-1">
+              {filteredBlueprints.map((bp) => {
+                const isSelected = canonicalArchetypeId === bp.id;
+                const isInteractive = INTERACTIVE_SIMULATOR_IDS.has(bp.id);
+                return (
+                  <button
+                    key={bp.id}
+                    onClick={() => handleArchetypeSelect(bp.id, bp.recommendedTier)}
+                    className={cn(
+                      "px-2.5 py-1.5 rounded-lg font-mono text-[11px] uppercase transition-all flex items-center gap-1.5 border group",
+                      isSelected
+                        ? "bg-accent text-background border-accent shadow-glow-cyan font-bold"
+                        : "bg-background/80 text-text-muted hover:text-white border-white/10 hover:border-white/20 hover:bg-white/5"
+                    )}
+                    title={`${bp.title} (${bp.categoryLabel})`}
+                  >
+                    <span className={cn(
+                      "text-[10px] font-bold px-1 rounded",
+                      isSelected ? "bg-black/20 text-background" : "bg-white/5 text-text-secondary"
+                    )}>
+                      #{bp.number}
+                    </span>
+                    <span className="truncate max-w-[140px] sm:max-w-[200px]">{bp.title}</span>
+                    {isInteractive ? (
+                      <span className={cn(
+                        "text-[8px] font-extrabold px-1 rounded uppercase tracking-wider",
+                        isSelected ? "bg-black text-accent" : "bg-accent/20 text-accent"
+                      )}>
+                        LIVE
+                      </span>
+                    ) : (
+                      <span className={cn(
+                        "text-[8px] font-extrabold px-1 rounded uppercase tracking-wider opacity-60",
+                        isSelected ? "bg-black/20 text-background" : "bg-white/10 text-text-muted"
+                      )}>
+                        SPEC
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Context bar if an archetype is active */}
+            {!isDefault && activeBlueprint && (
+              <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-lg bg-background/50 border border-white/5 text-[11px]">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-accent font-bold">ACTIVE BLUEPRINT:</span>
+                  <span className="text-white font-bold">#{activeBlueprint.number} {activeBlueprint.title}</span>
+                  <span className="text-text-muted">• {activeBlueprint.categoryLabel}</span>
+                  <span className="text-text-muted hidden md:inline">• Target: {activeBlueprint.targetAudience}</span>
+                </div>
+                <button
+                  onClick={() => handleArchetypeSelect("default")}
+                  className="flex items-center gap-1 text-[10px] text-text-muted hover:text-accent font-mono uppercase transition-colors ml-auto"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset to Default HUD</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* ROW 2: TIER & THEME CONTROLS */}
@@ -226,11 +373,15 @@ function DashboardLabContent() {
             <ShieldCheck className="w-5 h-5 text-success shrink-0" />
             <div>
               <span className="font-bold text-white block">
-                {selectedArchetype !== "default"
-                  ? `Ready to deploy this architecture blueprint?`
+                {!isDefault && activeBlueprint
+                  ? `Ready to deploy Blueprint #${activeBlueprint.number} (${activeBlueprint.title})?`
                   : "Ready to deploy with your trading bot?"}
               </span>
-              <span className="text-text-muted">Self-hosted perpetual license • No telemetry tracking • Full source code</span>
+              <span className="text-text-muted">
+                {!isDefault && activeBlueprint
+                  ? `Optimized for Algorb ${activeBlueprint.recommendedTier.toUpperCase()} • Self-hosted perpetual license • Full source code`
+                  : "Self-hosted perpetual license • No telemetry tracking • Full source code"}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-3">

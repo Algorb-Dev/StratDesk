@@ -3,6 +3,7 @@ import { THEMES } from "@/data/themes";
 import { DEMO_METRICS } from "@/data/demo-data";
 import { ARCHITECTURES_DATA, ArchitectureBlueprint } from "@/data/architectures-data";
 import { KillerWidgetSimulator } from "@/components/architectures/KillerWidgetSimulator";
+import { BlueprintSpecHud } from "@/components/architectures/BlueprintSpecHud";
 import { MetricCard } from "./MetricCard";
 import { EquityChart } from "./EquityChart";
 import { PositionsTable } from "./PositionsTable";
@@ -11,7 +12,7 @@ import { ControlBar } from "./ControlBar";
 import { TradeLedger } from "@/components/ledger/TradeLedger";
 import { AlgorbSymbol } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
-import { Activity, ShieldAlert, Cpu, Wifi, Power, BookOpen, Zap, Terminal } from "lucide-react";
+import { Activity, ShieldAlert, Cpu, Wifi, Power, BookOpen, Zap, Terminal, Layers, Clock } from "lucide-react";
 
 export interface DashboardPreviewProps {
   product?: "view" | "control";
@@ -32,7 +33,21 @@ const ARCHETYPE_ALIAS_MAP: Record<string, string> = {
   "options-cockpit": "options-volatility-surface",
 };
 
-function getArchetypeTelemetry(canonicalId: string, isLight: boolean) {
+const INTERACTIVE_SIMULATOR_IDS = new Set([
+  "prop-firm-evaluator-console",
+  "crypto-arbitrage-matrix",
+  "pair-trading-statarb-console",
+  "on-chain-dex-sniper",
+  "raw-developer-terminal-cli",
+  "chief-risk-officer-red-line",
+  "options-volatility-surface",
+]);
+
+function getArchetypeTelemetry(
+  canonicalId: string,
+  blueprint: ArchitectureBlueprint | null | undefined,
+  isLight: boolean
+) {
   switch (canonicalId) {
     case "crypto-arbitrage-matrix":
       return {
@@ -98,6 +113,16 @@ function getArchetypeTelemetry(canonicalId: string, isLight: boolean) {
         badgeText: "VOL-GREEKS v2.4",
       };
     default:
+      if (blueprint) {
+        return {
+          status: `${blueprint.killerWidget.badge} ACTIVE`,
+          metric1Icon: <Clock className={cn("w-3 h-3", isLight ? "text-sky-600" : "text-accent")} />,
+          metric1Text: blueprint.specs.latencyRequirement.split("/")[0],
+          metric2Icon: <Cpu className="w-3 h-3" />,
+          metric2Text: blueprint.categoryLabel.toUpperCase(),
+          badgeText: `PRESET #${blueprint.number}`,
+        };
+      }
       return {
         status: `BOT: ${DEMO_METRICS.botStatus}`,
         metric1Icon: <Wifi className={cn("w-3 h-3", isLight ? "text-sky-600" : "text-accent")} />,
@@ -179,6 +204,75 @@ function getArchetypeMetricCards(canonicalId: string) {
   }
 }
 
+function generateMetricValue(metricName: string, index: number): string {
+  const lower = metricName.toLowerCase();
+  if (lower.includes("bps") || lower.includes("slippage") || lower.includes("spread")) return "+14.2 bps";
+  if (lower.includes("sharpe")) return "2.84";
+  if (lower.includes("sortino")) return "3.42";
+  if (lower.includes("confidence") || lower.includes("%") || lower.includes("rate") || lower.includes("ratio") || lower.includes("fill")) return "94.6%";
+  if (lower.includes("pnl") || lower.includes("dollar") || lower.includes("aum") || lower.includes("yield")) return "+$3,420.00";
+  if (lower.includes("latency") || lower.includes("ping") || lower.includes("time") || lower.includes("delay")) return "1.2ms";
+  if (lower.includes("temp")) return "42.8°C";
+  if (lower.includes("entropy") || lower.includes("drift")) return "0.042";
+  if (lower.includes("var") || lower.includes("risk")) return "$842.10";
+  if (lower.includes("zscore") || lower.includes("sigma") || lower.includes("z-score")) return "+2.18σ";
+  if (lower.includes("loss")) return "-$140.20";
+  if (lower.includes("depth") || lower.includes("multiplier") || lower.includes("imbalance") || lower.includes("leverage")) return "3.2x";
+  if (lower.includes("queue") || lower.includes("trades") || lower.includes("lines")) return "4,210";
+  return index === 0 ? "OPTIMAL" : index === 1 ? "+2.4%" : index === 2 ? "NOMINAL" : "IN SPEC";
+}
+
+function getDynamicArchetypeCards(blueprint: ArchitectureBlueprint) {
+  const custom = getArchetypeMetricCards(blueprint.id);
+  if (custom) return custom;
+
+  const metrics = blueprint.specs.keyMetrics;
+  return [
+    {
+      label: (metrics[0] || "PRIMARY METRIC").toUpperCase(),
+      value: generateMetricValue(metrics[0] || "", 0),
+      delta: "+1.8%",
+      isPositive: true,
+      subtext: "Target: Nominal",
+    },
+    {
+      label: (metrics[1] || "SECONDARY METRIC").toUpperCase(),
+      value: generateMetricValue(metrics[1] || "", 1),
+      delta: "Active",
+      isPositive: true,
+      subtext: "Optimal Band",
+    },
+    {
+      label: (metrics[2] || "SYSTEM EFFICIENCY").toUpperCase(),
+      value: generateMetricValue(metrics[2] || "", 2),
+      delta: "In Spec",
+      isPositive: true,
+      subtext: blueprint.specs.latencyRequirement.split("/")[0],
+    },
+    {
+      label: (metrics[3] || "EXECUTION STATE").toUpperCase(),
+      value: generateMetricValue(metrics[3] || "", 3),
+      delta: "Nominal",
+      isPositive: true,
+      subtext: "Live Feed",
+    },
+    {
+      label: "LATENCY BUDGET",
+      value: blueprint.specs.latencyRequirement.split("/")[0] || "< 5ms",
+      delta: "Verified",
+      isPositive: true,
+      subtext: "Local IPC",
+    },
+    {
+      label: "ARCHETYPE TIER",
+      value: blueprint.recommendedTier === "control" ? "CONTROL" : "VIEW",
+      badge: blueprint.killerWidget.badge,
+      pulse: true,
+      subtext: `Preset #${blueprint.number}`,
+    },
+  ];
+}
+
 export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
   product = "view",
   theme = "obsidian",
@@ -196,6 +290,7 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     (b) => b.id === canonicalArchetypeId || b.id === archetypeId
   );
   const isArchetypeActive = Boolean(activeBlueprint && archetypeId !== "default");
+  const hasInteractiveSimulator = INTERACTIVE_SIMULATOR_IDS.has(canonicalArchetypeId);
 
   const themeStyle = {
     "--theme-bg": activeTheme.colors.bg,
@@ -206,8 +301,8 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
     "--theme-muted": activeTheme.colors.muted,
   } as React.CSSProperties;
 
-  const telemetry = getArchetypeTelemetry(canonicalArchetypeId, isLight);
-  const archetypeMetricCards = getArchetypeMetricCards(canonicalArchetypeId);
+  const telemetry = getArchetypeTelemetry(canonicalArchetypeId, activeBlueprint, isLight);
+  const archetypeMetricCards = activeBlueprint ? getDynamicArchetypeCards(activeBlueprint) : null;
 
   return (
     <div
@@ -415,107 +510,114 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             {/* If Control Mode: Render Interactive Control Bus */}
             {product === "control" && <ControlBar isLight={isLight} />}
 
-            {/* Middle Section: Equity Chart & Risk / Allocation Gauges */}
+            {/* Middle Section: Equity Chart & Risk / Allocation Gauges OR Blueprint Spec HUD */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
-              {/* Main Interactive Chart OR Killer Widget Simulator */}
+              {/* Main Interactive Chart OR Killer Widget Simulator OR Blueprint Spec HUD */}
               <div className={cn(
-                "lg:col-span-2 p-3 sm:p-4 rounded-lg flex flex-col border transition-colors",
+                (hasInteractiveSimulator || !isArchetypeActive) ? "lg:col-span-2" : "lg:col-span-3",
+                "p-3 sm:p-4 rounded-lg flex flex-col border transition-colors",
                 isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
               )}>
                 {isArchetypeActive && activeBlueprint ? (
-                  <div className="flex flex-col gap-3">
-                    <div className={cn(
-                      "flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b",
-                      isLight ? "border-slate-200" : "border-white/10"
-                    )}>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                        <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
-                          {activeBlueprint.killerWidget.badge}
-                        </span>
-                        <span className={cn("text-xs font-bold uppercase", isLight ? "text-slate-900" : "text-white")}>
-                          {activeBlueprint.title}
+                  hasInteractiveSimulator ? (
+                    <div className="flex flex-col gap-3">
+                      <div className={cn(
+                        "flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b",
+                        isLight ? "border-slate-200" : "border-white/10"
+                      )}>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                          <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
+                            {activeBlueprint.killerWidget.badge}
+                          </span>
+                          <span className={cn("text-xs font-bold uppercase", isLight ? "text-slate-900" : "text-white")}>
+                            {activeBlueprint.title}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-text-muted font-bold font-mono">
+                          LIVE INTERACTIVE SIMULATION
                         </span>
                       </div>
-                      <span className="text-[10px] text-text-muted font-bold font-mono">
-                        LIVE INTERACTIVE SIMULATION
-                      </span>
+                      <KillerWidgetSimulator blueprint={activeBlueprint} isLight={isLight} />
                     </div>
-                    <KillerWidgetSimulator blueprint={activeBlueprint} isLight={isLight} />
-                  </div>
+                  ) : (
+                    <BlueprintSpecHud blueprint={activeBlueprint} isLight={isLight} />
+                  )
                 ) : (
                   <EquityChart accentColor={isLight ? "#0284c7" : activeTheme.colors.accent} isLight={isLight} />
                 )}
               </div>
 
-              {/* Realtime Risk & Margin Radar */}
-              <div className={cn(
-                "p-3.5 sm:p-4 rounded-lg flex flex-col justify-between gap-3 text-xs border transition-colors",
-                isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
-              )}>
-                <div className={cn("flex items-center justify-between pb-2 border-b", isLight ? "border-slate-200" : "border-white/5")}>
-                  <span className={cn("font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5", isLight ? "text-slate-900" : "text-white")}>
-                    <ShieldAlert className={cn("w-3.5 h-3.5", isLight ? "text-amber-600" : "text-warning")} />
-                    RISK ALLOCATION
-                  </span>
-                  <span className={cn("text-[10px]", isLight ? "text-slate-400 font-semibold" : "text-text-muted")}>PARAM LIMITS</span>
-                </div>
+              {/* Realtime Risk & Margin Radar (shown when on default HUD or when interactive simulator is active) */}
+              {(hasInteractiveSimulator || !isArchetypeActive) && (
+                <div className={cn(
+                  "p-3.5 sm:p-4 rounded-lg flex flex-col justify-between gap-3 text-xs border transition-colors",
+                  isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+                )}>
+                  <div className={cn("flex items-center justify-between pb-2 border-b", isLight ? "border-slate-200" : "border-white/5")}>
+                    <span className={cn("font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5", isLight ? "text-slate-900" : "text-white")}>
+                      <ShieldAlert className={cn("w-3.5 h-3.5", isLight ? "text-amber-600" : "text-warning")} />
+                      RISK ALLOCATION
+                    </span>
+                    <span className={cn("text-[10px]", isLight ? "text-slate-400 font-semibold" : "text-text-muted")}>PARAM LIMITS</span>
+                  </div>
 
-                {/* Gauge 1: Margin Utilization */}
-                <div>
-                  <div className="flex justify-between text-[11px] mb-1">
-                    <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Margin Utilization</span>
-                    <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>34.2% / 50.0%</span>
-                  </div>
-                  <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
-                    <div
-                      className="h-full rounded transition-all duration-500"
-                      style={{ width: "34.2%", backgroundColor: isLight ? "#0284c7" : activeTheme.colors.accent }}
-                    />
-                  </div>
-                </div>
-
-                {/* Gauge 2: Drawdown Tolerance */}
-                <div>
-                  <div className="flex justify-between text-[11px] mb-1">
-                    <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Drawdown Cushion</span>
-                    <span className={cn("font-bold", isLight ? "text-emerald-700" : "text-success")}>4.21% / 10.0%</span>
-                  </div>
-                  <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
-                    <div
-                      className={cn("h-full rounded transition-all duration-500", isLight ? "bg-emerald-600" : "bg-success")}
-                      style={{ width: "42.1%" }}
-                    />
-                  </div>
-                </div>
-
-                {/* Gauge 3: Value at Risk (99% 1D) */}
-                <div>
-                  <div className="flex justify-between text-[11px] mb-1">
-                    <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Value at Risk (99% 1D)</span>
-                    <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>$842.10 (3.39%)</span>
-                  </div>
-                  <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
-                    <div
-                      className={cn("h-full rounded transition-all duration-500", isLight ? "bg-amber-500" : "bg-warning")}
-                      style={{ width: "28.5%" }}
-                    />
-                  </div>
-                </div>
-
-                {/* Strategy Weights Breakdown */}
-                <div className={cn("pt-2 border-t flex items-center justify-between text-[10px]", isLight ? "border-slate-200 text-slate-500" : "border-white/5 text-text-muted")}>
+                  {/* Gauge 1: Margin Utilization */}
                   <div>
-                    <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Alpha-V2:</span> 45%
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Margin Utilization</span>
+                      <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>34.2% / 50.0%</span>
+                    </div>
+                    <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
+                      <div
+                        className="h-full rounded transition-all duration-500"
+                        style={{ width: "34.2%", backgroundColor: isLight ? "#0284c7" : activeTheme.colors.accent }}
+                      />
+                    </div>
                   </div>
+
+                  {/* Gauge 2: Drawdown Tolerance */}
                   <div>
-                    <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>MeanRev:</span> 35%
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Drawdown Cushion</span>
+                      <span className={cn("font-bold", isLight ? "text-emerald-700" : "text-success")}>4.21% / 10.0%</span>
+                    </div>
+                    <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
+                      <div
+                        className={cn("h-full rounded transition-all duration-500", isLight ? "bg-emerald-600" : "bg-success")}
+                        style={{ width: "42.1%" }}
+                      />
+                    </div>
                   </div>
+
+                  {/* Gauge 3: Value at Risk (99% 1D) */}
                   <div>
-                    <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Arb:</span> 20%
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Value at Risk (99% 1D)</span>
+                      <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>$842.10 (3.39%)</span>
+                    </div>
+                    <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
+                      <div
+                        className={cn("h-full rounded transition-all duration-500", isLight ? "bg-amber-500" : "bg-warning")}
+                        style={{ width: "28.5%" }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Strategy Weights Breakdown */}
+                  <div className={cn("pt-2 border-t flex items-center justify-between text-[10px]", isLight ? "border-slate-200 text-slate-500" : "border-white/5 text-text-muted")}>
+                    <div>
+                      <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Alpha-V2:</span> 45%
+                    </div>
+                    <div>
+                      <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>MeanRev:</span> 35%
+                    </div>
+                    <div>
+                      <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Arb:</span> 20%
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Bottom Section: Active Positions Table & Execution Logs */}
