@@ -32,10 +32,27 @@ export const TradeLedger: React.FC<TradeLedgerProps> = ({
   const [strategyFilter, setStrategyFilter] = useState<string>("ALL");
   const [regimeFilter, setRegimeFilter] = useState<string>("ALL");
   const [outcomeFilter, setOutcomeFilter] = useState<"ALL" | "WINNERS" | "LOSERS">("ALL");
+  const [periodFilter, setPeriodFilter] = useState<string | null>(null);
   const [expandedTradeId, setExpandedTradeId] = useState<string | null>("TRD-2026-0907-142");
   const [isScreenshotMode, setIsScreenshotMode] = useState(false);
 
   const activeTheme = THEMES.find((t) => t.id === theme) || THEMES[1];
+
+  // Helper to match dates to periods
+  const matchesPeriod = (entryTime: string, filter: string): boolean => {
+    if (filter.startsWith("2026-W")) {
+      const weekNum = parseInt(filter.replace("2026-W", ""), 10);
+      const dateStr = entryTime.slice(0, 10);
+      if (weekNum === 36) return dateStr >= "2026-09-01" && dateStr <= "2026-09-07";
+      if (weekNum === 35) return dateStr >= "2026-08-25" && dateStr <= "2026-08-31";
+      if (weekNum === 34) return dateStr >= "2026-08-18" && dateStr <= "2026-08-24";
+      if (weekNum === 33) return dateStr >= "2026-08-11" && dateStr <= "2026-08-17";
+      if (weekNum === 32) return dateStr >= "2026-08-04" && dateStr <= "2026-08-10";
+      if (weekNum === 31) return dateStr >= "2026-07-28" && dateStr <= "2026-08-03";
+      return true;
+    }
+    return entryTime.startsWith(filter);
+  };
 
   // Distinct strategies & regimes from dataset
   const availableStrategies = useMemo(() => {
@@ -49,6 +66,11 @@ export const TradeLedger: React.FC<TradeLedgerProps> = ({
   // Filtered dataset
   const filteredTrades = useMemo(() => {
     return DEMO_TRADE_LEDGER.filter((trade) => {
+      // Periodic Drilldown filter
+      if (periodFilter && !matchesPeriod(trade.entryTime, periodFilter)) {
+        return false;
+      }
+
       // Search
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -83,7 +105,7 @@ export const TradeLedger: React.FC<TradeLedgerProps> = ({
 
       return true;
     });
-  }, [searchQuery, directionFilter, strategyFilter, regimeFilter, outcomeFilter]);
+  }, [periodFilter, searchQuery, directionFilter, strategyFilter, regimeFilter, outcomeFilter]);
 
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -91,6 +113,7 @@ export const TradeLedger: React.FC<TradeLedgerProps> = ({
     setStrategyFilter("ALL");
     setRegimeFilter("ALL");
     setOutcomeFilter("ALL");
+    setPeriodFilter(null);
   };
 
   const handleToggleExpand = (id: string) => {
@@ -148,7 +171,11 @@ export const TradeLedger: React.FC<TradeLedgerProps> = ({
           accentColor={isLight ? "#0284c7" : activeTheme.colors.accent}
           isLight={isLight}
         />
-        <LedgerPeriodicity isLight={isLight} />
+        <LedgerPeriodicity
+          isLight={isLight}
+          selectedPeriodFilter={periodFilter}
+          onFilterByPeriod={setPeriodFilter}
+        />
       </div>
 
       {/* 3. Search & Multi-Dimensional Filters */}
@@ -172,6 +199,42 @@ export const TradeLedger: React.FC<TradeLedgerProps> = ({
         onResetFilters={handleResetFilters}
         isLight={isLight}
       />
+
+      {/* Active Timeframe Filter Indicator */}
+      {periodFilter && (
+        <div
+          className={cn(
+            "px-3 py-2 rounded-lg border flex items-center justify-between text-xs font-mono",
+            isLight
+              ? "bg-sky-50 border-sky-200 text-sky-900"
+              : "bg-accent/10 border-accent/30 text-white"
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <span className="font-bold">ACTIVE TIMEFRAME FILTER:</span>
+            <span
+              className={cn(
+                "px-1.5 py-0.5 rounded font-bold text-[11px]",
+                isLight ? "bg-sky-200 text-sky-900" : "bg-accent/20 text-accent"
+              )}
+            >
+              {periodFilter}
+            </span>
+            <span className={cn("text-[10px]", isLight ? "text-slate-500" : "text-text-muted")}>
+              ({filteredTrades.length} audited trades matching)
+            </span>
+          </div>
+          <button
+            onClick={() => setPeriodFilter(null)}
+            className={cn(
+              "text-[10px] font-bold uppercase underline hover:no-underline",
+              isLight ? "text-sky-800" : "text-accent"
+            )}
+          >
+            Clear Timeframe Filter
+          </button>
+        </div>
+      )}
 
       {/* 4. Interactive Ledger Table */}
       <div
