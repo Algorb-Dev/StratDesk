@@ -4,8 +4,8 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: "/themes",
-        destination: "/#themes",
+        source: "/landing",
+        destination: "/home",
         permanent: true,
       },
       {

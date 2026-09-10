@@ -31,7 +31,7 @@ export const Navbar: React.FC = () => {
     { label: "Workstation", href: "/", icon: Cpu },
     { label: "Architectures", href: "/architectures", icon: Compass },
     { label: "Trade Ledger", href: "/ledger", icon: BookOpen },
-    { label: "Features", href: "/landing#features", icon: Layers },
+    { label: "Features", href: "/home#features", icon: Layers },
     { label: "How It Works", href: "/how-it-works", icon: Terminal },
     { label: "FAQ", href: "/faq", icon: HelpCircle },
   ];

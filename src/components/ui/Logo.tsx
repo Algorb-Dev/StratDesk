@@ -78,7 +78,7 @@ export const Logo: React.FC<LogoProps> = ({
   showBadge = false,
   badgeText = "STOREFRONT",
   glow = false,
-  href = "/",
+  href = "/home",
 }) => {
   const sizeMap = {
     sm: { symbol: 24, text: "text-base tracking-[0.2em]", gap: "gap-2" },
