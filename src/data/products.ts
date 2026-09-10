@@ -122,7 +122,7 @@ export const stratDeskProTier: ProductTier = {
     selfHosted: true,
   },
   suitableFor: "Quants, retail algorithmic traders, and system builders who require hands-on intervention authority, emergency circuit breakers, forensic trade journaling, and institutional telemetry over live capital.",
-  whopCheckoutUrl: "https://whop.com/checkout/plan_stratdesk_pro",
+  whopCheckoutUrl: "https://whop.com/strat-desk/stratdesk-pro-algorithmic-trading-terminal-bot-command-center/",
 };
 
 export const PRODUCTS: Record<ProductTierId, ProductTier> = {

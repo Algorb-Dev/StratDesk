@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/Badge";
 import { StratDeskSymbol } from "@/components/ui/Logo";
 import { TradingGrid } from "@/components/effects/TradingGrid";
 import { GlowField } from "@/components/effects/GlowField";
+import { PRODUCTS } from "@/data/products";
 import { ArrowRight, BookOpen, Terminal } from "lucide-react";
 
 export const FinalCta: React.FC = () => {
@@ -50,7 +51,7 @@ export const FinalCta: React.FC = () => {
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Button
-            href="https://whop.com/checkout/plan_stratdesk_pro"
+            href={PRODUCTS.pro.whopCheckoutUrl}
             target="_blank"
             rel="noopener noreferrer"
             variant="control"
