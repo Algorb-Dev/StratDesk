@@ -14,7 +14,7 @@ export const TechnicalSpecs: React.FC = () => {
 // Inbound Telemetry Frame from Customer Bot:
 {
   "jsonrpc": "2.0",
-  "method": "algorb.telemetry.v1",
+  "method": "stratdesk.telemetry.v1",
   "params": {
     "timestamp": 1725651735821,
     "equity": 24821.64,
@@ -51,10 +51,10 @@ Content-Type: application/json
   "status": "synced",
   "latency_us": 412
 }`,
-    python: `from algorb import AlgorbClient
+    python: `from stratdesk import StratDeskClient
 
 # Initialize client binding to local adapter
-client = AlgorbClient(
+client = StratDeskClient(
     host="127.0.0.1",
     port=9042,
     auth_secret="local_shared_secret"
@@ -70,7 +70,7 @@ client.broadcast_fill(
     latency_ms=14.2
 )
 
-# Control Bus listener (Algorb Control only):
+# Control Bus listener (StratDesk Pro):
 @client.on_command("EMERGENCY_HALT")
 def emergency_stop(payload):
     bot.cancel_all_orders()
@@ -78,16 +78,16 @@ def emergency_stop(payload):
     return {"status": "flattened", "timestamp": time.time()}`,
     docker: `version: "3.8"
 services:
-  algorb-dashboard:
-    image: algorb/storefront-core:latest
-    container_name: algorb-interface
+  stratdesk-dashboard:
+    image: stratdesk/runtime-pro:latest
+    container_name: stratdesk-interface
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"
       - "127.0.0.1:9042:9042"
     environment:
       - BIND_ADDRESS=127.0.0.1
-      - SECURE_TOKEN=\${ALGORB_SECRET}
+      - SECURE_TOKEN=\${STRATDESK_SECRET}
       - TELEMETRY_BUFFER_SIZE=10000
     network_mode: "host"`,
   };
@@ -116,17 +116,17 @@ services:
         </div>
 
         {/* Technical Specification Showcase */}
-        <div className="max-w-5xl mx-auto rounded-2xl bg-surface border border-white/15 overflow-hidden shadow-2xl font-mono text-xs">
+        <div className="max-w-5xl mx-auto rounded-2xl bg-surface border border-border overflow-hidden shadow-2xl font-mono text-xs">
           {/* Protocol Switcher Tabs */}
-          <div className="flex flex-wrap items-center justify-between p-3 bg-background border-b border-white/10 gap-2">
+          <div className="flex flex-wrap items-center justify-between p-3 bg-slate-100 dark:bg-background border-b border-border gap-2">
             <div className="flex flex-wrap items-center gap-1.5">
               <button
                 onClick={() => setActiveTab("websocket")}
                 className={cn(
                   "px-3 py-1.5 rounded text-xs font-bold uppercase transition-colors flex items-center gap-1.5",
                   activeTab === "websocket"
-                    ? "bg-accent/20 text-accent border border-accent/40"
-                    : "text-text-muted hover:text-white"
+                    ? "bg-sky-50 dark:bg-accent/20 text-sky-700 dark:text-accent border border-sky-400 dark:border-accent/40 shadow-sm"
+                    : "text-text-muted hover:text-slate-900 dark:hover:text-white"
                 )}
               >
                 <Radio className="w-3.5 h-3.5" />
@@ -137,8 +137,8 @@ services:
                 className={cn(
                   "px-3 py-1.5 rounded text-xs font-bold uppercase transition-colors flex items-center gap-1.5",
                   activeTab === "rest"
-                    ? "bg-accent/20 text-accent border border-accent/40"
-                    : "text-text-muted hover:text-white"
+                    ? "bg-sky-50 dark:bg-accent/20 text-sky-700 dark:text-accent border border-sky-400 dark:border-accent/40 shadow-sm"
+                    : "text-text-muted hover:text-slate-900 dark:hover:text-white"
                 )}
               >
                 <Network className="w-3.5 h-3.5" />
@@ -149,8 +149,8 @@ services:
                 className={cn(
                   "px-3 py-1.5 rounded text-xs font-bold uppercase transition-colors flex items-center gap-1.5",
                   activeTab === "python"
-                    ? "bg-accent/20 text-accent border border-accent/40"
-                    : "text-text-muted hover:text-white"
+                    ? "bg-sky-50 dark:bg-accent/20 text-sky-700 dark:text-accent border border-sky-400 dark:border-accent/40 shadow-sm"
+                    : "text-text-muted hover:text-slate-900 dark:hover:text-white"
                 )}
               >
                 <Terminal className="w-3.5 h-3.5" />
@@ -161,8 +161,8 @@ services:
                 className={cn(
                   "px-3 py-1.5 rounded text-xs font-bold uppercase transition-colors flex items-center gap-1.5",
                   activeTab === "docker"
-                    ? "bg-accent/20 text-accent border border-accent/40"
-                    : "text-text-muted hover:text-white"
+                    ? "bg-sky-50 dark:bg-accent/20 text-sky-700 dark:text-accent border border-sky-400 dark:border-accent/40 shadow-sm"
+                    : "text-text-muted hover:text-slate-900 dark:hover:text-white"
                 )}
               >
                 <Server className="w-3.5 h-3.5" />
@@ -172,7 +172,7 @@ services:
 
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-white/5 border border-white/10 text-text-secondary hover:text-white transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-white dark:bg-white/5 border border-border text-text-secondary hover:text-slate-900 dark:hover:text-white transition-colors shadow-sm"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? "COPIED" : "COPY CODE"}</span>
@@ -180,16 +180,16 @@ services:
           </div>
 
           {/* Code Viewer */}
-          <div className="p-6 bg-black/80 overflow-x-auto">
-            <pre className="text-text-secondary leading-relaxed text-xs">
+          <div data-terminal="true" className="p-6 bg-slate-950 dark:bg-black/80 overflow-x-auto text-slate-200">
+            <pre className="text-slate-300 dark:text-text-secondary leading-relaxed text-xs">
               <code>{snippets[activeTab]}</code>
             </pre>
           </div>
 
           {/* Compatibility Badges */}
-          <div className="p-4 bg-surface-elevated border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-[11px] text-text-muted">
+          <div className="p-4 bg-slate-100 dark:bg-surface-elevated border-t border-border flex flex-wrap items-center justify-between gap-4 text-[11px] text-text-muted">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-white font-bold">COMPATIBILITY:</span>
+              <span className="text-slate-900 dark:text-white font-bold">COMPATIBILITY:</span>
               <span>Python 3.9+</span>
               <span>• Node 18+</span>
               <span>• Go 1.21+</span>
@@ -197,7 +197,7 @@ services:
               <span>• CCXT Framework</span>
               <span>• Custom FIX</span>
             </div>
-            <span className="text-accent">Zero external dependencies</span>
+            <span className="text-accent font-semibold">Zero external dependencies</span>
           </div>
         </div>
       </div>

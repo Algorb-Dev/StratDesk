@@ -13,12 +13,12 @@ export const HowItWorksSteps: React.FC = () => {
   const steps = [
     {
       num: "01",
-      title: "CHOOSE & LICENSE",
-      shortTitle: "BUY",
+      title: "DEPLOY STRATDESK PRO",
+      shortTitle: "LICENSE",
       icon: ShoppingCart,
-      tagline: "Select Algorb View or Algorb Control",
+      tagline: "One perpetual license for your entire bot operations",
       description:
-        "Select the license that fits your operational needs. Algorb View provides read-only surveillance; Algorb Control adds the active low-latency command bus and emergency stop.",
+        "Get instant access to the complete StratDesk Pro codebase. Includes all 20 specialized bot architectures, the active low-latency command bus, emergency kill-switch, and forensic trade ledger.",
       badge: "STEP 01",
       details: ["Perpetual self-hosted license", "Full source code included", "No recurring cloud fees"],
     },
@@ -58,15 +58,15 @@ export const HowItWorksSteps: React.FC = () => {
   ];
 
   const codeSnippets: Record<string, string> = {
-    python: `from algorb import AlgorbAdapter
+    python: `from stratdesk import StratDeskAdapter
 
 # 1. Initialize local adapter (runs on localhost:9042)
-algorb = AlgorbAdapter(port=9042, secret="local_token_hmac")
+stratdesk = StratDeskAdapter(port=9042, secret="local_token_hmac")
 
 # 2. Inside your bot execution loop:
 @bot.on_fill
 def handle_fill(order):
-    algorb.emit_fill(
+    stratdesk.emit_fill(
         symbol=order.symbol,
         side=order.side,
         size=order.amount,
@@ -75,18 +75,18 @@ def handle_fill(order):
     )
 
 # 3. Stream periodic equity & risk telemetry:
-algorb.emit_telemetry(
+stratdesk.emit_telemetry(
     equity=account.total_equity,
     unrealized_pnl=account.unrealized_pnl,
     positions=bot.get_open_positions(),
     risk_utilization=account.margin_ratio
 )`,
-    typescript: `import { AlgorbAdapter } from "@algorb/adapter";
+    typescript: `import { StratDeskAdapter } from "@stratdesk/adapter";
 
-const algorb = new AlgorbAdapter({ port: 9042 });
+const stratdesk = new StratDeskAdapter({ port: 9042 });
 
 bot.on("orderFilled", (fill) => {
-  algorb.emitFill({
+  stratdesk.emitFill({
     symbol: fill.symbol,
     side: fill.side,
     price: fill.price,
@@ -95,7 +95,7 @@ bot.on("orderFilled", (fill) => {
 });
 
 setInterval(() => {
-  algorb.emitTelemetry({
+  stratdesk.emitTelemetry({
     equity: portfolio.nav,
     drawdown: portfolio.maxDrawdown,
     positions: portfolio.getPositions()
@@ -119,7 +119,7 @@ setInterval(() => {
           <Badge variant="accent" size="sm" className="mb-3">
             INTEGRATION WORKFLOW
           </Badge>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight font-sans">
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight font-sans">
             FOUR STEPS TO TOTAL VISIBILITY.
           </h2>
           <p className="mt-4 text-base sm:text-lg text-text-secondary">
@@ -137,10 +137,10 @@ setInterval(() => {
                 key={s.num}
                 onClick={() => setActiveStep(idx)}
                 className={cn(
-                  "p-4 rounded-xl text-left border transition-all duration-200 flex flex-col justify-between group",
+                  "p-4 rounded-xl text-left border transition-all duration-200 flex flex-col justify-between group shadow-sm",
                   isSelected
-                    ? "bg-surface-elevated border-accent/70 shadow-glow-cyan"
-                    : "bg-surface/50 border-white/5 hover:border-white/20"
+                    ? "bg-sky-50 dark:bg-surface-elevated border-sky-400 dark:border-accent/70 shadow-glow-cyan"
+                    : "bg-surface border-border hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50 dark:hover:bg-surface/50"
                 )}
               >
                 <div className="flex items-center justify-between text-xs text-text-muted mb-2">
@@ -149,7 +149,7 @@ setInterval(() => {
                   </span>
                   <Icon className={cn("w-4 h-4", isSelected ? "text-accent" : "text-text-muted")} />
                 </div>
-                <div className="font-bold text-sm text-white font-sans">
+                <div className="font-bold text-sm text-slate-900 dark:text-white font-sans">
                   {s.shortTitle}
                 </div>
                 <span className="text-[11px] text-text-muted truncate mt-1">
@@ -161,14 +161,14 @@ setInterval(() => {
         </div>
 
         {/* Detailed Active Step Presentation */}
-        <div className="rounded-2xl bg-surface border border-white/10 p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center shadow-2xl">
+        <div className="rounded-2xl bg-surface border border-border p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center shadow-2xl">
           {/* Left Column: Step Description */}
           <div className="flex flex-col gap-4 font-mono">
             <Badge variant="accent" size="sm" className="w-fit">
               {steps[activeStep].badge} • {steps[activeStep].shortTitle}
             </Badge>
 
-            <h3 className="text-2xl sm:text-3xl font-bold font-sans text-white">
+            <h3 className="text-2xl sm:text-3xl font-bold font-sans text-slate-900 dark:text-white">
               {steps[activeStep].title}
             </h3>
 
@@ -176,7 +176,7 @@ setInterval(() => {
               {steps[activeStep].description}
             </p>
 
-            <div className="space-y-2 mt-4 pt-4 border-t border-white/10 text-xs">
+            <div className="space-y-2 mt-4 pt-4 border-t border-border text-xs">
               {steps[activeStep].details.map((detail) => (
                 <div key={detail} className="flex items-center gap-2 text-text-primary">
                   <CheckCircle2 className="w-4 h-4 text-accent shrink-0" />
@@ -212,7 +212,7 @@ setInterval(() => {
           </div>
 
           {/* Right Column: Interactive Code Demonstration */}
-          <div className="rounded-xl bg-black/80 border border-white/10 p-4 font-mono text-xs overflow-hidden flex flex-col justify-between">
+          <div data-terminal="true" className="rounded-xl bg-slate-950 dark:bg-black/80 border border-slate-800 dark:border-white/10 p-4 font-mono text-xs overflow-hidden flex flex-col justify-between text-white">
             <div className="flex items-center justify-between pb-3 border-b border-white/10 text-[11px]">
               <div className="flex items-center gap-2">
                 <button

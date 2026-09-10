@@ -8,17 +8,17 @@ import { Terminal, ArrowRight, AlertTriangle, CheckCircle2, Sparkles } from "luc
 import { cn } from "@/lib/utils";
 
 export const TheProblem: React.FC = () => {
-  const [activeView, setActiveView] = useState<"terminal" | "algorb">("algorb");
+  const [activeView, setActiveView] = useState<"terminal" | "stratdesk">("stratdesk");
 
   return (
-    <section className="relative py-28 bg-background-secondary border-b border-white/10 overflow-hidden">
+    <section className="relative py-28 bg-background-secondary border-b border-border overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-4xl mx-auto mb-14">
           <Badge variant="warning" size="sm" className="mb-4">
             THE DEVELOPER&apos;S BOT DILEMMA
           </Badge>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight font-sans leading-tight">
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight font-sans leading-tight">
             YOUR BOT IS SMART. <br />
             <span className="text-text-muted">ITS INTERFACE SHOULDN&apos;T LOOK LIKE THIS.</span>
           </h2>
@@ -28,39 +28,39 @@ export const TheProblem: React.FC = () => {
           </p>
 
           {/* Interactive Toggle Pill */}
-          <div className="mt-8 inline-flex items-center gap-2 p-1 rounded-lg bg-surface border border-white/10">
+          <div className="mt-8 inline-flex items-center gap-2 p-1 rounded-lg bg-surface border border-border shadow-sm">
             <button
               onClick={() => setActiveView("terminal")}
               className={cn(
                 "px-4 py-2 text-xs font-mono font-bold rounded flex items-center gap-2 transition-all",
                 activeView === "terminal"
                   ? "bg-danger/20 text-danger border border-danger/40"
-                  : "text-text-muted hover:text-white"
+                  : "text-text-muted hover:text-slate-900 dark:hover:text-white"
               )}
             >
               <AlertTriangle className="w-3.5 h-3.5" />
               <span>TERMINAL CHAOS</span>
             </button>
             <button
-              onClick={() => setActiveView("algorb")}
+              onClick={() => setActiveView("stratdesk")}
               className={cn(
                 "px-4 py-2 text-xs font-mono font-bold rounded flex items-center gap-2 transition-all",
-                activeView === "algorb"
-                  ? "bg-accent text-background font-extrabold shadow-glow-cyan"
-                  : "text-text-muted hover:text-white"
+                activeView === "stratdesk"
+                  ? "bg-accent text-slate-950 font-extrabold shadow-glow-cyan"
+                  : "text-text-muted hover:text-slate-900 dark:hover:text-white"
               )}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>ALGORB COMMAND CENTER</span>
+              <span>STRATDESK COMMAND CENTER</span>
             </button>
           </div>
         </div>
 
         {/* Dynamic Display Area */}
-        <div className="relative rounded-2xl border border-white/10 overflow-hidden shadow-2xl bg-surface">
+        <div className="relative rounded-2xl border border-border overflow-hidden shadow-2xl bg-surface">
           {activeView === "terminal" ? (
             /* Messy Terminal View */
-            <div className="p-6 sm:p-8 font-mono text-xs sm:text-sm bg-black/90 min-h-[500px] flex flex-col justify-between">
+            <div data-terminal="true" className="p-6 sm:p-8 font-mono text-xs sm:text-sm bg-black/90 min-h-[500px] flex flex-col justify-between">
               <div className="flex items-center justify-between pb-4 border-b border-white/10 text-text-muted">
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block" />
@@ -93,16 +93,22 @@ export const TheProblem: React.FC = () => {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => setActiveView("algorb")}
+                  onClick={() => setActiveView("stratdesk")}
                 >
-                  UPGRADE TO ALGORB
+                  UPGRADE TO STRATDESK
                 </Button>
               </div>
             </div>
           ) : (
-            /* Algorb Command Center View */
+            /* StratDesk Command Center View */
             <div className="p-3 sm:p-6 bg-background">
-              <DashboardPreview product="control" theme="obsidian" />
+              <DashboardPreview
+                product="pro"
+                defaultTheme="obsidian"
+                variant="execution"
+                showArchitectureSwitcher={false}
+                showThemeSwitcher={false}
+              />
             </div>
           )}
         </div>

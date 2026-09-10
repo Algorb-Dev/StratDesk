@@ -41,7 +41,7 @@ export interface ArchitectureBlueprint {
   targetAudience: string;
   layoutDescription: string;
   killerWidget: KillerWidgetSpec;
-  recommendedTier: "view" | "control";
+  recommendedTier: "core" | "pro" | "view" | "control";
   tags: string[];
   specs: {
     latencyRequirement: string;
@@ -80,7 +80,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "SPREAD HEATMAP",
       simulationType: "spread-heatmap",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#cross-exchange", "#basis-arb", "#sub-millisecond", "#dual-socket"],
     specs: {
       latencyRequirement: "< 1.5ms IPC / < 12ms cross-venue ping",
@@ -106,7 +106,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "MEMPOOL SCANNER",
       simulationType: "mempool-sniper",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#solana-evm", "#mempool-sniping", "#honeypot-guard", "#priority-fee"],
     specs: {
       latencyRequirement: "Direct RPC WebSocket / Block time < 400ms",
@@ -132,7 +132,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "SLIPPAGE SCATTER",
       simulationType: "vwap-scatter",
     },
-    recommendedTier: "view",
+    recommendedTier: "pro",
     tags: ["#block-orders", "#vwap-benchmark", "#twap-slicer", "#equity-execution"],
     specs: {
       latencyRequirement: "< 10ms FIX protocol / Market-on-Close",
@@ -158,7 +158,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "GREEKS COCKPIT",
       simulationType: "options-greeks",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#options-greeks", "#vol-surface", "#gamma-scalp", "#delta-neutral"],
     specs: {
       latencyRequirement: "< 5ms Black-Scholes continuous re-eval",
@@ -188,7 +188,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "Z-SCORE REVERSION",
       simulationType: "zscore-reversion",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#stat-arb", "#cointegration", "#z-score", "#mean-reversion"],
     specs: {
       latencyRequirement: "< 5ms multi-leg atomic dispatch",
@@ -214,7 +214,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "ORDERBOOK NET",
       simulationType: "grid-density",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#grid-bot", "#passive-maker", "#impermanent-loss", "#range-liquidity"],
     specs: {
       latencyRequirement: "< 10ms post-only order replacement",
@@ -240,7 +240,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "MODEL DRIFT RADAR",
       simulationType: "ai-monitor",
     },
-    recommendedTier: "view",
+    recommendedTier: "pro",
     tags: ["#deep-learning", "#reinforcement-learning", "#model-drift", "#policy-entropy"],
     specs: {
       latencyRequirement: "Inference cycle < 25ms GPU/ONNX runtime",
@@ -266,7 +266,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "R-MULTIPLE WATERFALL",
       simulationType: "momentum-waterfall",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#trend-following", "#momentum-scanner", "#breakout-filter", "#multi-ticker"],
     specs: {
       latencyRequirement: "< 20ms multi-feed WebSocket aggregation",
@@ -296,7 +296,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "DRAWDOWN HALO",
       simulationType: "drawdown-halo",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#prop-firm", "#drawdown-halo", "#ftmo-rules", "#emergency-lockout"],
     specs: {
       latencyRequirement: "Real-time tick-level equity reconciliation",
@@ -322,7 +322,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "EMERGENCY FLATTEN",
       simulationType: "cro-redline",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#fund-governance", "#cro-oversight", "#var-risk", "#master-kill-switch"],
     specs: {
       latencyRequirement: "< 100ms global multi-venue flatten dispatch",
@@ -348,7 +348,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "GLANCEABLE VITALS",
       simulationType: "pi-node",
     },
-    recommendedTier: "view",
+    recommendedTier: "pro",
     tags: ["#raspberry-pi", "#desk-display", "#800x480", "#hardware-vitals"],
     specs: {
       latencyRequirement: "Low-footprint DOM, < 30MB browser RAM usage",
@@ -374,7 +374,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "EDGE DECAY RADAR",
       simulationType: "monte-carlo",
     },
-    recommendedTier: "view",
+    recommendedTier: "pro",
     tags: ["#monte-carlo", "#backtest-verification", "#edge-decay", "#walk-forward"],
     specs: {
       latencyRequirement: "Continuous rolling statistical comparison",
@@ -404,7 +404,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "OBS HUD OVERLAY",
       simulationType: "obs-ticker",
     },
-    recommendedTier: "view",
+    recommendedTier: "pro",
     tags: ["#obs-studio", "#twitch-trading", "#livestream-hud", "#privacy-mode"],
     specs: {
       latencyRequirement: "Smooth 60 FPS CSS rendering / Transparent DOM",
@@ -430,7 +430,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "EXECUTIVE SUMMARY",
       simulationType: "glass-summary",
     },
-    recommendedTier: "view",
+    recommendedTier: "pro",
     tags: ["#glassmorphism", "#executive-view", "#calm-ui", "#apy-projector"],
     specs: {
       latencyRequirement: "Buffered periodic tick updates (1s refresh)",
@@ -456,7 +456,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "INTERACTIVE CLI",
       simulationType: "raw-cli",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#cli-terminal", "#crt-scanlines", "#keyboard-shortcuts", "#raw-monospace"],
     specs: {
       latencyRequirement: "< 0.5ms terminal buffer render",
@@ -482,7 +482,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "INSTITUTIONAL DENSITY",
       simulationType: "bloomberg-macro",
     },
-    recommendedTier: "view",
+    recommendedTier: "pro",
     tags: ["#bloomberg-style", "#macro-calendar", "#maximum-density", "#wall-street"],
     specs: {
       latencyRequirement: "Zero-latency virtualized table rendering (10,000+ rows)",
@@ -512,7 +512,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "SHARE CARD GENERATOR",
       simulationType: "social-sharecard",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#copy-trading", "#whop-monetization", "#social-proof", "#viral-marketing"],
     specs: {
       latencyRequirement: "Synchronized multi-account order mirror < 50ms",
@@ -538,7 +538,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "NLP SENTIMENT RADAR",
       simulationType: "nlp-sentiment",
     },
-    recommendedTier: "view",
+    recommendedTier: "pro",
     tags: ["#nlp-sentiment", "#news-trading", "#twitter-scraping", "#headline-triggers"],
     specs: {
       latencyRequirement: "Headline ingestion to NLP classification < 200ms",
@@ -564,7 +564,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "SWIPEABLE ACTIONS",
       simulationType: "mobile-pager",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#mobile-first", "#remote-kill", "#swipe-actions", "#push-intervene"],
     specs: {
       latencyRequirement: "Mobile WebSocket with cellular reconnection recovery",
@@ -590,7 +590,7 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       badge: "MODULAR CANVAS",
       simulationType: "modular-grid",
     },
-    recommendedTier: "control",
+    recommendedTier: "pro",
     tags: ["#drag-drop", "#modular-grid", "#multi-monitor", "#power-customization"],
     specs: {
       latencyRequirement: "Zero-lag re-flow on layout resize",
@@ -598,6 +598,6 @@ export const ARCHITECTURES_DATA: ArchitectureBlueprint[] = [
       alertVectors: ["Layout Unsaved Warning", "Screen Resolution Discrepancy", "Widget Dock Conflict"],
     },
     summary:
-      "Algorb's crown jewel: an infinitely configurable modular cockpit enabling quants to design, save, and share their ultimate command center.",
+      "StratDesk's crown jewel: an infinitely configurable modular cockpit enabling quants to design, save, and share their ultimate command center.",
   },
 ];

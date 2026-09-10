@@ -33,13 +33,14 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
 
   return (
     <div
+      data-terminal="true"
       className={cn(
-        "rounded-xl border border-white/10 bg-[#080b11] overflow-hidden font-mono text-xs shadow-2xl transition-all",
+        "rounded-xl border border-slate-800 dark:border-white/10 bg-[#080b11] overflow-hidden font-mono text-xs shadow-xl dark:shadow-2xl transition-all",
         className
       )}
     >
       {/* Terminal Title Bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-white/[0.03] border-b border-white/10 select-none">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900/60 dark:bg-white/[0.03] border-b border-slate-800 dark:border-white/10 select-none">
         <div className="flex items-center gap-3">
           {/* Window control dots */}
           <div className="flex items-center gap-1.5">
@@ -74,7 +75,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({
               "px-2.5 py-1 rounded text-[11px] font-mono transition-all flex items-center gap-1.5 border",
               copied
                 ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                : "bg-white/5 text-text-muted hover:text-white border-white/10 hover:border-white/20"
+                : "bg-white/5 text-slate-400 hover:text-white border-white/10 hover:border-white/20"
             )}
             title="Copy code to clipboard"
           >

@@ -11,10 +11,18 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://stratdesk.internal");
+
 export const metadata: Metadata = {
-  title: "Algorb — Premium Interfaces for Personal Trading Bots",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "StratDesk | Institutional Dashboards for Algorithmic Trading",
+    template: "%s | StratDesk",
+  },
   description:
-    "Turn your trading bot into a command center. Algorb provides high-density, self-hosted dashboards for developers and quants who build and run automated trading systems.",
+    "Self-hosted, institutional-grade React dashboards and command centers for quantitative developers and retail algos.",
   keywords: [
     "trading bot dashboard",
     "algorithmic trading dashboard",
@@ -24,29 +32,41 @@ export const metadata: Metadata = {
     "trading bot monitoring",
     "trading bot control panel",
     "quant developer tools",
+    "CCXT dashboard",
+    "trade ledger",
   ],
-  authors: [{ name: "Algorb" }],
-  creator: "Algorb",
-  publisher: "Algorb",
+  authors: [{ name: "StratDesk" }],
+  creator: "StratDesk",
+  publisher: "StratDesk",
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
   openGraph: {
-    title: "Algorb — Premium Interfaces for Personal Trading Bots",
+    title: "StratDesk | Institutional Dashboards for Algorithmic Trading",
     description:
-      "Turn your trading bot into a command center. High-density, self-hosted dashboards for algorithmic and automated trading bots.",
-    url: "https://algorb.internal",
-    siteName: "Algorb",
+      "Self-hosted, institutional-grade React dashboards and command centers for quantitative developers and retail algos.",
+    url: "/",
+    siteName: "StratDesk",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "StratDesk | Institutional Dashboards for Algorithmic Trading",
+      },
+    ],
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Algorb — Premium Interfaces for Personal Trading Bots",
+    title: "StratDesk | Institutional Dashboards for Algorithmic Trading",
     description:
-      "Turn your trading bot into a command center. Self-hosted telemetry and command interfaces for automated bots.",
+      "Self-hosted, institutional-grade React dashboards and command centers for quantitative developers and retail algos.",
+    images: ["/og-image.png"],
+    creator: "@stratdesk",
   },
   robots: {
     index: true,

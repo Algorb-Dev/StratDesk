@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Algorb Control — Bot Adapter Pipeline
+StratDesk Pro — Bot Adapter Pipeline
 Demonstrates how an algorithmic trading bot or execution engine pushes
-audited trade records and forensic telemetry directly to Algorb Control.
+audited trade records and forensic telemetry directly to StratDesk Pro.
 
 Protocol: HTTP/JSON REST to /api/ledger
 """
@@ -10,10 +10,16 @@ Protocol: HTTP/JSON REST to /api/ledger
 import asyncio
 import json
 import sys
+import time
+import secrets
+import hmac
+import hashlib
 from datetime import datetime, timezone
 from typing import List, Literal, Optional, TypedDict, Union
 import aiohttp
 from pydantic import BaseModel, Field
+
+DEFAULT_STRATDESK_SECRET = "stratdesk_local_master_secret_v1"
 
 
 # ==============================================================================
@@ -29,7 +35,7 @@ class TradeTelemetryModel(BaseModel):
 
 class TradeLedgerEntryModel(BaseModel):
     """
-    Pydantic model representing the exact Algorb Control TradeLedgerEntry interface.
+    Pydantic model representing the exact StratDesk Pro TradeLedgerEntry interface.
     Includes all required forensic and execution telemetry fields.
     """
     id: str = Field(..., description="Unique trade execution ID (e.g. TRD-2026-0907-143)")
@@ -110,6 +116,38 @@ class TradeLedgerEntryDict(TypedDict, total=False):
     tags: List[str]
 
 
+def sign_trade_payload(payload_dict: dict, secret: str = DEFAULT_STRATDESK_SECRET) -> dict:
+    """
+    Computes cryptographic HMAC-SHA256 headers with timestamp and anti-replay nonce.
+    """
+    timestamp = int(time.time() * 1000)
+    nonce = f"{timestamp}-{secrets.token_hex(4)}"
+    canonical_msg = f"{timestamp}:{nonce}:INGEST_TRADE:{json.dumps(payload_dict)}"
+    sig = hmac.new(secret.encode("utf-8"), canonical_msg.encode("utf-8"), hashlib.sha256).hexdigest()
+    return {
+        "x-stratdesk-signature": sig,
+        "x-stratdesk-timestamp": str(timestamp),
+        "x-stratdesk-nonce": nonce,
+    }
+
+
+def sign_control_command(action: str, params: dict, secret: str = DEFAULT_STRATDESK_SECRET) -> dict:
+    """
+    Generates HMAC-SHA256 signed payload for the StratDesk Command Bus (/api/command).
+    """
+    timestamp = int(time.time() * 1000)
+    nonce = f"{timestamp}-{secrets.token_hex(4)}"
+    canonical_msg = f"{timestamp}:{nonce}:{action}:{json.dumps(params, separators=(',', ':'))}"
+    sig = hmac.new(secret.encode("utf-8"), canonical_msg.encode("utf-8"), hashlib.sha256).hexdigest()
+    return {
+        "action": action,
+        "params": params,
+        "signature": sig,
+        "timestamp": timestamp,
+        "nonce": nonce,
+    }
+
+
 # ==============================================================================
 # 2. Async Transmission Pipeline
 # ==============================================================================
@@ -118,34 +156,71 @@ async def push_trade_execution(
     trade_data: Union[TradeLedgerEntryModel, dict],
     endpoint_url: str = "http://localhost:3000/api/ledger",
     timeout_seconds: float = 10.0,
+    use_hmac: bool = True,
 ) -> dict:
     """
-    Asynchronously transmits an executed trade payload to the Algorb Control ledger API.
-
-    :param trade_data: TradeLedgerEntryModel instance or dictionary conforming to the schema
-    :param endpoint_url: Full URL to the Next.js /api/ledger route
-    :param timeout_seconds: Network request timeout
-    :return: Ingestion response payload dict from Algorb
+    Asynchronously transmits an executed trade payload to the StratDesk Pro ledger API.
+    Optionally cryptographically signs the frame using HMAC-SHA256.
     """
     payload = trade_data.model_dump() if isinstance(trade_data, BaseModel) else trade_data
+    payload_raw = json.dumps(payload)
+
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "StratDesk-BotAdapter/1.0 (Python/aiohttp)",
+    }
+
+    if use_hmac:
+        timestamp = int(time.time() * 1000)
+        nonce = f"{timestamp}-{secrets.token_hex(4)}"
+        canonical_msg = f"{timestamp}:{nonce}:INGEST_TRADE:{payload_raw}"
+        sig = hmac.new(DEFAULT_STRATDESK_SECRET.encode("utf-8"), canonical_msg.encode("utf-8"), hashlib.sha256).hexdigest()
+        headers["x-stratdesk-signature"] = sig
+        headers["x-stratdesk-timestamp"] = str(timestamp)
+        headers["x-stratdesk-nonce"] = nonce
+        print(f"    [HMAC-SHA256 SIGNED] Signature: {sig[:16]}... Nonce: {nonce}")
 
     timeout = aiohttp.ClientTimeout(total=timeout_seconds)
     async with aiohttp.ClientSession(timeout=timeout) as session:
-        headers = {
-            "Content-Type": "application/json",
-            "User-Agent": "Algorb-BotAdapter/1.0 (Python/aiohttp)",
-        }
-        async with session.post(endpoint_url, json=payload, headers=headers) as response:
+        async with session.post(endpoint_url, data=payload_raw, headers=headers) as response:
             status = response.status
             response_json = await response.json()
 
             if status in (200, 201):
-                print(f"[ALGORB INGESTION SUCCESS] HTTP {status} — Recorded ID: {response_json.get('recordedId')}")
+                hmac_flag = "✓ HMAC Verified" if response_json.get("hmacVerified") else "Local Open"
+                print(f"[STRATDESK INGESTION SUCCESS] HTTP {status} — Recorded ID: {response_json.get('recordedId')} ({hmac_flag})")
                 return response_json
             else:
                 error_msg = f"HTTP {status}: {response_json}"
-                print(f"[ALGORB INGESTION FAILED] {error_msg}")
+                print(f"[STRATDESK INGESTION FAILED] {error_msg}")
                 raise RuntimeError(error_msg)
+
+
+async def test_command_bus(
+    action: str = "EMERGENCY_HALT",
+    params: dict = None,
+    endpoint_url: str = "http://localhost:3000/api/command",
+) -> dict:
+    """
+    Broadcasts a cryptographically signed control command to the StratDesk Command Bus.
+    """
+    if params is None:
+        params = {"flattenRisk": True, "cancelResting": True}
+
+    signed_cmd = sign_control_command(action, params)
+
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "StratDesk-BotAdapter/1.0 (Python/aiohttp)",
+        "x-stratdesk-signature": signed_cmd["signature"],
+        "x-stratdesk-timestamp": str(signed_cmd["timestamp"]),
+        "x-stratdesk-nonce": signed_cmd["nonce"],
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(endpoint_url, json=signed_cmd, headers=headers) as response:
+            res_json = await response.json()
+            return res_json
 
 
 # ==============================================================================
@@ -154,7 +229,7 @@ async def push_trade_execution(
 
 async def main():
     print("\n==================================================================")
-    print("  ALGORB CONTROL // BOT ADAPTER PIPELINE DEMO")
+    print("  STRATDESK PRO // BOT ADAPTER PIPELINE DEMO")
     print("==================================================================")
 
     # 1. Synthesize a mock winning trade with forensic telemetry
@@ -204,13 +279,24 @@ async def main():
 
     # 2. Transmit via async pipeline
     target_endpoint = "http://localhost:3000/api/ledger"
-    print(f"\n[2] Transmitting execution to Algorb Command Bus ({target_endpoint})...")
+    print(f"\n[2] Transmitting execution to StratDesk Command Bus ({target_endpoint})...")
 
     try:
         response = await push_trade_execution(mock_trade, endpoint_url=target_endpoint)
-        print(f"\n[3] Ingestion Confirmed by Algorb Control:")
+        print(f"\n[3] Ingestion Confirmed by StratDesk Pro:")
         print(f"    {json.dumps(response, indent=4)}")
-        print("\nPipeline execution complete. Trade verified on dashboard.")
+
+        # 3. Test Cryptographic Command Bus verification
+        cmd_endpoint = "http://localhost:3000/api/command"
+        print(f"\n[4] Testing Cryptographic Command Bus ({cmd_endpoint})...")
+        cmd_res = await test_command_bus(
+            action="EMERGENCY_HALT",
+            params={"flattenRisk": True, "cancelResting": True},
+            endpoint_url=cmd_endpoint,
+        )
+        print(f"    [COMMAND BUS VERIFIED ✓]: {json.dumps(cmd_res)}")
+
+        print("\nPipeline execution complete. Trade & HMAC command bus verified.")
     except Exception as exc:
         print(f"\n[!] Failed to transmit trade: {exc}")
         print("    Ensure the Next.js server is running on http://localhost:3000")

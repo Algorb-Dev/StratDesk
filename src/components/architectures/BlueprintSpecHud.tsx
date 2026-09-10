@@ -30,6 +30,9 @@ export const BlueprintSpecHud: React.FC<BlueprintSpecHudProps> = ({
 }) => {
   const productTier = PRODUCTS[blueprint.recommendedTier];
 
+  const isPro = blueprint.recommendedTier === "pro" || blueprint.recommendedTier === "control";
+  const tierName = isPro ? "PRO" : "CORE";
+
   return (
     <div className="flex flex-col gap-5 font-mono text-xs select-none">
       {/* 1. Header Spec Bar */}
@@ -50,12 +53,12 @@ export const BlueprintSpecHud: React.FC<BlueprintSpecHudProps> = ({
             <span
               className={cn(
                 "px-2 py-0.5 text-[9px] font-bold rounded uppercase border",
-                blueprint.recommendedTier === "control"
-                  ? "bg-accent/10 text-accent border-accent/30"
-                  : "bg-white/5 text-text-secondary border-white/10"
+                isLight
+                  ? "bg-amber-50 text-amber-900 border-amber-300"
+                  : "bg-warning/10 text-warning border-warning/30"
               )}
             >
-              ALGORB {blueprint.recommendedTier.toUpperCase()}
+              STRATDESK PRO
             </span>
           </div>
           <h3 className={cn("text-base sm:text-lg font-bold font-sans", isLight ? "text-slate-900" : "text-white")}>
@@ -215,7 +218,7 @@ export const BlueprintSpecHud: React.FC<BlueprintSpecHudProps> = ({
           <div className="flex items-center justify-center sm:justify-start gap-2">
             <ShieldCheck className="w-4 h-4 text-success" />
             <span className="font-bold text-white text-sm">
-              Deploy Preset #{blueprint.number} with Algorb {blueprint.recommendedTier.toUpperCase()}
+              Deploy Preset #{blueprint.number} with StratDesk Pro
             </span>
           </div>
           <p className="text-xs text-text-muted font-sans">
@@ -280,7 +283,7 @@ function ArchitecturalWireframeSvg({
       <circle cx="26" cy="15" r="3" fill="#f59e0b" opacity="0.8" />
       <circle cx="36" cy="15" r="3" fill="#10b981" opacity="0.8" />
       <text x="50" y="18" fill="rgba(255, 255, 255, 0.5)" fontSize="9">
-        ALGORB RUNTIME // PRESET {blueprint.number} • {blueprint.title.toUpperCase()}
+        STRATDESK RUNTIME // PRESET {blueprint.number} • {blueprint.title.toUpperCase()}
       </text>
       <text x="680" y="18" fill="#00f0ff" fontSize="8" fontWeight="bold">
         {blueprint.specs.latencyRequirement.split("/")[0]}

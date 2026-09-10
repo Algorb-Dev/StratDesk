@@ -1,8 +1,8 @@
 import React from "react";
-import { Hero } from "@/components/hero/Hero";
+import { ProHeroSection } from "@/components/home/ProHeroSection";
 import { CredibilityStrip } from "@/components/hero/CredibilityStrip";
-import { TheProblem } from "@/components/home/TheProblem";
-import { ProductCards } from "@/components/products/ProductCards";
+import { Testimonials } from "@/components/home/Testimonials";
+import { ComparisonTable } from "@/components/home/ComparisonTable";
 import { ArchitecturesShowcase } from "@/components/home/ArchitecturesShowcase";
 import { FeatureShowcase } from "@/components/features/FeatureShowcase";
 import { BotArchitecture } from "@/components/architecture/BotArchitecture";
@@ -18,17 +18,17 @@ import { FinalCta } from "@/components/cta/FinalCta";
 export default function HomePage() {
   return (
     <div className="flex flex-col w-full">
-      <Hero />
+      <ProHeroSection />
       <CredibilityStrip />
-      <TheProblem />
-      <ProductCards />
+      <Testimonials />
+      <ComparisonTable />
       <ArchitecturesShowcase />
       <FeatureShowcase />
       <BotArchitecture />
       <HowItWorksSteps />
       <AiIntegration />
       <ThemeGallery />
-      <DashboardLab />
+      <DashboardLab mode="launcher" />
       <TechnicalSpecs />
       <SecuritySection />
       <FaqAccordion />

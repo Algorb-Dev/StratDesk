@@ -14,18 +14,19 @@ export const THEME_IDS: ThemeId[] = [
   "light",
 ];
 
-export const THEME_STORAGE_KEY = "algorb_dashboard_theme";
+export const THEME_STORAGE_KEY = "stratdesk_dashboard_theme";
+export const THEME_STORAGE_KEY_LEGACY = "algorb_dashboard_theme";
 export const DEFAULT_THEME: ThemeId = "terminal";
 
-const DASHBOARD_THEME_CHANGE_EVENT = "algorb_dashboard_theme_change";
+const DASHBOARD_THEME_CHANGE_EVENT = "stratdesk_dashboard_theme_change";
+const DASHBOARD_THEME_CHANGE_EVENT_LEGACY = "algorb_dashboard_theme_change";
 
 /**
  * Custom hook to read and write active bot dashboard theme state
  * ("terminal" | "obsidian" | "quant" | "command" | "vector" | "light")
  * with localStorage persistence.
  *
- * Scoped exclusively to the dashboard HUD / Dashboard Lab preview,
- * leaving the marketing website to be controlled by the dark/light mode toggle.
+ * Scoped exclusively to the dashboard HUD / Dashboard Lab preview.
  */
 export function useTheme() {
   const [theme, setThemeState] = useState<ThemeId>(DEFAULT_THEME);
@@ -36,7 +37,8 @@ export function useTheme() {
 
     let initialTheme = DEFAULT_THEME;
     try {
-      const stored = localStorage.getItem(THEME_STORAGE_KEY) as ThemeId | null;
+      const stored = (localStorage.getItem(THEME_STORAGE_KEY) ||
+        localStorage.getItem(THEME_STORAGE_KEY_LEGACY)) as ThemeId | null;
       if (stored && THEME_IDS.includes(stored)) {
         initialTheme = stored;
       }
@@ -56,7 +58,10 @@ export function useTheme() {
 
     // Synchronize across browser tabs
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === THEME_STORAGE_KEY && e.newValue) {
+      if (
+        (e.key === THEME_STORAGE_KEY || e.key === THEME_STORAGE_KEY_LEGACY) &&
+        e.newValue
+      ) {
         const nextTheme = e.newValue as ThemeId;
         if (THEME_IDS.includes(nextTheme)) {
           setThemeState(nextTheme);
@@ -65,10 +70,12 @@ export function useTheme() {
     };
 
     window.addEventListener(DASHBOARD_THEME_CHANGE_EVENT, handleCustomThemeChange);
+    window.addEventListener(DASHBOARD_THEME_CHANGE_EVENT_LEGACY, handleCustomThemeChange);
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
       window.removeEventListener(DASHBOARD_THEME_CHANGE_EVENT, handleCustomThemeChange);
+      window.removeEventListener(DASHBOARD_THEME_CHANGE_EVENT_LEGACY, handleCustomThemeChange);
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
@@ -87,6 +94,9 @@ export function useTheme() {
     if (typeof window !== "undefined") {
       window.dispatchEvent(
         new CustomEvent<ThemeId>(DASHBOARD_THEME_CHANGE_EVENT, { detail: newTheme })
+      );
+      window.dispatchEvent(
+        new CustomEvent<ThemeId>(DASHBOARD_THEME_CHANGE_EVENT_LEGACY, { detail: newTheme })
       );
     }
   }, []);

@@ -12,7 +12,7 @@ interface LogoProps {
   href?: string;
 }
 
-export const AlgorbSymbol: React.FC<{
+export const StratDeskSymbol: React.FC<{
   className?: string;
   size?: number;
   glow?: boolean;
@@ -69,6 +69,8 @@ export const AlgorbSymbol: React.FC<{
   );
 };
 
+export const AlgorbSymbol = StratDeskSymbol;
+
 export const Logo: React.FC<LogoProps> = ({
   className,
   size = "md",
@@ -89,11 +91,11 @@ export const Logo: React.FC<LogoProps> = ({
 
   const content = (
     <div className={cn("inline-flex items-center group cursor-pointer select-none", gap, className)}>
-      <AlgorbSymbol size={symbol} glow={glow} />
+      <StratDeskSymbol size={symbol} glow={glow} />
       {showWordmark && (
         <div className="flex items-center gap-2">
           <span className={cn("font-bold text-white font-mono uppercase transition-colors duration-200 group-hover:text-accent", text)}>
-            Algorb
+            StratDesk
           </span>
           {showBadge && (
             <span className="px-1.5 py-0.5 text-[9px] font-mono font-semibold tracking-wider text-accent/90 bg-accent/10 border border-accent/30 rounded">
@@ -107,7 +109,7 @@ export const Logo: React.FC<LogoProps> = ({
 
   if (href) {
     return (
-      <Link href={href} aria-label="Algorb Homepage" className="inline-flex">
+      <Link href={href} aria-label="StratDesk Homepage" className="inline-flex">
         {content}
       </Link>
     );

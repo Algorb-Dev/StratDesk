@@ -39,9 +39,9 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantStyles = {
     primary:
-      "bg-accent text-background font-bold hover:bg-accent-hover hover:shadow-glow-cyan active:scale-[0.98] border border-accent",
+      "bg-accent text-slate-950 font-bold hover:bg-accent-hover hover:shadow-glow-cyan active:scale-[0.98] border border-accent",
     secondary:
-      "bg-surface-elevated text-text-primary hover:bg-surface-hover hover:border-accent/40 border border-border text-white active:scale-[0.98]",
+      "bg-surface-elevated text-text-primary hover:bg-surface-hover hover:border-accent/40 border border-border active:scale-[0.98]",
     outline:
       "bg-transparent text-text-primary border border-border hover:border-accent/60 hover:text-accent hover:bg-accent/5 active:scale-[0.98]",
     danger:

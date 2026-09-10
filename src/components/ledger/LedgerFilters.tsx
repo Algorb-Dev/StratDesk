@@ -185,14 +185,12 @@ export const LedgerFilters: React.FC<LedgerFiltersProps> = ({
             <select
               value={strategyFilter}
               onChange={(e) => onStrategyChange(e.target.value)}
-              className={cn(
-                "px-2 py-1 rounded border text-[10px] font-bold font-mono outline-none cursor-pointer",
-                isLight ? "bg-slate-50 border-slate-200 text-slate-800" : "bg-black/30 border-white/10 text-text-secondary"
-              )}
+              style={{ colorScheme: "dark" }}
+              className="px-2.5 py-1 rounded border text-[10px] font-bold font-mono outline-none cursor-pointer bg-[#0c1017] border-white/15 text-slate-200 focus:border-accent shadow-sm"
             >
-              <option value="ALL">ALL STRATEGIES</option>
+              <option value="ALL" className="bg-[#0c1017] text-slate-200 py-1 font-mono">ALL STRATEGIES</option>
               {availableStrategies.map((strat) => (
-                <option key={strat} value={strat}>
+                <option key={strat} value={strat} className="bg-[#0c1017] text-slate-200 py-1 font-mono">
                   {strat}
                 </option>
               ))}
@@ -204,14 +202,12 @@ export const LedgerFilters: React.FC<LedgerFiltersProps> = ({
             <select
               value={regimeFilter}
               onChange={(e) => onRegimeChange(e.target.value)}
-              className={cn(
-                "px-2 py-1 rounded border text-[10px] font-bold font-mono outline-none cursor-pointer",
-                isLight ? "bg-slate-50 border-slate-200 text-slate-800" : "bg-black/30 border-white/10 text-text-secondary"
-              )}
+              style={{ colorScheme: "dark" }}
+              className="px-2.5 py-1 rounded border text-[10px] font-bold font-mono outline-none cursor-pointer bg-[#0c1017] border-white/15 text-slate-200 focus:border-accent shadow-sm"
             >
-              <option value="ALL">ALL REGIMES</option>
+              <option value="ALL" className="bg-[#0c1017] text-slate-200 py-1 font-mono">ALL REGIMES</option>
               {availableRegimes.map((reg) => (
-                <option key={reg} value={reg}>
+                <option key={reg} value={reg} className="bg-[#0c1017] text-slate-200 py-1 font-mono">
                   {reg}
                 </option>
               ))}

@@ -13,7 +13,7 @@ export default function HowItWorksPage() {
             TECHNICAL WALKTHROUGH
           </Badge>
           <h1 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight font-sans">
-            HOW ALGORB CONNECTS.
+            HOW STRATDESK CONNECTS.
           </h1>
           <p className="mt-4 text-base sm:text-xl text-text-secondary leading-relaxed font-sans">
             A comprehensive breakdown of how the interface communicates with your local trading bot process without compromising execution safety or secret keys.

@@ -11,6 +11,13 @@ interface EquityChartProps {
   isLight?: boolean;
 }
 
+interface HoverState {
+  x: number;
+  y: number;
+  equity: number;
+  time: string;
+}
+
 export const EquityChart: React.FC<EquityChartProps> = ({
   className,
   accentColor = "#00f0ff",
@@ -18,7 +25,7 @@ export const EquityChart: React.FC<EquityChartProps> = ({
   isLight = false,
 }) => {
   const [activeTimeframe, setActiveTimeframe] = useState<string>("1D");
-  const [hoveredPoint, setHoveredPoint] = useState<ChartPoint | null>(null);
+  const [hoverState, setHoverState] = useState<HoverState | null>(null);
 
   const points = TIMEFRAME_CHARTS[activeTimeframe] || TIMEFRAME_CHARTS["1D"];
 
@@ -39,10 +46,9 @@ export const EquityChart: React.FC<EquityChartProps> = ({
     return { x, y, point: p };
   });
 
-  // Build SVG path
+  // Build SVG path with smooth cubic bezier curves
   const linePath = coords.reduce((acc, curr, idx) => {
     if (idx === 0) return `M ${curr.x} ${curr.y}`;
-    // Smooth bezier curve
     const prev = coords[idx - 1];
     const cpX1 = prev.x + (curr.x - prev.x) / 2;
     const cpY1 = prev.y;
@@ -53,9 +59,45 @@ export const EquityChart: React.FC<EquityChartProps> = ({
 
   const areaPath = `${linePath} L ${coords[coords.length - 1].x} ${height} L ${coords[0].x} ${height} Z`;
 
-  const displayPoint = hoveredPoint || points[points.length - 1];
+  // Continuous pointer move handler tracking anywhere along the line curve
+  const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    const svgRect = e.currentTarget.getBoundingClientRect();
+    if (!svgRect.width) return;
+
+    const relX = ((e.clientX - svgRect.left) / svgRect.width) * width;
+    const clampedX = Math.max(paddingX, Math.min(width - paddingX, relX));
+    const progress = (clampedX - paddingX) / (width - paddingX * 2);
+
+    const exactIndex = progress * (points.length - 1);
+    const i0 = Math.floor(exactIndex);
+    const i1 = Math.min(points.length - 1, Math.ceil(exactIndex));
+    const t = exactIndex - i0;
+
+    const p0 = points[i0];
+    const p1 = points[i1];
+    const c0 = coords[i0];
+    const c1 = coords[i1];
+
+    // Smooth cubic Hermite interpolation matching the bezier line curve exactly
+    const cy = (1 - 3 * t * t + 2 * t * t * t) * c0.y + (3 * t * t - 2 * t * t * t) * c1.y;
+    const interpEquity = p0.equity + t * (p1.equity - p0.equity);
+    const interpTime = t > 0.5 ? p1.time : p0.time;
+
+    setHoverState({
+      x: clampedX,
+      y: cy,
+      equity: interpEquity,
+      time: interpTime,
+    });
+  };
+
+  const handlePointerLeave = () => {
+    setHoverState(null);
+  };
+
   const initialEquity = points[0].equity;
-  const currentEquity = displayPoint.equity;
+  const currentEquity = hoverState ? hoverState.equity : points[points.length - 1].equity;
+  const currentTime = hoverState ? hoverState.time : points[points.length - 1].time;
   const delta = currentEquity - initialEquity;
   const deltaPct = ((delta / initialEquity) * 100).toFixed(2);
 
@@ -71,7 +113,7 @@ export const EquityChart: React.FC<EquityChartProps> = ({
               PORTFOLIO NAV ({activeTimeframe})
             </span>
             <span className={cn("text-[10px] font-mono", isLight ? "text-slate-400" : "text-text-muted")}>
-              • {displayPoint.time}
+              • {currentTime}
             </span>
           </div>
           <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 mt-0.5 min-w-0">
@@ -102,7 +144,7 @@ export const EquityChart: React.FC<EquityChartProps> = ({
                 key={tf}
                 onClick={() => {
                   setActiveTimeframe(tf);
-                  setHoveredPoint(null);
+                  setHoverState(null);
                 }}
                 className={cn(
                   "px-2 py-1 text-[10px] font-mono font-medium rounded transition-colors",
@@ -122,12 +164,14 @@ export const EquityChart: React.FC<EquityChartProps> = ({
         )}
       </div>
 
-      {/* SVG Canvas */}
+      {/* SVG Canvas with Continuous Hover scrub */}
       <div className="relative flex-1 w-full pt-2 min-h-[140px] sm:min-h-[170px] select-none">
         <svg
           viewBox={`0 0 ${width} ${height}`}
           className="w-full h-full overflow-visible"
           preserveAspectRatio="none"
+          onPointerMove={handlePointerMove}
+          onPointerLeave={handlePointerLeave}
         >
           <defs>
             <linearGradient id={`equity-gradient-${activeTimeframe}`} x1="0" y1="0" x2="0" y2="1">
@@ -158,42 +202,123 @@ export const EquityChart: React.FC<EquityChartProps> = ({
             strokeLinejoin="round"
           />
 
-          {/* Interactive Hover Nodes */}
-          {coords.map((c, i) => (
-            <g key={i} className="cursor-crosshair">
+          {/* Vertical Crosshair Guide */}
+          {hoverState && (
+            <line
+              x1={hoverState.x}
+              y1={0}
+              x2={hoverState.x}
+              y2={height}
+              stroke={isLight ? "#0284c7" : accentColor}
+              strokeWidth="1.2"
+              strokeDasharray="3 3"
+              opacity="0.65"
+            />
+          )}
+
+          {/* Continuous Tracking Point on the Curve */}
+          {hoverState ? (
+            <g className="transition-transform duration-75">
               <circle
-                cx={c.x}
-                cy={c.y}
-                r="4"
-                className={cn(
-                  "transition-all duration-150",
-                  hoveredPoint?.time === c.point.time
-                    ? isLight
-                      ? "fill-sky-600 stroke-slate-900 stroke-2 r-6"
-                      : "fill-accent stroke-white stroke-2 r-6"
-                    : "fill-surface stroke-accent stroke-1 opacity-0 hover:opacity-100"
-                )}
-                onMouseEnter={() => setHoveredPoint(c.point)}
+                cx={hoverState.x}
+                cy={hoverState.y}
+                r="7"
+                fill={accentColor}
+                opacity="0.35"
               />
-              <rect
-                x={c.x - (width / points.length) / 2}
-                y="0"
-                width={width / points.length}
-                height={height}
-                fill="transparent"
-                onMouseEnter={() => setHoveredPoint(c.point)}
-                onMouseLeave={() => setHoveredPoint(null)}
+              <circle
+                cx={hoverState.x}
+                cy={hoverState.y}
+                r="4.5"
+                fill={accentColor}
+                opacity="0.6"
+              />
+              <circle
+                cx={hoverState.x}
+                cy={hoverState.y}
+                r="2.8"
+                fill="#ffffff"
+                stroke={isLight ? "#0284c7" : accentColor}
+                strokeWidth="1.8"
               />
             </g>
-          ))}
+          ) : (
+            /* Pulsing Latest Point when not hovering */
+            <circle
+              cx={coords[coords.length - 1].x}
+              cy={coords[coords.length - 1].y}
+              r="4"
+              fill={accentColor}
+              className="animate-pulse"
+            />
+          )}
 
-          {/* Pulsing Latest Point */}
-          <circle
-            cx={coords[coords.length - 1].x}
-            cy={coords[coords.length - 1].y}
-            r="4"
-            fill={accentColor}
-            className="animate-pulse"
+          {/* Floating Hover Pill Tooltip right above/below curve */}
+          {hoverState && (() => {
+            const tooltipWidth = 114;
+            const tooltipHeight = 36;
+            let tx = hoverState.x - tooltipWidth / 2;
+            if (tx < 6) tx = 6;
+            if (tx + tooltipWidth > width - 6) tx = width - tooltipWidth - 6;
+
+            const ty = hoverState.y > 48 ? hoverState.y - tooltipHeight - 10 : hoverState.y + 12;
+            const currentDelta = hoverState.equity - initialEquity;
+            const currentDeltaPct = ((currentDelta / initialEquity) * 100).toFixed(2);
+            const isPositive = currentDelta >= 0;
+
+            return (
+              <g transform={`translate(${tx}, ${ty})`} className="pointer-events-none select-none">
+                <rect
+                  width={tooltipWidth}
+                  height={tooltipHeight}
+                  rx="6"
+                  ry="6"
+                  fill={isLight ? "#ffffff" : "#090d16"}
+                  stroke={isLight ? "rgba(2, 132, 199, 0.45)" : "rgba(0, 240, 255, 0.55)"}
+                  strokeWidth="1.2"
+                />
+                <text
+                  x={tooltipWidth / 2}
+                  y="15"
+                  textAnchor="middle"
+                  className={isLight ? "fill-slate-900" : "fill-white"}
+                  fontSize="10"
+                  fontFamily="monospace"
+                  fontWeight="bold"
+                >
+                  {formatCurrency(hoverState.equity)}
+                </text>
+                <text
+                  x={tooltipWidth / 2}
+                  y="28"
+                  textAnchor="middle"
+                  className={
+                    isPositive
+                      ? isLight
+                        ? "fill-emerald-700"
+                        : "fill-emerald-400"
+                      : isLight
+                      ? "fill-rose-700"
+                      : "fill-rose-400"
+                  }
+                  fontSize="8"
+                  fontFamily="monospace"
+                  fontWeight="bold"
+                >
+                  {hoverState.time} • {isPositive ? "+" : ""}{currentDeltaPct}%
+                </text>
+              </g>
+            );
+          })()}
+
+          {/* Full Interactive Hitbox Surface */}
+          <rect
+            x="0"
+            y="0"
+            width={width}
+            height={height}
+            fill="transparent"
+            className="cursor-crosshair"
           />
         </svg>
       </div>

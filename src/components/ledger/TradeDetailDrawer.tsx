@@ -45,7 +45,7 @@ export const TradeDetailDrawer: React.FC<TradeDetailDrawerProps> = ({
       (activeTrade.slippageBps !== undefined ? `${activeTrade.slippageBps} bps` : "0.0 bps");
 
     const receipt = `
-[ ALGORB FORENSIC AUDIT ]
+[ STRATDESK FORENSIC AUDIT ]
 Ticket:       ${ticketId}
 Symbol:       ${activeTrade.symbol}
 Direction:    ${activeTrade.direction}
@@ -71,7 +71,7 @@ Book Depth:   ${bookDepthVal}x
 Notes:        ${activeTrade.notes}
 Tags:         ${activeTrade.tags?.join(" ") || ""}
 ----------------------------------
-Verified by Algorb Control Telemetry Bus
+Verified by StratDesk Pro Telemetry Bus
 Timestamp:    ${new Date().toISOString()}
 `.trim();
 

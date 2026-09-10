@@ -395,7 +395,7 @@ export const LedgerPeriodicity: React.FC<LedgerPeriodicityProps> = ({
                   {onFilterByPeriod && (
                     <div className="pt-1 flex items-center justify-between">
                       <span className={cn("text-[9px]", isLight ? "text-slate-400" : "text-text-muted")}>
-                        Synced to Algorb Bot Audit Bus
+                        Synced to StratDesk Bot Audit Bus
                       </span>
                       <button
                         onClick={(e) => {

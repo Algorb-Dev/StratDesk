@@ -17,9 +17,9 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "Algorb — Archetype-Specific SDK Adapters & Telemetry Payloads",
+  title: "StratDesk — Archetype-Specific SDK Adapters & Telemetry Payloads",
   description:
-    "Learn how to format specialized telemetry payloads for Algorb bot archetypes: Prop-Firm Drawdown Halo, Crypto Arbitrage Matrix, Stat-Arb Z-Score, and DEX Snipers.",
+    "Learn how to format specialized telemetry payloads for StratDesk bot archetypes: Prop-Firm Drawdown Halo, Crypto Arbitrage Matrix, Stat-Arb Z-Score, and DEX Snipers.",
 };
 
 export default function ArchetypesDocsPage() {
@@ -27,53 +27,53 @@ export default function ArchetypesDocsPage() {
     <div className="space-y-12">
       {/* Page Header */}
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-[11px] font-mono text-text-muted">
-          <Link href="/docs" className="hover:text-white transition-colors">
+        <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500 dark:text-text-muted">
+          <Link href="/docs" className="hover:text-slate-900 dark:hover:text-white transition-colors">
             Documentation
           </Link>
-          <ChevronRight className="w-3 h-3 text-text-muted" />
-          <span className="text-accent font-bold">Archetype SDKs</span>
+          <ChevronRight className="w-3 h-3 text-slate-400 dark:text-text-muted" />
+          <span className="text-sky-700 dark:text-accent font-bold">Archetype SDKs</span>
         </div>
 
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-white font-sans tracking-tight">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white font-sans tracking-tight">
           Archetype-Specific SDK Adapters
         </h1>
-        <p className="text-sm text-text-secondary font-sans max-w-3xl leading-relaxed">
-          Each of Algorb&apos;s 20 specialized bot archetypes is powered by targeted telemetry vectors. Format your payloads according to these archetype specifications to feed custom HUD widgets like the Drawdown Halo, Spread Heatmap, and Z-Score Reversion Oscillator.
+        <p className="text-sm text-slate-600 dark:text-text-secondary font-sans max-w-3xl leading-relaxed">
+          Each of StratDesk&apos;s 20 specialized bot archetypes is powered by targeted telemetry vectors. Format your payloads according to these archetype specifications to feed custom HUD widgets like the Drawdown Halo, Spread Heatmap, and Z-Score Reversion Oscillator.
         </p>
       </div>
 
       {/* Archetype 1: Prop-Firm Halo */}
-      <section id="prop-firm" className="p-6 sm:p-8 rounded-2xl bg-surface/70 border border-white/10 space-y-6 font-mono text-xs">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+      <section id="prop-firm" className="p-6 sm:p-8 rounded-2xl bg-surface/90 dark:bg-surface/70 border border-border space-y-6 font-mono text-xs shadow-sm dark:shadow-none">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-warning" />
-              <span className="text-warning font-bold uppercase text-[11px]">
+              <span className="text-amber-700 dark:text-warning font-bold uppercase text-[11px]">
                 ARCHETYPE 09 // FTMO & PROP-FIRM COMPLIANCE
               </span>
             </div>
-            <h2 className="text-xl font-bold text-white font-sans">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white font-sans">
               The Prop-Firm Evaluator Halo
             </h2>
           </div>
 
           <Link
-            href="/?archetype=prop-firm-evaluator-console&tier=control#dashboard-lab"
-            className="px-3 py-1.5 rounded-lg border border-warning/40 text-warning hover:bg-warning/10 font-bold text-xs flex items-center gap-1.5 transition-all"
+            href="/lab?archetype=prop-firm-evaluator-console"
+            className="px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-700 dark:text-warning hover:bg-amber-50 dark:hover:bg-warning/10 font-bold text-xs flex items-center gap-1.5 transition-all"
           >
             <Sliders className="w-3.5 h-3.5" />
             <span>TEST IN LAB</span>
           </Link>
         </div>
 
-        <p className="text-text-secondary font-sans leading-relaxed text-sm">
-          To drive the circular <strong>Daily Drawdown Halo</strong> and emergency hard-kill lockout, report your account&apos;s distance from daily and max breach ceilings. When current drawdown reaches within 10% of the daily limit, Algorb automatically illuminates the red alert halo.
+        <p className="text-slate-600 dark:text-text-secondary font-sans leading-relaxed text-sm">
+          To drive the circular <strong className="text-slate-900 dark:text-white">Daily Drawdown Halo</strong> and emergency hard-kill lockout, report your account&apos;s distance from daily and max breach ceilings. When current drawdown reaches within 10% of the daily limit, StratDesk automatically illuminates the red alert halo.
         </p>
 
         <div className="space-y-3">
-          <div className="text-white font-bold text-xs uppercase flex items-center gap-1.5">
-            <ShieldAlert className="w-3.5 h-3.5 text-warning" />
+          <div className="text-slate-900 dark:text-white font-bold text-xs uppercase flex items-center gap-1.5">
+            <ShieldAlert className="w-3.5 h-3.5 text-amber-600 dark:text-warning" />
             <span>Python Compliance Wrapper & Halo Dispatch</span>
           </div>
           <CodeBlock
@@ -88,7 +88,7 @@ async def push_prop_firm_trade(
     account_size: float = 100000.00
 ):
     """
-    Transmits execution fill and daily compliance telemetry to Algorb Control.
+    Transmits execution fill and daily compliance telemetry to StratDesk Pro.
     The Drawdown Halo computes: buffer_remaining = daily_limit - current_drawdown
     """
     cushion_remaining = daily_limit - current_drawdown  # e.g. $3,150.00
@@ -131,36 +131,36 @@ async def push_prop_firm_trade(
       </section>
 
       {/* Archetype 2: Crypto Arbitrage Matrix */}
-      <section id="crypto-arbitrage" className="p-6 sm:p-8 rounded-2xl bg-surface/70 border border-white/10 space-y-6 font-mono text-xs">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+      <section id="crypto-arbitrage" className="p-6 sm:p-8 rounded-2xl bg-surface/90 dark:bg-surface/70 border border-border space-y-6 font-mono text-xs shadow-sm dark:shadow-none">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              <span className="text-accent font-bold uppercase text-[11px]">
+              <span className="text-sky-700 dark:text-accent font-bold uppercase text-[11px]">
                 ARCHETYPE 01 // CROSS-EXCHANGE BASIS ARBITRAGE
               </span>
             </div>
-            <h2 className="text-xl font-bold text-white font-sans">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white font-sans">
               Crypto Arbitrage & Dual-Ping Telemetry
             </h2>
           </div>
 
           <Link
-            href="/?archetype=crypto-arbitrage-matrix&tier=control#dashboard-lab"
-            className="px-3 py-1.5 rounded-lg border border-accent/40 text-accent hover:bg-accent/10 font-bold text-xs flex items-center gap-1.5 transition-all"
+            href="/lab?archetype=crypto-arbitrage-matrix"
+            className="px-3 py-1.5 rounded-lg border border-sky-300 dark:border-accent/40 text-sky-700 dark:text-accent hover:bg-sky-50 dark:hover:bg-accent/10 font-bold text-xs flex items-center gap-1.5 transition-all"
           >
             <Sliders className="w-3.5 h-3.5" />
             <span>TEST IN LAB</span>
           </Link>
         </div>
 
-        <p className="text-text-secondary font-sans leading-relaxed text-sm">
-          Arbitrage bots operate across two or more venues simultaneously (e.g. Binance and Bybit). To populate the live <strong>Spread Heatmap</strong> and <strong>Dual Ping Visualizer</strong>, transmit microsecond round-trip latency measurements and basis point spread capture.
+        <p className="text-slate-600 dark:text-text-secondary font-sans leading-relaxed text-sm">
+          Arbitrage bots operate across two or more venues simultaneously (e.g. Binance and Bybit). To populate the live <strong className="text-slate-900 dark:text-white">Spread Heatmap</strong> and <strong className="text-slate-900 dark:text-white">Dual Ping Visualizer</strong>, transmit microsecond round-trip latency measurements and basis point spread capture.
         </p>
 
         <div className="space-y-3">
-          <div className="text-white font-bold text-xs uppercase flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-accent" />
+          <div className="text-slate-900 dark:text-white font-bold text-xs uppercase flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5 text-sky-600 dark:text-accent" />
             <span>Python Dual-Socket Latency & Arbitrage Dispatch</span>
           </div>
           <CodeBlock
@@ -223,36 +223,36 @@ async def push_arbitrage_execution(
       </section>
 
       {/* Archetype 3: Pair Trading / Stat-Arb Z-Score */}
-      <section id="stat-arb" className="p-6 sm:p-8 rounded-2xl bg-surface/70 border border-white/10 space-y-6 font-mono text-xs">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+      <section id="stat-arb" className="p-6 sm:p-8 rounded-2xl bg-surface/90 dark:bg-surface/70 border border-border space-y-6 font-mono text-xs shadow-sm dark:shadow-none">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span className="text-emerald-400 font-bold uppercase text-[11px]">
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold uppercase text-[11px]">
                 ARCHETYPE 05 // COINTEGRATED PAIR TRADING
               </span>
             </div>
-            <h2 className="text-xl font-bold text-white font-sans">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white font-sans">
               Stat-Arb Z-Score & Mean Reversion
             </h2>
           </div>
 
           <Link
-            href="/?archetype=pair-trading-statarb-console&tier=control#dashboard-lab"
-            className="px-3 py-1.5 rounded-lg border border-emerald-400/40 text-emerald-400 hover:bg-emerald-400/10 font-bold text-xs flex items-center gap-1.5 transition-all"
+            href="/lab?archetype=pair-trading-statarb-console"
+            className="px-3 py-1.5 rounded-lg border border-emerald-500/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-400/10 font-bold text-xs flex items-center gap-1.5 transition-all"
           >
             <Sliders className="w-3.5 h-3.5" />
             <span>TEST IN LAB</span>
           </Link>
         </div>
 
-        <p className="text-text-secondary font-sans leading-relaxed text-sm">
-          Statistical arbitrageurs trade spread oscillations between cointegrated pairs (e.g. BTC vs ETH). To feed the <strong>Z-Score Oscillation Tracker</strong> and mean-reversion bands, transmit the live standard deviation distance (<code className="text-accent">zScore</code>) and half-life decay.
+        <p className="text-slate-600 dark:text-text-secondary font-sans leading-relaxed text-sm">
+          Statistical arbitrageurs trade spread oscillations between cointegrated pairs (e.g. BTC vs ETH). To feed the <strong className="text-slate-900 dark:text-white">Z-Score Oscillation Tracker</strong> and mean-reversion bands, transmit the live standard deviation distance (<code className="text-sky-700 dark:text-accent font-bold">zScore</code>) and half-life decay.
         </p>
 
         <div className="space-y-3">
-          <div className="text-white font-bold text-xs uppercase flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="text-slate-900 dark:text-white font-bold text-xs uppercase flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Python Kalman Filter Z-Score Dispatch</span>
           </div>
           <CodeBlock
@@ -269,7 +269,7 @@ async def push_statarb_trade(
 ):
     """
     Pushes mean-reversion execution with mathematical model confidence.
-    Algorb uses zScore to plot 2.0σ entry triggers and 0.0σ exit reversions.
+    StratDesk uses zScore to plot 2.0σ entry triggers and 0.0σ exit reversions.
     """
     payload = {
         "id": f"STAT-{ticket}",
@@ -310,17 +310,17 @@ async def push_statarb_trade(
       {/* Archetype 4 & 5 Grid: DEX Sniper & CRO Red-Line */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* DEX Sniper */}
-        <section id="dex-sniper" className="p-6 rounded-2xl bg-surface/70 border border-white/10 space-y-4 font-mono text-xs">
+        <section id="dex-sniper" className="p-6 rounded-2xl bg-surface/90 dark:bg-surface/70 border border-border space-y-4 font-mono text-xs shadow-sm dark:shadow-none">
           <div className="flex items-center justify-between">
-            <span className="text-accent font-bold text-[11px] uppercase">ARCHETYPE 02 // DEX SNIPER</span>
-            <span className="px-2 py-0.5 rounded bg-accent/10 text-accent text-[9px] font-bold">SOLANA / EVM</span>
+            <span className="text-sky-700 dark:text-accent font-bold text-[11px] uppercase">ARCHETYPE 02 // DEX SNIPER</span>
+            <span className="px-2 py-0.5 rounded bg-sky-100 dark:bg-accent/10 text-sky-800 dark:text-accent text-[9px] font-bold">SOLANA / EVM</span>
           </div>
 
-          <h3 className="text-base font-bold text-white font-sans">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white font-sans">
             On-Chain DEX Mempool & Honeypot Guard
           </h3>
 
-          <p className="text-text-secondary font-sans text-xs leading-relaxed">
+          <p className="text-slate-600 dark:text-text-secondary font-sans text-xs leading-relaxed">
             Report pending transaction queues, Gwei priority fees, and contract audit checklists:
           </p>
 
@@ -355,17 +355,17 @@ async def push_statarb_trade(
         </section>
 
         {/* CRO Red-Line */}
-        <section id="cro-redline" className="p-6 rounded-2xl bg-surface/70 border border-white/10 space-y-4 font-mono text-xs">
+        <section id="cro-redline" className="p-6 rounded-2xl bg-surface/90 dark:bg-surface/70 border border-border space-y-4 font-mono text-xs shadow-sm dark:shadow-none">
           <div className="flex items-center justify-between">
-            <span className="text-red-400 font-bold text-[11px] uppercase">ARCHETYPE 10 // RISK GOVERNANCE</span>
-            <span className="px-2 py-0.5 rounded bg-red-500/10 text-red-400 text-[9px] font-bold">RED-LINE VaR</span>
+            <span className="text-red-700 dark:text-red-400 font-bold text-[11px] uppercase">ARCHETYPE 10 // RISK GOVERNANCE</span>
+            <span className="px-2 py-0.5 rounded bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400 text-[9px] font-bold">RED-LINE VaR</span>
           </div>
 
-          <h3 className="text-base font-bold text-white font-sans">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white font-sans">
             Chief Risk Officer & VaR Red-Line
           </h3>
 
-          <p className="text-text-secondary font-sans text-xs leading-relaxed">
+          <p className="text-slate-600 dark:text-text-secondary font-sans text-xs leading-relaxed">
             Report pooled capital leverage, 99% parametric Value at Risk, and emergency lockout state:
           </p>
 
@@ -401,12 +401,12 @@ async def push_statarb_trade(
       </div>
 
       {/* Bottom Launch Callout */}
-      <div className="p-6 rounded-2xl bg-surface/60 border border-white/10 font-mono text-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="p-6 rounded-2xl bg-surface/90 dark:bg-surface/60 border border-border font-mono text-xs flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm dark:shadow-none">
         <div>
-          <span className="text-white font-bold block mb-1">
+          <span className="text-slate-900 dark:text-white font-bold block mb-1">
             Need to see these archetypes in action?
           </span>
-          <span className="text-text-muted">
+          <span className="text-slate-500 dark:text-text-muted">
             Launch any of the 20 blueprints in the interactive Dashboard Lab with live simulated data.
           </span>
         </div>
@@ -414,13 +414,13 @@ async def push_statarb_trade(
         <div className="flex items-center gap-3">
           <Link
             href="/architectures"
-            className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white font-bold uppercase transition-colors"
+            className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-900 dark:text-white font-bold uppercase transition-colors border border-border"
           >
             Explore 20 Blueprints
           </Link>
           <Link
-            href="/#dashboard-lab"
-            className="px-4 py-2 rounded-lg bg-accent text-background font-bold uppercase shadow-glow-cyan transition-all flex items-center gap-1.5"
+            href="/lab"
+            className="px-4 py-2 rounded-lg bg-accent text-slate-950 font-bold uppercase shadow-sm dark:shadow-glow-cyan transition-all flex items-center gap-1.5"
           >
             <Sliders className="w-3.5 h-3.5" />
             <span>Launch Dashboard Lab</span>

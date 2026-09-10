@@ -5,9 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
-import { SiteThemeToggle } from "@/components/ui/SiteThemeToggle";
 import { cn } from "@/lib/utils";
-import { Menu, X, ArrowRight, Terminal, Cpu, Layers, ShieldCheck, HelpCircle, BookOpen, Compass } from "lucide-react";
+import { Menu, X, ArrowRight, Terminal, Cpu, Layers, ShieldCheck, HelpCircle, BookOpen, Compass, FileText } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -29,11 +28,11 @@ export const Navbar: React.FC = () => {
   }, [pathname]);
 
   const navLinks = [
-    { label: "Products", href: "/products", icon: Layers },
     { label: "Architectures", href: "/architectures", icon: Compass },
-    { label: "Features", href: "/#features", icon: Cpu },
+    { label: "Trade Ledger", href: "/ledger", icon: BookOpen },
+    { label: "Dashboard Lab", href: "/lab", icon: Cpu },
+    { label: "Features", href: "/#features", icon: Layers },
     { label: "How It Works", href: "/how-it-works", icon: Terminal },
-    { label: "Themes", href: "/themes", icon: Layers },
     { label: "FAQ", href: "/faq", icon: HelpCircle },
   ];
 
@@ -43,12 +42,12 @@ export const Navbar: React.FC = () => {
         className={cn(
           "fixed top-0 left-0 right-0 z-40 transition-all duration-300 select-none",
           isScrolled
-            ? "py-2.5 bg-background/85 backdrop-blur-md border-b border-white/10 shadow-lg shadow-black/50"
+            ? "py-2.5 bg-background/85 backdrop-blur-md border-b border-border shadow-md dark:shadow-black/50"
             : "py-4 bg-transparent border-b border-transparent"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* LEFT: Algorb Logo */}
+          {/* LEFT: StratDesk Logo */}
           <div className="flex items-center gap-8">
             <Logo size="md" glow={true} />
           </div>
@@ -65,7 +64,7 @@ export const Navbar: React.FC = () => {
                     "px-3.5 py-1.5 rounded transition-all duration-150 uppercase tracking-wider relative group",
                     isActive
                       ? "text-accent bg-accent/5 font-semibold"
-                      : "text-text-secondary hover:text-white hover:bg-white/[0.03]"
+                      : "text-text-secondary hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.03]"
                   )}
                 >
                   {link.label}
@@ -81,13 +80,11 @@ export const Navbar: React.FC = () => {
             })}
           </nav>
 
-          {/* RIGHT: Site Theme Mode (Dark/Light), Documentation & Explore CTA */}
+          {/* RIGHT: Documentation & Explore CTA */}
           <div className="hidden md:flex items-center gap-2.5">
-            <SiteThemeToggle />
-
             <Link
               href="/docs"
-              className="flex items-center gap-1.5 px-3 py-1.5 font-mono text-xs text-text-secondary hover:text-white transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 font-mono text-xs text-text-secondary hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               <BookOpen className="w-3.5 h-3.5" />
               <span>DOCS</span>
@@ -110,7 +107,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-              className="p-2 rounded bg-white/5 border border-white/10 text-text-secondary hover:text-white transition-colors"
+              className="p-2 rounded bg-surface border border-border text-text-secondary hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -120,12 +117,12 @@ export const Navbar: React.FC = () => {
 
       {/* High-End Mobile Navigation Drawer */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden bg-background/95 backdrop-blur-xl flex flex-col pt-20 px-6 pb-8 border-b border-white/10">
-          <div className="flex items-center justify-between pb-6 border-b border-white/10">
+        <div className="fixed inset-0 z-50 md:hidden bg-background/95 backdrop-blur-xl flex flex-col pt-20 px-6 pb-8 border-b border-border">
+          <div className="flex items-center justify-between pb-6 border-b border-border">
             <Logo size="sm" showBadge={true} badgeText="MENU" />
             <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="p-2 rounded bg-white/5 border border-white/10 text-white"
+              className="p-2 rounded bg-surface border border-border text-text-primary"
             >
               <X className="w-5 h-5" />
             </button>
@@ -139,7 +136,7 @@ export const Navbar: React.FC = () => {
                   key={link.label}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-3.5 rounded bg-surface/50 border border-white/5 text-white hover:border-accent/40 hover:text-accent transition-all text-sm uppercase tracking-wider"
+                  className="flex items-center justify-between p-3.5 rounded bg-surface border border-border text-text-primary hover:border-accent/40 hover:text-accent transition-all text-sm uppercase tracking-wider"
                 >
                   <div className="flex items-center gap-3">
                     <Icon className="w-4 h-4 text-accent" />
@@ -153,10 +150,10 @@ export const Navbar: React.FC = () => {
             <Link
               href="/docs"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between p-3.5 rounded bg-surface/50 border border-white/5 text-white hover:border-accent/40 hover:text-accent transition-all text-sm uppercase tracking-wider"
+              className="flex items-center justify-between p-3.5 rounded bg-surface border border-border text-text-primary hover:border-accent/40 hover:text-accent transition-all text-sm uppercase tracking-wider"
             >
               <div className="flex items-center gap-3">
-                <BookOpen className="w-4 h-4 text-text-muted" />
+                <FileText className="w-4 h-4 text-text-muted" />
                 <span>DOCUMENTATION</span>
               </div>
               <ArrowRight className="w-4 h-4 opacity-50" />
@@ -164,11 +161,6 @@ export const Navbar: React.FC = () => {
           </nav>
 
           <div className="mt-auto flex flex-col gap-3">
-            <div className="p-2.5 rounded-lg bg-surface/50 border border-white/5 flex items-center justify-between">
-              <span className="text-[11px] font-mono text-text-muted uppercase">COLOR MODE:</span>
-              <SiteThemeToggle showLabel={true} />
-            </div>
-
             <Button
               href="/#dashboard-lab"
               variant="primary"
@@ -180,7 +172,7 @@ export const Navbar: React.FC = () => {
             >
               EXPLORE DASHBOARDS
             </Button>
-            <div className="flex items-center justify-between text-[11px] font-mono text-text-muted pt-2 border-t border-white/10">
+            <div className="flex items-center justify-between text-[11px] font-mono text-text-muted pt-2 border-t border-border">
               <span className="flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-success" />
                 SELF-HOSTED INTERFACE

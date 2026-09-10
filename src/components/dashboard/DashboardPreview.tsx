@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { THEMES } from "@/data/themes";
 import { DEMO_METRICS } from "@/data/demo-data";
 import { ARCHITECTURES_DATA, ArchitectureBlueprint } from "@/data/architectures-data";
@@ -11,19 +11,27 @@ import { ExecutionLogs } from "./ExecutionLogs";
 import { ControlBar } from "./ControlBar";
 import { TradeLedger } from "@/components/ledger/TradeLedger";
 import { ThemeSwitcher } from "./ThemeSwitcher";
-import { useTheme } from "@/hooks/useTheme";
-import { AlgorbSymbol } from "@/components/ui/Logo";
+import { ArchitectureSwitcher } from "./ArchitectureSwitcher";
+import { useTheme, ThemeId } from "@/hooks/useTheme";
+import { useDashboardArchitecture, resolveCanonicalArchetypeId } from "@/hooks/useDashboardArchitecture";
+import { StratDeskSymbol } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
 import { Activity, ShieldAlert, Cpu, Wifi, Power, BookOpen, Zap, Terminal, Layers, Clock } from "lucide-react";
 
 export interface DashboardPreviewProps {
-  product?: "view" | "control";
-  theme?: "terminal" | "obsidian" | "quant" | "command" | "vector" | "light";
+  product?: "pro" | "stratdesk" | "control" | "core" | "view";
+  theme?: ThemeId;
+  defaultTheme?: ThemeId;
+  onThemeChange?: (theme: ThemeId) => void;
   className?: string;
   isHero?: boolean;
   initialControlTab?: "hud" | "ledger";
   archetypeId?: string;
   showThemeSwitcher?: boolean;
+  showArchitectureSwitcher?: boolean;
+  onArchitectureChange?: (id: string) => void;
+  filterTier?: string;
+  variant?: "full" | "hero" | "execution" | "theme";
 }
 
 const ARCHETYPE_ALIAS_MAP: Record<string, string> = {
@@ -268,7 +276,7 @@ function getDynamicArchetypeCards(blueprint: ArchitectureBlueprint) {
     },
     {
       label: "ARCHETYPE TIER",
-      value: blueprint.recommendedTier === "control" ? "CONTROL" : "VIEW",
+      value: "PRO",
       badge: blueprint.killerWidget.badge,
       pulse: true,
       subtext: `Preset #${blueprint.number}`,
@@ -277,39 +285,114 @@ function getDynamicArchetypeCards(blueprint: ArchitectureBlueprint) {
 }
 
 export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
-  product = "view",
+  product = "pro",
   theme: propTheme,
+  defaultTheme,
+  onThemeChange,
   className,
   isHero = false,
   initialControlTab = "hud",
-  archetypeId = "default",
-  showThemeSwitcher = true,
+  archetypeId: propArchetypeId = "default",
+  showThemeSwitcher,
+  showArchitectureSwitcher,
+  onArchitectureChange,
+  filterTier,
+  variant,
 }) => {
+  const effectiveVariant = variant || (isHero ? "hero" : "full");
+  const shouldShowThemeSwitcher = showThemeSwitcher ?? (effectiveVariant === "full");
+  const shouldShowArchitectureSwitcher = showArchitectureSwitcher ?? (effectiveVariant === "full");
   const [controlView, setControlView] = useState<"hud" | "ledger">(initialControlTab);
-  const { theme: hookTheme } = useTheme();
-  const activeThemeId = propTheme || hookTheme;
+  const { theme: hookTheme, setTheme: setHookTheme } = useTheme();
+
+  // Local state to allow instant hot-swapping when changed via dropdown or props
+  const [internalTheme, setInternalTheme] = useState<ThemeId | null>(null);
+
+  useEffect(() => {
+    if (propTheme !== undefined) {
+      setInternalTheme(propTheme);
+    }
+  }, [propTheme]);
+
+  const activeThemeId =
+    internalTheme !== null
+      ? internalTheme
+      : propTheme !== undefined
+      ? propTheme
+      : defaultTheme !== undefined
+      ? defaultTheme
+      : hookTheme;
+
   const activeTheme = THEMES.find((t) => t.id === activeThemeId) || THEMES[0];
   const theme = activeTheme.id;
   const isLight = theme === "light";
 
-  const canonicalArchetypeId = ARCHETYPE_ALIAS_MAP[archetypeId] || archetypeId;
+  const handleThemeSelect = (selectedTheme: ThemeId) => {
+    setInternalTheme(selectedTheme);
+    setHookTheme(selectedTheme);
+    if (onThemeChange) {
+      onThemeChange(selectedTheme);
+    }
+  };
+
+  const {
+    architecture: hookArchitecture,
+    setArchitecture: setHookArchitecture,
+  } = useDashboardArchitecture();
+
+  // Local state to allow instant hot-swapping when changed via dropdown or props
+  const [internalArchetype, setInternalArchetype] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (propArchetypeId !== undefined) {
+      setInternalArchetype(propArchetypeId);
+    }
+  }, [propArchetypeId]);
+
+  const activeArchetype =
+    internalArchetype !== null
+      ? internalArchetype
+      : propArchetypeId !== undefined
+      ? propArchetypeId
+      : hookArchitecture;
+
+  const canonicalArchetypeId = resolveCanonicalArchetypeId(activeArchetype);
   const activeBlueprint = ARCHITECTURES_DATA.find(
-    (b) => b.id === canonicalArchetypeId || b.id === archetypeId
+    (b) => b.id === canonicalArchetypeId || b.id === activeArchetype
   );
-  const isArchetypeActive = Boolean(activeBlueprint && archetypeId !== "default");
+  const isArchetypeActive = Boolean(activeBlueprint && activeArchetype !== "default");
   const hasInteractiveSimulator = INTERACTIVE_SIMULATOR_IDS.has(canonicalArchetypeId);
 
-  const themeStyle = {
-    "--theme-bg": activeTheme.colors.bg,
-    "--theme-surface": activeTheme.colors.surface,
-    "--theme-border": activeTheme.colors.border,
-    "--theme-accent": activeTheme.colors.accent,
-    "--theme-text": activeTheme.colors.text,
-    "--theme-muted": activeTheme.colors.muted,
-  } as React.CSSProperties;
+  const handleArchitectureSelect = (newId: string) => {
+    setInternalArchetype(newId);
+    setHookArchitecture(newId);
+    if (onArchitectureChange) {
+      onArchitectureChange(newId);
+    }
+  };
 
-  const telemetry = getArchetypeTelemetry(canonicalArchetypeId, activeBlueprint, isLight);
-  const archetypeMetricCards = activeBlueprint ? getDynamicArchetypeCards(activeBlueprint) : null;
+  const themeStyle = useMemo(
+    () =>
+      ({
+        "--theme-bg": activeTheme.colors.bg,
+        "--theme-surface": activeTheme.colors.surface,
+        "--theme-border": activeTheme.colors.border,
+        "--theme-accent": activeTheme.colors.accent,
+        "--theme-text": activeTheme.colors.text,
+        "--theme-muted": activeTheme.colors.muted,
+      } as React.CSSProperties),
+    [activeTheme.colors]
+  );
+
+  const telemetry = useMemo(
+    () => getArchetypeTelemetry(canonicalArchetypeId, activeBlueprint, isLight),
+    [canonicalArchetypeId, activeBlueprint, isLight]
+  );
+
+  const archetypeMetricCards = useMemo(
+    () => (activeBlueprint ? getDynamicArchetypeCards(activeBlueprint) : null),
+    [activeBlueprint]
+  );
 
   return (
     <div
@@ -343,9 +426,9 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           {/* Left: Product & Brand Identifier */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <AlgorbSymbol size={22} glow={theme !== "vector" && !isLight} />
+              <StratDeskSymbol size={22} glow={theme !== "vector" && !isLight} />
               <span className={cn("font-bold tracking-widest text-sm uppercase", isLight ? "text-slate-900" : "text-white")}>
-                ALGORB {product === "control" ? "CONTROL" : "VIEW"}
+                STRATDESK PRO
               </span>
             </div>
             <span
@@ -390,15 +473,29 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
               {telemetry.badgeText}
             </div>
 
+            {/* Mount interactive ArchitectureSwitcher */}
+            {shouldShowArchitectureSwitcher && (
+              <ArchitectureSwitcher
+                variant="compact"
+                activeArchitectureId={activeArchetype}
+                onArchitectureChange={handleArchitectureSelect}
+                isLight={isLight}
+              />
+            )}
+
             {/* Mount interactive ThemeSwitcher */}
-            {showThemeSwitcher && (
-              <ThemeSwitcher variant="compact" activeThemeId={theme} />
+            {shouldShowThemeSwitcher && (
+              <ThemeSwitcher
+                variant="compact"
+                activeThemeId={theme}
+                onThemeChange={handleThemeSelect}
+              />
             )}
           </div>
         </div>
 
-        {/* If Control Mode: View Switcher (Live Command HUD vs Audit & Trade Ledger) */}
-        {product === "control" && (
+        {/* View Switcher: Live Command HUD vs Audit & Trade Ledger (Only for Full Dashboard Lab) */}
+        {effectiveVariant === "full" && (
           <div className={cn("flex flex-wrap items-center justify-between gap-3 p-1 rounded-lg border", isLight ? "bg-slate-100 border-slate-200" : "bg-surface-elevated/70 border-white/10")}>
             <div className="flex items-center gap-1.5">
               <button
@@ -445,13 +542,18 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
           </div>
         )}
 
-        {/* If Control Mode & Ledger Tab Active: Render Full Institutional Trade Ledger */}
-        {product === "control" && controlView === "ledger" ? (
+        {/* If Ledger Tab Active: Render Full Institutional Trade Ledger */}
+        {effectiveVariant === "full" && controlView === "ledger" ? (
           <TradeLedger theme={theme} isLight={isLight} />
         ) : (
           <>
             {/* Metric Cards Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+            <div className={cn(
+              "grid gap-2.5",
+              effectiveVariant === "execution" || effectiveVariant === "theme"
+                ? "grid-cols-2 sm:grid-cols-4"
+                : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6"
+            )}>
               {archetypeMetricCards ? (
                 archetypeMetricCards.map((card, idx) => (
                   <MetricCard
@@ -466,6 +568,76 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
                     isLight={isLight}
                   />
                 ))
+              ) : effectiveVariant === "execution" ? (
+                <>
+                  <MetricCard
+                    label="EQUITY (NAV)"
+                    value={DEMO_METRICS.equityFormatted}
+                    delta={DEMO_METRICS.dailyPnlPercent}
+                    isPositive={true}
+                    subtext="Peak: $25,120.00"
+                    isLight={isLight}
+                  />
+                  <MetricCard
+                    label="TODAY'S P&L"
+                    value={DEMO_METRICS.dailyPnlFormatted}
+                    delta={DEMO_METRICS.dailyPnlPercent}
+                    isPositive={true}
+                    subtext="Unrealized: +$882"
+                    isLight={isLight}
+                  />
+                  <MetricCard
+                    label="MAX DRAWDOWN"
+                    value={DEMO_METRICS.drawdown}
+                    delta="Safe"
+                    isPositive={true}
+                    subtext={`Ceiling: ${DEMO_METRICS.maxDrawdown}`}
+                    isLight={isLight}
+                  />
+                  <MetricCard
+                    label="BOT STATUS"
+                    value={DEMO_METRICS.botStatus}
+                    badge="ACTIVE"
+                    pulse={true}
+                    subtext={`Uptime: ${DEMO_METRICS.uptime}`}
+                    isLight={isLight}
+                  />
+                </>
+              ) : effectiveVariant === "theme" ? (
+                <>
+                  <MetricCard
+                    label="EQUITY (NAV)"
+                    value={DEMO_METRICS.equityFormatted}
+                    delta={DEMO_METRICS.dailyPnlPercent}
+                    isPositive={true}
+                    subtext="Peak: $25,120.00"
+                    isLight={isLight}
+                  />
+                  <MetricCard
+                    label="TOTAL RETURN"
+                    value={DEMO_METRICS.totalReturn}
+                    delta="+14.2%"
+                    isPositive={true}
+                    subtext="Annualized: 210%"
+                    isLight={isLight}
+                  />
+                  <MetricCard
+                    label="WIN RATE"
+                    value={DEMO_METRICS.winRate}
+                    delta="72/100"
+                    isPositive={true}
+                    subtext={`Profit Factor: ${DEMO_METRICS.profitFactor}`}
+                    isLight={isLight}
+                  />
+                  <MetricCard
+                    label="BOT STATUS"
+                    value={DEMO_METRICS.botStatus}
+                    badge="ACTIVE"
+                    pulse={true}
+                    subtext={`Uptime: ${DEMO_METRICS.uptime}`}
+                    isLight={isLight}
+                  />
+                </>
               ) : (
                 <>
                   <MetricCard
@@ -520,135 +692,139 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
               )}
             </div>
 
-            {/* If Control Mode: Render Interactive Control Bus */}
-            {product === "control" && <ControlBar isLight={isLight} />}
+            {/* Interactive Control Bus */}
+            <ControlBar isLight={isLight} />
 
-            {/* Middle Section: Equity Chart & Risk / Allocation Gauges OR Blueprint Spec HUD */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
-              {/* Main Interactive Chart OR Killer Widget Simulator OR Blueprint Spec HUD */}
-              <div className={cn(
-                (hasInteractiveSimulator || !isArchetypeActive) ? "lg:col-span-2" : "lg:col-span-3",
-                "p-3 sm:p-4 rounded-lg flex flex-col border transition-colors",
-                isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
-              )}>
-                {isArchetypeActive && activeBlueprint ? (
-                  hasInteractiveSimulator ? (
-                    <div className="flex flex-col gap-3">
-                      <div className={cn(
-                        "flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b",
-                        isLight ? "border-slate-200" : "border-white/10"
-                      )}>
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                          <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
-                            {activeBlueprint.killerWidget.badge}
-                          </span>
-                          <span className={cn("text-xs font-bold uppercase", isLight ? "text-slate-900" : "text-white")}>
-                            {activeBlueprint.title}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-text-muted font-bold font-mono">
-                          LIVE INTERACTIVE SIMULATION
-                        </span>
-                      </div>
-                      <KillerWidgetSimulator blueprint={activeBlueprint} isLight={isLight} />
-                    </div>
-                  ) : (
-                    <BlueprintSpecHud blueprint={activeBlueprint} isLight={isLight} />
-                  )
-                ) : (
-                  <EquityChart accentColor={isLight ? "#0284c7" : activeTheme.colors.accent} isLight={isLight} />
-                )}
-              </div>
-
-              {/* Realtime Risk & Margin Radar (shown when on default HUD or when interactive simulator is active) */}
-              {(hasInteractiveSimulator || !isArchetypeActive) && (
+            {/* Middle Section: Equity Chart & Risk / Allocation Gauges (Rendered for hero, theme, and full variants) */}
+            {effectiveVariant !== "execution" && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
+                {/* Main Interactive Chart OR Killer Widget Simulator OR Blueprint Spec HUD */}
                 <div className={cn(
-                  "p-3.5 sm:p-4 rounded-lg flex flex-col justify-between gap-3 text-xs border transition-colors",
+                  (hasInteractiveSimulator || !isArchetypeActive) ? "lg:col-span-2" : "lg:col-span-3",
+                  "p-3 sm:p-4 rounded-lg flex flex-col border transition-colors",
                   isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
                 )}>
-                  <div className={cn("flex items-center justify-between pb-2 border-b", isLight ? "border-slate-200" : "border-white/5")}>
-                    <span className={cn("font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5", isLight ? "text-slate-900" : "text-white")}>
-                      <ShieldAlert className={cn("w-3.5 h-3.5", isLight ? "text-amber-600" : "text-warning")} />
-                      RISK ALLOCATION
-                    </span>
-                    <span className={cn("text-[10px]", isLight ? "text-slate-400 font-semibold" : "text-text-muted")}>PARAM LIMITS</span>
-                  </div>
-
-                  {/* Gauge 1: Margin Utilization */}
-                  <div>
-                    <div className="flex justify-between text-[11px] mb-1">
-                      <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Margin Utilization</span>
-                      <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>34.2% / 50.0%</span>
-                    </div>
-                    <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
-                      <div
-                        className="h-full rounded transition-all duration-500"
-                        style={{ width: "34.2%", backgroundColor: isLight ? "#0284c7" : activeTheme.colors.accent }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Gauge 2: Drawdown Tolerance */}
-                  <div>
-                    <div className="flex justify-between text-[11px] mb-1">
-                      <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Drawdown Cushion</span>
-                      <span className={cn("font-bold", isLight ? "text-emerald-700" : "text-success")}>4.21% / 10.0%</span>
-                    </div>
-                    <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
-                      <div
-                        className={cn("h-full rounded transition-all duration-500", isLight ? "bg-emerald-600" : "bg-success")}
-                        style={{ width: "42.1%" }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Gauge 3: Value at Risk (99% 1D) */}
-                  <div>
-                    <div className="flex justify-between text-[11px] mb-1">
-                      <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Value at Risk (99% 1D)</span>
-                      <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>$842.10 (3.39%)</span>
-                    </div>
-                    <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
-                      <div
-                        className={cn("h-full rounded transition-all duration-500", isLight ? "bg-amber-500" : "bg-warning")}
-                        style={{ width: "28.5%" }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Strategy Weights Breakdown */}
-                  <div className={cn("pt-2 border-t flex items-center justify-between text-[10px]", isLight ? "border-slate-200 text-slate-500" : "border-white/5 text-text-muted")}>
-                    <div>
-                      <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Alpha-V2:</span> 45%
-                    </div>
-                    <div>
-                      <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>MeanRev:</span> 35%
-                    </div>
-                    <div>
-                      <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Arb:</span> 20%
-                    </div>
-                  </div>
+                  {isArchetypeActive && activeBlueprint ? (
+                    hasInteractiveSimulator ? (
+                      <div className="flex flex-col gap-3">
+                        <div className={cn(
+                          "flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b",
+                          isLight ? "border-slate-200" : "border-white/10"
+                        )}>
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                            <span className="text-[10px] font-bold text-accent uppercase tracking-wider">
+                              {activeBlueprint.killerWidget.badge}
+                            </span>
+                            <span className={cn("text-xs font-bold uppercase", isLight ? "text-slate-900" : "text-white")}>
+                              {activeBlueprint.title}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-text-muted font-bold font-mono">
+                            LIVE INTERACTIVE SIMULATION
+                          </span>
+                        </div>
+                        <KillerWidgetSimulator blueprint={activeBlueprint} isLight={isLight} />
+                      </div>
+                    ) : (
+                      <BlueprintSpecHud blueprint={activeBlueprint} isLight={isLight} />
+                    )
+                  ) : (
+                    <EquityChart accentColor={isLight ? "#0284c7" : activeTheme.colors.accent} isLight={isLight} />
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Bottom Section: Active Positions Table & Execution Logs */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
-              <div className={cn(
-                "p-3 sm:p-4 rounded-lg border transition-colors",
-                isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
-              )}>
-                <PositionsTable isLight={isLight} />
-              </div>
+                {/* Realtime Risk & Margin Radar */}
+                {(hasInteractiveSimulator || !isArchetypeActive) && (
+                  <div className={cn(
+                    "p-3.5 sm:p-4 rounded-lg flex flex-col justify-between gap-3 text-xs border transition-colors",
+                    isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+                  )}>
+                    <div className={cn("flex items-center justify-between pb-2 border-b", isLight ? "border-slate-200" : "border-white/5")}>
+                      <span className={cn("font-bold uppercase tracking-wider text-[11px] flex items-center gap-1.5", isLight ? "text-slate-900" : "text-white")}>
+                        <ShieldAlert className={cn("w-3.5 h-3.5", isLight ? "text-amber-600" : "text-warning")} />
+                        RISK ALLOCATION
+                      </span>
+                      <span className={cn("text-[10px]", isLight ? "text-slate-400 font-semibold" : "text-text-muted")}>PARAM LIMITS</span>
+                    </div>
 
-              <div className={cn(
-                "p-3 sm:p-4 rounded-lg border transition-colors",
-                isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
-              )}>
-                <ExecutionLogs maxLogs={5} isLight={isLight} />
+                    {/* Gauge 1: Margin Utilization */}
+                    <div>
+                      <div className="flex justify-between text-[11px] mb-1">
+                        <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Margin Utilization</span>
+                        <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>34.2% / 50.0%</span>
+                      </div>
+                      <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
+                        <div
+                          className="h-full rounded transition-all duration-500"
+                          style={{ width: "34.2%", backgroundColor: isLight ? "#0284c7" : activeTheme.colors.accent }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Gauge 2: Drawdown Tolerance */}
+                    <div>
+                      <div className="flex justify-between text-[11px] mb-1">
+                        <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Drawdown Cushion</span>
+                        <span className={cn("font-bold", isLight ? "text-emerald-700" : "text-success")}>4.21% / 10.0%</span>
+                      </div>
+                      <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
+                        <div
+                          className={cn("h-full rounded transition-all duration-500", isLight ? "bg-emerald-600" : "bg-success")}
+                          style={{ width: "42.1%" }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Gauge 3: Value at Risk (99% 1D) */}
+                    <div>
+                      <div className="flex justify-between text-[11px] mb-1">
+                        <span className={isLight ? "text-slate-500 font-medium" : "text-text-muted"}>Value at Risk (99% 1D)</span>
+                        <span className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>$842.10 (3.39%)</span>
+                      </div>
+                      <div className={cn("w-full h-2 rounded overflow-hidden", isLight ? "bg-slate-100 border border-slate-200/60" : "bg-white/5")}>
+                        <div
+                          className={cn("h-full rounded transition-all duration-500", isLight ? "bg-amber-500" : "bg-warning")}
+                          style={{ width: "28.5%" }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Strategy Weights Breakdown */}
+                    <div className={cn("pt-2 border-t flex items-center justify-between text-[10px]", isLight ? "border-slate-200 text-slate-500" : "border-white/5 text-text-muted")}>
+                      <div>
+                        <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Alpha-V2:</span> 45%
+                      </div>
+                      <div>
+                        <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>MeanRev:</span> 35%
+                      </div>
+                      <div>
+                        <span className={cn("font-bold mr-1", isLight ? "text-slate-900" : "text-white")}>Arb:</span> 20%
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
+
+            {/* Bottom Section: Active Positions Table & Execution Logs (Rendered exclusively for execution and full variants) */}
+            {(effectiveVariant === "full" || effectiveVariant === "execution") && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+                <div className={cn(
+                  "p-3 sm:p-4 rounded-lg border transition-colors",
+                  isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+                )}>
+                  <PositionsTable isLight={isLight} />
+                </div>
+
+                <div className={cn(
+                  "p-3 sm:p-4 rounded-lg border transition-colors",
+                  isLight ? "bg-white border-slate-200 shadow-sm" : "bg-surface/50 border-white/5"
+                )}>
+                  <ExecutionLogs maxLogs={5} isLight={isLight} />
+                </div>
+              </div>
+            )}
           </>
         )}
 
@@ -661,7 +837,7 @@ export const DashboardPreview: React.FC<DashboardPreviewProps> = ({
             <span className={cn("inline-block w-1.5 h-1.5 rounded-full", isLight ? "bg-sky-600" : "bg-accent")} />
             <span>DEMO ENVIRONMENT • LOCAL TELEMETRY MOCK</span>
           </div>
-          <span>Algorb Interface Layer v1.0.0 • No live order risk</span>
+          <span>StratDesk Interface Layer v1.0.0 • No live order risk</span>
         </div>
       </div>
     </div>

@@ -1,0 +1,27 @@
+# StratDesk Pro — Cursor AI Integration Rules
+
+You are the AI assistant inside Cursor. When the user asks you to connect, mould, or adapt StratDesk Pro for their trading bot:
+
+## 1. PRESERVATION INVARIANTS (NEVER BREAK)
+- Dark Mode Shell & 6 Dashboard Themes: The host website is strictly dark institutional (#0c1017). The bot dashboard HUD supports 6 precision themes (`terminal`, `obsidian`, `quant`, `command`, `vector`, `light`). Never break dark mode styling on the website.
+- Monospace Typography: All HUD telemetry headers, metric cards, tables, and values must use `font-mono` with uppercase tracking (`tracking-wider`).
+- Layout Hierarchy: Maintain glassmorphic panels (`bg-surface/80 border border-white/10 backdrop-blur-md`). Never replace HUD components with generic tables.
+- Security: Maintain HMAC-SHA256 signature verification on `/api/command`.
+- Support Invariant: Never alter or remove `stratdesk.pro@gmail.com`.
+
+## 2. AUTO-MOULDING PROTOCOL
+1. Inspect the user's trading bot to identify:
+   - Language (Python CCXT/asyncio, TypeScript, Go, Rust)
+   - Strategy type (Arbitrage, FTMO, DEX Sniper, Market Making, Stat-Arb, Trend)
+   - State variables (equity, positions, order fill hooks)
+2. Mould the 6 Top Metric Cards in `src/data/architectures-data.ts` to display the bot's real metrics.
+3. Mould symbols and parameters to match the bot's actual pairs and settings.
+4. Auto-add requested features:
+   - Wire `EMERGENCY_HALT` from `/api/command` to the bot's cancellation and position flattening function.
+   - Wire daily loss ceiling auto-halt if requested.
+   - Wire webhook alerts if requested.
+5. Generate a non-invasive drop-in bridge (`stratdesk_bridge.py`, `.ts`, or `.go`) dispatching to `POST /api/ledger`.
+
+## 3. VERIFICATION
+- Run `npm run typecheck` (must pass with 0 errors).
+- Run `npm run lint` (must pass with 0 errors).

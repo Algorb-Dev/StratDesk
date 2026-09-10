@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { TradeLedgerEntry } from "@/data/ledger-data";
+import { computeHmacSha256, DEFAULT_STRATDESK_SECRET } from "@/lib/hmac";
 
 /**
  * Validates and normalizes incoming trade payload into strict TradeLedgerEntry
@@ -174,15 +175,52 @@ function validateAndNormalizeTrade(data: Record<string, unknown>): {
  * POST /api/ledger
  * Ingestion endpoint for algorithmic trading bots to push audited trade telemetry
  */
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
-    const rawData = await req.json();
+    const rawText = await req.text();
+    let rawData: Record<string, unknown>;
+
+    try {
+      rawData = JSON.parse(rawText);
+    } catch {
+      return Response.json(
+        { success: false, error: "Invalid payload: request body must be valid JSON" },
+        { status: 400 }
+      );
+    }
 
     if (!rawData || typeof rawData !== "object") {
       return Response.json(
         { success: false, error: "Invalid payload: request body must be a JSON object" },
         { status: 400 }
       );
+    }
+
+    // Optional cryptographic HMAC-SHA256 verification if headers are provided
+    const signature = req.headers.get("x-stratdesk-signature") || "";
+    const timestamp = Number(req.headers.get("x-stratdesk-timestamp") || 0);
+    const nonce = req.headers.get("x-stratdesk-nonce") || "";
+    let hmacVerified = false;
+
+    if (signature) {
+      if (!timestamp || !nonce) {
+        return Response.json(
+          { success: false, error: "Missing required 'x-stratdesk-timestamp' or 'x-stratdesk-nonce' headers for signed ingestion" },
+          { status: 401 }
+        );
+      }
+      const canonical = `${timestamp}:${nonce}:INGEST_TRADE:${rawText}`;
+      const expected = await computeHmacSha256(canonical, DEFAULT_STRATDESK_SECRET);
+
+      if (expected !== signature) {
+        return Response.json(
+          { success: false, error: "Cryptographic HMAC-SHA256 signature mismatch: trade payload was altered or secret key is invalid" },
+          { status: 401 }
+        );
+      }
+      hmacVerified = true;
     }
 
     const { isValid, errors, payload } = validateAndNormalizeTrade(
@@ -198,12 +236,13 @@ export async function POST(req: Request) {
 
     // Simulate database / IPC event bus ingestion with forensic logging
     console.log(`\n======================================================`);
-    console.log(`[ALGORB LEDGER INGESTION] New trade execution recorded: ${payload.id}`);
+    console.log(`[STRATDESK LEDGER INGESTION] New trade execution recorded: ${payload.id}`);
     console.log(`  Ticket: ${payload.ticket || payload.id}`);
     console.log(`  Asset: ${payload.symbol} | Direction: ${payload.direction} ${payload.leverage}`);
     console.log(`  Size: ${payload.size} | Notional: $${payload.notionalValue.toFixed(2)}`);
     console.log(`  Entry: $${payload.entryPrice.toFixed(2)} -> Exit: $${payload.exitPrice.toFixed(2)}`);
     console.log(`  Net Realized PnL: $${payload.pnl.toFixed(2)} (${payload.pnlPercent.toFixed(2)}%) | ${payload.rMultiple}R`);
+    console.log(`  Security: ${hmacVerified ? "HMAC-SHA256 VERIFIED ✓" : "LOCAL IPC (OPEN)"}`);
     console.log(`  Regime: ${payload.marketRegime} | Strategy: ${payload.strategy}`);
     console.log(`  Forensic Telemetry:`);
     console.log(`    • Model Z-Score: ${payload.telemetry.zScore}σ`);
@@ -217,13 +256,14 @@ export async function POST(req: Request) {
       {
         success: true,
         recordedId: payload.id,
+        hmacVerified,
         timestamp: new Date().toISOString(),
       },
       { status: 201 }
     );
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Internal server error";
-    console.error("[ALGORB LEDGER INGESTION ERROR]:", message);
+    console.error("[STRATDESK LEDGER INGESTION ERROR]:", message);
     return Response.json(
       { success: false, error: message },
       { status: 500 }
@@ -238,7 +278,7 @@ export async function POST(req: Request) {
 export async function GET() {
   return Response.json({
     status: "online",
-    service: "Algorb Control Trade Ledger Ingestion API",
+    service: "StratDesk Pro Trade Ledger Ingestion API",
     endpoint: "POST /api/ledger",
     version: "1.0.0",
     protocol: "IPC/HTTP REST",

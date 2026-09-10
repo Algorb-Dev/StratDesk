@@ -5,8 +5,8 @@ import Link from "next/link";
 import { ArchitectureBlueprint } from "@/data/architectures-data";
 import { PRODUCTS } from "@/data/products";
 import { KillerWidgetSimulator } from "./KillerWidgetSimulator";
-import { AlgorbSymbol } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
+import { useSiteTheme } from "@/hooks/useSiteTheme";
 import { cn } from "@/lib/utils";
 import { X, ShieldCheck, ArrowRight, Zap, ExternalLink, Activity, Terminal, Sliders } from "lucide-react";
 
@@ -19,8 +19,10 @@ interface ArchitectureModalProps {
 export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
   blueprint,
   onClose,
-  isLight = false,
+  isLight: propIsLight,
 }) => {
+  const { isLight: themeIsLight } = useSiteTheme();
+  const isLight = propIsLight ?? themeIsLight;
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -62,21 +64,21 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
             </span>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-bold text-sm sm:text-base text-white">
+                <span className={cn("font-bold text-sm sm:text-base", isLight ? "text-slate-900" : "text-white")}>
                   {blueprint.title}
                 </span>
                 <span
                   className={cn(
                     "px-2 py-0.5 text-[9px] font-bold rounded uppercase border",
-                    blueprint.recommendedTier === "control"
-                      ? "bg-accent/10 text-accent border-accent/30"
-                      : "bg-white/5 text-text-secondary border-white/10"
+                    isLight
+                      ? "bg-amber-50 text-amber-900 border-amber-300"
+                      : "bg-warning/10 text-warning border-warning/30"
                   )}
                 >
-                  ALGORB {blueprint.recommendedTier.toUpperCase()}
+                  STRATDESK PRO
                 </span>
               </div>
-              <span className="text-[10px] text-text-muted">
+              <span className={cn("text-[10px]", isLight ? "text-slate-500" : "text-text-muted")}>
                 {blueprint.categoryLabel} • {blueprint.targetAudience}
               </span>
             </div>
@@ -84,7 +86,12 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors text-text-muted hover:text-white"
+            className={cn(
+              "p-1.5 rounded-lg border transition-colors",
+              isLight
+                ? "border-slate-300 hover:bg-slate-100 text-slate-500 hover:text-slate-900"
+                : "border-white/10 hover:bg-white/10 text-text-muted hover:text-white"
+            )}
             title="Close inspector"
           >
             <X className="w-4 h-4" />
@@ -100,10 +107,10 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
               isLight ? "bg-white border-slate-200" : "bg-white/[0.02] border-white/5"
             )}
           >
-            <span className="text-[10px] font-bold text-accent uppercase tracking-wider block mb-1">
+            <span className={cn("text-[10px] font-bold uppercase tracking-wider block mb-1", isLight ? "text-sky-700" : "text-accent")}>
               TARGET BOT OPERATOR & DEPLOYMENT SCENARIO
             </span>
-            <p className="text-xs text-text-secondary leading-relaxed font-sans">
+            <p className={cn("text-xs leading-relaxed font-sans", isLight ? "text-slate-600" : "text-text-secondary")}>
               {blueprint.summary}
             </p>
           </div>
@@ -111,11 +118,11 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
           {/* Interactive Killer Widget Simulation */}
           <div>
             <div className="flex items-center justify-between pb-1.5">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+              <span className={cn("text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5", isLight ? "text-slate-600" : "text-text-muted")}>
                 <Zap className="w-3.5 h-3.5 text-accent" />
                 INTERACTIVE KILLER WIDGET SIMULATION
               </span>
-              <span className="text-[10px] text-accent font-bold">LIVE TELEMETRY TESTBED</span>
+              <span className={cn("text-[10px] font-bold", isLight ? "text-sky-700" : "text-accent")}>LIVE TELEMETRY TESTBED</span>
             </div>
             <KillerWidgetSimulator blueprint={blueprint} isLight={isLight} />
           </div>
@@ -127,10 +134,10 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
               isLight ? "bg-white border-slate-200" : "bg-black/20 border-white/5"
             )}
           >
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+            <span className={cn("text-[10px] font-bold uppercase tracking-wider", isLight ? "text-slate-500" : "text-text-muted")}>
               LAYOUT TOPOLOGY & DISPLAY COMPOSITION
             </span>
-            <p className="text-xs text-text-secondary leading-relaxed font-sans">
+            <p className={cn("text-xs leading-relaxed font-sans", isLight ? "text-slate-600" : "text-text-secondary")}>
               {blueprint.layoutDescription}
             </p>
           </div>
@@ -143,10 +150,10 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
                 isLight ? "bg-white border-slate-200" : "bg-white/[0.02] border-white/5"
               )}
             >
-              <span className="text-[10px] font-bold uppercase text-text-muted">
+              <span className={cn("text-[10px] font-bold uppercase", isLight ? "text-slate-500" : "text-text-muted")}>
                 Latency & Runtime Budget
               </span>
-              <div className="text-white font-bold">{blueprint.specs.latencyRequirement}</div>
+              <div className={cn("font-bold", isLight ? "text-slate-900" : "text-white")}>{blueprint.specs.latencyRequirement}</div>
             </div>
 
             <div
@@ -155,10 +162,10 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
                 isLight ? "bg-white border-slate-200" : "bg-white/[0.02] border-white/5"
               )}
             >
-              <span className="text-[10px] font-bold uppercase text-text-muted">
+              <span className={cn("text-[10px] font-bold uppercase", isLight ? "text-slate-500" : "text-text-muted")}>
                 Primary Monitored Metrics
               </span>
-              <div className="text-text-secondary truncate">
+              <div className={cn("truncate font-medium", isLight ? "text-slate-600" : "text-text-secondary")}>
                 {blueprint.specs.keyMetrics.join(" • ")}
               </div>
             </div>
@@ -169,7 +176,10 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
             {blueprint.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 rounded border border-white/5 bg-white/[0.02] text-text-muted text-[10px]"
+                className={cn(
+                  "px-2 py-0.5 rounded border text-[10px]",
+                  isLight ? "border-slate-200 bg-slate-100 text-slate-600" : "border-white/5 bg-white/[0.02] text-text-muted"
+                )}
               >
                 {tag}
               </span>
@@ -184,22 +194,27 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
             isLight ? "border-slate-200 bg-white" : "border-white/10 bg-surface/80"
           )}
         >
-          <div className="flex items-center gap-2 text-[10px] text-text-muted">
-            <ShieldCheck className="w-4 h-4 text-success" />
+          <div className={cn("flex items-center gap-2 text-[10px]", isLight ? "text-slate-600" : "text-text-muted")}>
+            <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-success" />
             <span>Ready-to-use template in {productTier.name}. Compatible with all 6 themes.</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={onClose}
-              className="px-3 py-2 rounded text-xs text-text-muted hover:text-white transition-colors"
+              className={cn("px-3 py-2 rounded text-xs transition-colors", isLight ? "text-slate-500 hover:text-slate-900" : "text-text-muted hover:text-white")}
             >
               Back to Explorer
             </button>
             <Link
-              href={`/?archetype=${blueprint.id}&tier=${blueprint.recommendedTier}#dashboard-lab`}
+              href={`/?archetype=${blueprint.id}#dashboard-lab`}
               onClick={onClose}
-              className="px-3.5 py-2 rounded-lg border border-accent/40 text-accent hover:bg-accent/10 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5"
+              className={cn(
+                "px-3.5 py-2 rounded-lg border font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5",
+                isLight
+                  ? "border-sky-300 text-sky-700 bg-sky-50/70 hover:bg-sky-100"
+                  : "border-accent/40 text-accent hover:bg-accent/10"
+              )}
             >
               <Sliders className="w-3.5 h-3.5" />
               <span>LAUNCH IN DASHBOARD LAB</span>
@@ -208,9 +223,14 @@ export const ArchitectureModal: React.FC<ArchitectureModalProps> = ({
               href={productTier.whopCheckoutUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 rounded-lg bg-accent text-black font-bold text-xs uppercase tracking-wider hover:bg-accent/80 transition-all flex items-center gap-1.5 shadow-lg shadow-accent/20"
+              className={cn(
+                "px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-lg",
+                isLight
+                  ? "bg-slate-900 text-white hover:bg-slate-800"
+                  : "bg-accent text-black hover:bg-accent/80 shadow-accent/20"
+              )}
             >
-              <span>GET {productTier.name.toUpperCase()}</span>
+              <span>GET STRATDESK PRO</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>

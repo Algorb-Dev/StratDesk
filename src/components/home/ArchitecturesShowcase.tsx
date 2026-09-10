@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ARCHITECTURES_DATA, ArchitectureBlueprint } from "@/data/architectures-data";
 import { KillerWidgetSimulator } from "@/components/architectures/KillerWidgetSimulator";
+import { useSiteTheme } from "@/hooks/useSiteTheme";
 import { cn } from "@/lib/utils";
 import {
   Compass,
@@ -17,6 +18,8 @@ import {
 } from "lucide-react";
 
 export const ArchitecturesShowcase: React.FC = () => {
+  const { isLight } = useSiteTheme();
+
   // Select 5 premier archetypes for homepage interactive showcase
   const showcaseIds = [
     "prop-firm-evaluator-console",
@@ -47,9 +50,9 @@ export const ArchitecturesShowcase: React.FC = () => {
             <span>20 TAILORED ARCHITECTURES // ZERO GENERIC DASHBOARDS</span>
           </div>
 
-          <h2 className="text-2xl sm:text-4xl font-bold font-mono tracking-tight text-white">
+          <h2 className="text-2xl sm:text-4xl font-bold font-mono tracking-tight text-slate-900 dark:text-white">
             CHOOSE YOUR ARCHETYPE. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-white">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-700 via-sky-600 to-indigo-700 dark:from-accent dark:to-white">
               BUILT FOR YOUR EXACT ALPHA.
             </span>
           </h2>
@@ -83,8 +86,8 @@ export const ArchitecturesShowcase: React.FC = () => {
                 className={cn(
                   "p-3.5 rounded-xl border text-xs cursor-pointer transition-all duration-200 select-none flex items-center justify-between gap-3",
                   isActive
-                    ? "bg-surface-elevated border-accent shadow-lg shadow-accent/10 ring-1 ring-accent/30"
-                    : "bg-surface/50 border-white/5 hover:border-white/15 hover:bg-surface-elevated/50 text-text-secondary"
+                    ? "bg-sky-50 dark:bg-surface-elevated border-sky-400 dark:border-accent shadow-lg shadow-sky-500/10 dark:shadow-accent/10 ring-1 ring-sky-400/30 dark:ring-accent/30"
+                    : "bg-surface border-border hover:border-slate-300 dark:hover:border-white/15 hover:bg-slate-50 dark:hover:bg-surface-elevated/50 text-text-secondary"
                 )}
               >
                 <div className="flex items-center gap-3 min-w-0">
@@ -92,14 +95,14 @@ export const ArchitecturesShowcase: React.FC = () => {
                     className={cn(
                       "w-7 h-7 rounded-md font-bold text-xs flex items-center justify-center shrink-0 border",
                       isActive
-                        ? "bg-accent text-black border-accent"
-                        : "bg-white/5 text-text-muted border-white/10"
+                        ? "bg-accent text-slate-950 border-accent"
+                        : "bg-slate-100 dark:bg-white/5 text-text-muted border-border"
                     )}
                   >
                     {bp.number}
                   </span>
                   <div className="truncate">
-                    <div className={cn("font-bold text-xs truncate", isActive ? "text-white" : "text-slate-300")}>
+                    <div className={cn("font-bold text-xs truncate", isActive ? "text-slate-900 dark:text-white" : "text-slate-700 dark:text-slate-300")}>
                       {bp.title}
                     </div>
                     <div className="text-[10px] text-text-muted truncate">
@@ -118,7 +121,7 @@ export const ArchitecturesShowcase: React.FC = () => {
             );
           })}
 
-          <div className="p-3 rounded-lg border border-white/5 bg-black/20 text-[11px] text-text-muted flex items-center justify-between">
+          <div className="p-3 rounded-lg border border-border bg-slate-100/60 dark:bg-black/20 text-[11px] text-text-muted flex items-center justify-between">
             <span>+15 More Specialized Architectures</span>
             <Link href="/architectures" className="text-accent font-bold underline hover:no-underline">
               Browse Full Catalog
@@ -127,22 +130,22 @@ export const ArchitecturesShowcase: React.FC = () => {
         </div>
 
         {/* Right Column: Live Interactive Simulation Stage (7 cols) */}
-        <div className="lg:col-span-7 rounded-2xl border border-white/10 bg-surface/60 backdrop-blur-md p-5 sm:p-6 font-mono space-y-4 shadow-2xl">
+        <div className="lg:col-span-7 rounded-2xl border border-border bg-surface/90 backdrop-blur-md p-5 sm:p-6 font-mono space-y-4 shadow-2xl">
           {/* Active Archetype Header */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-white/10">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border">
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
                 <span className="text-xs text-accent font-bold">ARCHETYPE {activeBlueprint.number}</span>
-                <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-white/5 text-text-secondary border border-white/10 uppercase">
+                <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 dark:bg-white/5 text-text-secondary border border-border uppercase">
                   {activeBlueprint.categoryLabel}
                 </span>
               </div>
-              <h3 className="font-bold text-base text-white">{activeBlueprint.title}</h3>
+              <h3 className="font-bold text-base text-slate-900 dark:text-white">{activeBlueprint.title}</h3>
             </div>
 
             <div className="flex items-center gap-2">
               <Link
-                href={`/?archetype=${activeBlueprint.id}&tier=${activeBlueprint.recommendedTier}#dashboard-lab`}
+                href={`/?archetype=${activeBlueprint.id}#dashboard-lab`}
                 className="px-2.5 py-1 rounded text-[10px] text-accent border border-accent/30 hover:bg-accent/10 uppercase font-bold flex items-center gap-1 transition-all"
               >
                 <Sliders className="w-3 h-3" />
@@ -150,7 +153,7 @@ export const ArchitecturesShowcase: React.FC = () => {
               </Link>
               <Link
                 href="/architectures"
-                className="text-[10px] text-text-muted hover:text-white uppercase font-bold flex items-center gap-1 transition-colors"
+                className="text-[10px] text-text-muted hover:text-slate-900 dark:hover:text-white uppercase font-bold flex items-center gap-1 transition-colors"
               >
                 <span>Full Blueprint</span>
                 <ExternalLink className="w-3 h-3" />
@@ -165,14 +168,14 @@ export const ArchitecturesShowcase: React.FC = () => {
 
           {/* Live Interactive Simulator */}
           <div className="pt-1">
-            <KillerWidgetSimulator blueprint={activeBlueprint} isLight={false} />
+            <KillerWidgetSimulator blueprint={activeBlueprint} isLight={isLight} />
           </div>
 
           {/* Bottom Specs Pill */}
-          <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-[10px] text-text-muted border-t border-white/5">
+          <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-[10px] text-text-muted border-t border-border">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-3.5 h-3.5 text-success" />
-              <span>Recommended Tier: <strong className="text-white">Algorb {activeBlueprint.recommendedTier.toUpperCase()}</strong></span>
+              <span>License: <strong className="text-slate-900 dark:text-white">StratDesk Pro (Perpetual)</strong></span>
             </div>
             <Link
               href="/architectures"

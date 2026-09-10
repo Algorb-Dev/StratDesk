@@ -25,9 +25,9 @@ const DEFAULT_TABS: CodeTabItem[] = [
     description: "Production async WebSocket fill listener with CCXT.pro and aiohttp.",
     code: `#!/usr/bin/env python3
 """
-Algorb Control — CCXT.pro Real-Time Execution Adapter
+StratDesk Pro — CCXT.pro Real-Time Execution Adapter
 Listens to live private WebSocket order fills and dispatches forensic
-telemetry directly to your Algorb dashboard (http://localhost:3000/api/ledger).
+telemetry directly to your StratDesk dashboard (http://localhost:3000/api/ledger).
 """
 
 import asyncio
@@ -36,21 +36,21 @@ import time
 import aiohttp
 import ccxt.pro as ccxt
 
-ALGORB_LEDGER_URL = os.getenv("ALGORB_LEDGER_URL", "http://localhost:3000/api/ledger")
+STRATDESK_LEDGER_URL = os.getenv("STRATDESK_LEDGER_URL", "http://localhost:3000/api/ledger")
 SYMBOL = "BTC/USDT:USDT"  # Binance USD-M Perpetual
 
-async def push_to_algorb(session: aiohttp.ClientSession, payload: dict):
-    """Dispatches audited trade telemetry to the local Algorb API."""
+async def push_to_stratdesk(session: aiohttp.ClientSession, payload: dict):
+    """Dispatches audited trade telemetry to the local StratDesk API."""
     try:
-        async with session.post(ALGORB_LEDGER_URL, json=payload, timeout=2.0) as resp:
+        async with session.post(STRATDESK_LEDGER_URL, json=payload, timeout=2.0) as resp:
             if resp.status == 201:
                 data = await resp.json()
-                print(f"[ALGORB IPC] ✓ Telemetry recorded: {data.get('recordedId')}")
+                print(f"[STRATDESK IPC] ✓ Telemetry recorded: {data.get('recordedId')}")
             else:
                 text = await resp.text()
-                print(f"[ALGORB IPC] ✗ Dispatch failed [{resp.status}]: {text}")
+                print(f"[STRATDESK IPC] ✗ Dispatch failed [{resp.status}]: {text}")
     except Exception as e:
-        print(f"[ALGORB IPC] Connection error: {e}")
+        print(f"[STRATDESK IPC] Connection error: {e}")
 
 async def stream_exchange_fills():
     # 1. Initialize CCXT.pro async WebSocket exchange
@@ -115,8 +115,8 @@ async def stream_exchange_fills():
                         }
                     }
 
-                    # 4. Stream to Algorb Control dashboard
-                    await push_to_algorb(session, payload)
+                    # 4. Stream to StratDesk Pro dashboard
+                    await push_to_stratdesk(session, payload)
 
         except Exception as e:
             print(f"[BOT] WebSocket stream error: {e}")
@@ -130,14 +130,14 @@ if __name__ == "__main__":
     id: "python-aiohttp",
     label: "Python (aiohttp/REST)",
     language: "python",
-    filename: "algorb_client.py",
+    filename: "stratdesk_client.py",
     badge: "LIGHTWEIGHT",
     description: "Standalone async function with zero trading exchange dependencies.",
     code: `import aiohttp
 import asyncio
 from datetime import datetime, timezone
 
-async def log_trade_to_algorb(
+async def log_trade_to_stratdesk(
     ticket: str,
     symbol: str,
     direction: str,  # "LONG" or "SHORT"
@@ -152,7 +152,7 @@ async def log_trade_to_algorb(
     notes: str = ""
 ):
     """
-    Pushes an audited execution record to the local Algorb Control dashboard.
+    Pushes an audited execution record to the local StratDesk Pro dashboard.
     Safe to call fire-and-forget inside your trading bot's event loop.
     """
     url = "http://localhost:3000/api/ledger"
@@ -171,7 +171,7 @@ async def log_trade_to_algorb(
         "strategy": strategy,
         "marketRegime": "High Volatility Breakout",
         "orderType": "LIMIT_MAKER",
-        "notes": notes or "Automated execution captured via Algorb Python client.",
+        "notes": notes or "Automated execution captured via StratDesk Python client.",
         "tags": ["#automated", "#live-fill", "#python-sdk"],
         "zScore": z_score,
         "confidence": confidence,
@@ -187,16 +187,16 @@ async def log_trade_to_algorb(
         try:
             async with session.post(url, json=payload, timeout=1.5) as resp:
                 data = await resp.json()
-                print(f"[ALGORB IPC] Recorded trade {data.get('recordedId')} (Status: {resp.status})")
+                print(f"[STRATDESK IPC] Recorded trade {data.get('recordedId')} (Status: {resp.status})")
                 return data
         except Exception as e:
-            print(f"[ALGORB IPC] Ingestion error: {e}")
+            print(f"[STRATDESK IPC] Ingestion error: {e}")
             return None
 
 # Usage example:
 if __name__ == "__main__":
     asyncio.run(
-        log_trade_to_algorb(
+        log_trade_to_stratdesk(
             ticket="ORD-10492",
             symbol="BTC-PERP",
             direction="LONG",
@@ -213,7 +213,7 @@ if __name__ == "__main__":
     id: "nodejs-ts",
     label: "Node.js (TypeScript)",
     language: "typescript",
-    filename: "algorb-telemetry.ts",
+    filename: "stratdesk-telemetry.ts",
     badge: "TYPESCRIPT",
     description: "Type-safe client function for Node.js and TypeScript bot runtimes.",
     code: `import { TradeLedgerEntry } from "./types";
@@ -232,7 +232,7 @@ interface PushTradeParams {
   latencyMs?: number;
 }
 
-export async function pushTradeToAlgorb(params: PushTradeParams) {
+export async function pushTradeToStratDesk(params: PushTradeParams) {
   const pnlPercent = params.direction === "LONG"
     ? Number((((params.exitPrice - params.entryPrice) / params.entryPrice) * 100).toFixed(2))
     : Number((((params.entryPrice - params.exitPrice) / params.entryPrice) * 100).toFixed(2));
@@ -250,7 +250,7 @@ export async function pushTradeToAlgorb(params: PushTradeParams) {
     strategy: params.strategy || "Node.js Quantitative Engine",
     marketRegime: "Active Trend Expansion",
     orderType: "LIMIT_MAKER",
-    notes: params.notes || "Fills synchronized via Node.js Algorb adapter.",
+    notes: params.notes || "Fills synchronized via Node.js StratDesk adapter.",
     tags: ["#nodejs", "#typescript", "#direct-ipc"],
     zScore: params.zScore ?? 1.95,
     confidence: 0.92,
@@ -273,7 +273,7 @@ export async function pushTradeToAlgorb(params: PushTradeParams) {
   }
 
   const result = await response.json();
-  console.log(\`[Algorb IPC] Fill Recorded: \${result.recordedId}\`);
+  console.log(\`[StratDesk IPC] Fill Recorded: \${result.recordedId}\`);
   return result;
 }`,
   },
@@ -299,7 +299,7 @@ export async function pushTradeToAlgorb(params: PushTradeParams) {
     "strategy": "Orderbook Imbalance",
     "marketRegime": "High Volatility Breakout",
     "orderType": "LIMIT_MAKER",
-    "notes": "Verified cURL execution fill pushed to local Algorb dashboard.",
+    "notes": "Verified cURL execution fill pushed to local StratDesk dashboard.",
     "tags": ["#curl-test", "#quickstart", "#live-api"],
     "zScore": 2.45,
     "confidence": 0.95,
@@ -330,7 +330,7 @@ export const CodeTabs: React.FC<CodeTabsProps> = ({
   return (
     <div className={cn("space-y-3 font-mono", className)}>
       {/* Tab Switcher Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-2 p-1.5 rounded-xl bg-surface/80 border border-white/10 backdrop-blur-md">
+      <div className="flex flex-wrap items-center justify-between gap-2 p-1.5 rounded-xl bg-surface/90 dark:bg-surface/80 border border-border backdrop-blur-md shadow-sm">
         <div className="flex flex-wrap items-center gap-1">
           {tabs.map((tab) => {
             const isActive = tab.id === activeTabId;
@@ -341,8 +341,8 @@ export const CodeTabs: React.FC<CodeTabsProps> = ({
                 className={cn(
                   "px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all flex items-center gap-2 border",
                   isActive
-                    ? "bg-accent text-background border-accent shadow-glow-cyan font-bold"
-                    : "text-text-muted hover:text-white border-transparent hover:bg-white/5"
+                    ? "bg-accent text-slate-950 border-accent shadow-sm dark:shadow-glow-cyan font-bold"
+                    : "text-slate-600 dark:text-text-muted hover:text-slate-900 dark:hover:text-white border-transparent hover:bg-slate-100 dark:hover:bg-white/5"
                 )}
               >
                 <span>{tab.label}</span>
@@ -351,8 +351,8 @@ export const CodeTabs: React.FC<CodeTabsProps> = ({
                     className={cn(
                       "px-1.5 py-0.2 text-[8px] rounded uppercase font-bold",
                       isActive
-                        ? "bg-black/30 text-background"
-                        : "bg-white/10 text-accent"
+                        ? "bg-black/20 text-slate-950"
+                        : "bg-sky-50 dark:bg-white/10 text-sky-700 dark:text-accent border border-sky-200 dark:border-white/10"
                     )}
                   >
                     {tab.badge}
@@ -364,7 +364,7 @@ export const CodeTabs: React.FC<CodeTabsProps> = ({
         </div>
 
         {activeTab?.description && (
-          <span className="text-[11px] text-text-muted hidden md:inline px-3 font-sans">
+          <span className="text-[11px] text-slate-500 dark:text-text-muted hidden md:inline px-3 font-sans">
             {activeTab.description}
           </span>
         )}

@@ -1,8 +1,8 @@
-# Algorb — Official Storefront
+# StratDesk — Official Storefront
 
-> Premium, self-hosted dashboards and interfaces for personal algorithmic trading systems.
+> Premium, self-hosted dashboards and command centers for personal algorithmic trading systems.
 
-Algorb provides the interface layer for custom trading bots. Your bot keeps its strategy, execution engine, exchange connections, and private keys. Algorb gives it an institutional command center.
+StratDesk provides the interface layer for custom trading bots. Your bot keeps its strategy, execution engine, exchange connections, and private keys. StratDesk gives it an institutional command center.
 
 ---
 
@@ -35,7 +35,7 @@ Default local URL: `http://localhost:3000`
 ## 🏛️ Brand & Design System
 
 ### Brand Name
-- **Algorb** (always exact; no suffixes like Capital, Trading, AI, Labs).
+- **StratDesk** (and **StratDesk Pro** for the software toolkit).
 
 ### Design Tokens
 Centralized in `tailwind.config.ts` and `src/app/globals.css`:
@@ -49,49 +49,60 @@ To change the global accent color, update `accent.DEFAULT` in `tailwind.config.t
 
 ---
 
-## 🧩 Architecture & Future-Proofing
+## 📖 Developer Quickstart
+For a practical guide to connecting your bot, pushing trades to `/api/ledger`, and testing interactive HUDs, see:
+👉 [**QUICKSTART.md**](./QUICKSTART.md)
 
-### 1. Dashboard Preview Abstraction
+---
+
+## 🧩 Architecture & Key Features
+
+### 1. Dashboard Preview & In-HUD Switchers
 Located at `src/components/dashboard/DashboardPreview.tsx`:
 ```tsx
-<DashboardPreview product="view" theme="terminal" />
+<DashboardPreview product="pro" theme="obsidian" archetypeId="default" />
 ```
-- Supports `product="view" | "control"`.
-- Supports 6 themes: `terminal`, `obsidian`, `quant`, `command`, `vector`, `light`.
-- When real dashboards are developed, swap the mock internals or embed the real runtime component directly into this interface.
+- **In-HUD Architecture Switcher**: Hot-swap between all **20 specialized bot blueprints** directly in the top header chrome with `localStorage` persistence and URL deep-linking support.
+- **In-HUD Theme Switcher**: Instant switching between 6 high-contrast themes: `terminal`, `obsidian`, `quant`, `command`, `vector`, `light`.
+- **Professional Command Center**: Bidirectional HMAC-signed command bus, emergency kill-switch (`FLATTEN & HALT`), runtime strategy pauses, and forensic trade ledger unlocked for all users.
 
 ### 2. Centralized Configuration Files
-- **`src/data/products.ts`**: Product tiers (`Algorb View`, `Algorb Control`), feature highlights, capability flags, launch pricing placeholders (`PRICE TBA`).
-- **`src/data/themes.ts`**: Fictional dashboard themes with color tokens and traits.
-- **`src/data/features.ts`**: 8 interactive features with dedicated mini-demo types.
-- **`src/data/demo-data.ts`**: Fictional telemetry figures (Equity `$24,821.64`, Daily PnL `+$482.17`, Win Rate `72.4%`, active positions, log streams).
+- **`src/data/products.ts`**: StratDesk Pro product tier ($49 Early Bird, $59 original), full capability list, and Whop checkout link.
+- **`src/data/architectures-data.ts`**: 20 comprehensive quant bot architecture blueprints across 5 categories with killer widget specs (all unlocked).
+- **`src/data/themes.ts`**: 6 dashboard themes with custom palette tokens.
+- **`src/data/features.ts`**: Interactive capability showcase with live mini-demos.
+- **`src/data/demo-data.ts`**: Simulated telemetry figures (NAV `$24,821.64`, Win Rate `72.4%`, active positions, log streams).
 - **`src/data/faq.ts`**: Technical answers and architecture clarifications.
 
-### 3. Payment & Merchant of Record Integration (Whop)
+### 3. Automated Trade Ledger Ingestion (`/api/ledger`)
+StratDesk includes an automated server route at `POST /api/ledger` to ingest trade executions directly from Python (`ccxt`), Node.js, or direct fix engines into the frontend trade journal with R-multiple analysis and forensic execution telemetry.
+
+### 4. Payment & Merchant of Record Integration (Whop)
 Payments and fulfillment are handled natively by Whop via direct hosted checkout links:
-- Configure checkout URLs in `src/data/products.ts`:
-  - `PRODUCTS.view.whopCheckoutUrl`
-  - `PRODUCTS.control.whopCheckoutUrl`
-- All buy buttons (`GET ALGORB VIEW` and `GET ALGORB CONTROL`) link directly to your Whop checkout in a new tab (`target="_blank"` with `rel="noopener noreferrer"`), ensuring zero local backend dependency and eliminating checkout abandonment friction.
+- `PRODUCTS.pro.whopCheckoutUrl`
+All purchase actions link directly to your Whop checkout in a new tab (`target="_blank"` with `rel="noopener noreferrer"`).
 
 ---
 
 ## 🗺️ Routes
 
-- `/`: Main Storefront (Hero with live floating terminal, Credibility strip, Problem morph, Products, 8-card feature matrix, Architecture pipeline, How It Works, AI integration, Themes Gallery, Dashboard Lab, Developer specs, Security, FAQ, Final CTA, Footer).
-- `/products`: Product catalog & side-by-side capability matrix.
-- `/products/view`: Algorb View deep-dive detail page.
-- `/products/control`: Algorb Control command center detail page.
-- `/themes`: Interactive themes exploration.
+- `/`: Main Storefront (Hero with live floating command center, Credibility strip, Problem morph, Flagship Product Showcase, 8-card feature matrix, Architecture pipeline, How It Works, AI integration, Themes Gallery, Dashboard Lab, Developer specs, Security, FAQ, Final CTA, Footer).
+- `/products`: Product catalog, Early Bird pricing ($49), & complete capability matrix.
+- `/products/pro`: StratDesk Pro command center detail page ($49 Early Bird).
+- `/architectures`: Interactive catalog of all 20 specialized trading bot blueprints with interactive simulators and filters.
+- `/lab`: Dedicated interactive Dashboard Lab simulator workstation.
+- `/themes`: Interactive themes exploration gallery.
 - `/how-it-works`: 4-step workflow, dataflow sequence, adapter examples.
-- `/docs`: Developer documentation, WebSocket JSON-RPC spec, REST schema, Python SDK snippet, AI agent prompt guide.
+- `/docs`: Developer documentation hub, Python CCXT boilerplate, WebSocket JSON-RPC spec, REST schema, AI prompt spec.
 - `/faq`: Standalone searchable FAQ hub.
+- `/legal/terms`: Software license grant, non-custodial guarantee, and financial risk disclosures.
+- `/legal/privacy`: Zero cloud telemetry tracking, non-custodial privacy pillars.
 
 ---
 
 ## 🔒 Security & Data Integrity
-Algorb is 100% self-hosted client-side software:
+StratDesk is 100% self-hosted client-side software:
 - Zero external tracking on customer portfolio data or orders.
 - Does not touch or store exchange API secret keys.
 - Local loopback telemetry binding on `127.0.0.1:9042`.
-- HMAC-SHA256 authenticated command verification on Algorb Control.
+- HMAC-SHA256 authenticated command verification on StratDesk Pro.

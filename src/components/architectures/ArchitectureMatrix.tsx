@@ -10,6 +10,7 @@ import {
 } from "@/data/architectures-data";
 import { PRODUCTS } from "@/data/products";
 import { ArchitectureModal } from "./ArchitectureModal";
+import { useSiteTheme } from "@/hooks/useSiteTheme";
 import { cn } from "@/lib/utils";
 import {
   Search,
@@ -28,10 +29,11 @@ interface ArchitectureMatrixProps {
 }
 
 export const ArchitectureMatrix: React.FC<ArchitectureMatrixProps> = ({
-  isLight = false,
+  isLight: propIsLight,
 }) => {
+  const { isLight: themeIsLight } = useSiteTheme();
+  const isLight = propIsLight ?? themeIsLight;
   const [selectedCategory, setSelectedCategory] = useState<ArchitectureCategory | "all">("all");
-  const [selectedTier, setSelectedTier] = useState<"all" | "view" | "control">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeModalBlueprint, setActiveModalBlueprint] = useState<ArchitectureBlueprint | null>(null);
 
@@ -39,10 +41,6 @@ export const ArchitectureMatrix: React.FC<ArchitectureMatrixProps> = ({
     return ARCHITECTURES_DATA.filter((bp) => {
       // Category Filter
       if (selectedCategory !== "all" && bp.category !== selectedCategory) {
-        return false;
-      }
-      // Tier Filter
-      if (selectedTier !== "all" && bp.recommendedTier !== selectedTier) {
         return false;
       }
       // Search
@@ -59,7 +57,7 @@ export const ArchitectureMatrix: React.FC<ArchitectureMatrixProps> = ({
       }
       return true;
     });
-  }, [selectedCategory, selectedTier, searchQuery]);
+  }, [selectedCategory, searchQuery]);
 
   return (
     <div className="w-full space-y-8">
@@ -72,7 +70,7 @@ export const ArchitectureMatrix: React.FC<ArchitectureMatrixProps> = ({
             : "bg-surface/80 border-white/10 backdrop-blur-md"
         )}
       >
-        {/* Row 1: Search and Tier Switcher */}
+        {/* Row 1: Search and Status Badge */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {/* Live Search */}
           <div className="relative flex-1 max-w-md">
@@ -99,29 +97,12 @@ export const ArchitectureMatrix: React.FC<ArchitectureMatrixProps> = ({
             )}
           </div>
 
-          {/* Tier Filter Switcher */}
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-text-muted text-[10px] uppercase font-bold mr-1 hidden sm:inline">
-              Tier:
+          {/* Unlocked Status Badge */}
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-warning/10 text-amber-600 dark:text-warning border border-warning/20">
+              <Sparkles className="w-3.5 h-3.5" />
+              ALL 20 BLUEPRINTS UNLOCKED // STRATDESK PRO
             </span>
-            {(["all", "view", "control"] as const).map((tier) => (
-              <button
-                key={tier}
-                onClick={() => setSelectedTier(tier)}
-                className={cn(
-                  "px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all border",
-                  selectedTier === tier
-                    ? isLight
-                      ? "bg-sky-600 text-white border-sky-600 shadow-sm"
-                      : "bg-accent/20 text-accent border-accent/40 shadow-sm"
-                    : isLight
-                    ? "bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900"
-                    : "bg-white/[0.02] text-text-muted border-white/5 hover:text-white hover:bg-white/5"
-                )}
-              >
-                {tier === "all" ? "All Tiers" : `Algorb ${tier}`}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -196,51 +177,60 @@ export const ArchitectureMatrix: React.FC<ArchitectureMatrixProps> = ({
                   <span
                     className={cn(
                       "px-2 py-0.5 text-[9px] font-bold rounded uppercase border",
-                      blueprint.recommendedTier === "control"
-                        ? isLight
-                          ? "bg-sky-50 text-sky-800 border-sky-300"
-                          : "bg-accent/10 text-accent border-accent/30"
-                        : isLight
-                        ? "bg-slate-100 text-slate-700 border-slate-300"
-                        : "bg-white/5 text-text-secondary border-white/10"
+                      isLight
+                        ? "bg-amber-50 text-amber-900 border-amber-300"
+                        : "bg-warning/10 text-warning border-warning/30"
                     )}
                   >
-                    ALGORB {blueprint.recommendedTier.toUpperCase()}
+                    STRATDESK PRO
                   </span>
                 </div>
 
                 {/* Title */}
-                <h3 className="font-bold text-sm sm:text-base text-white group-hover:text-accent transition-colors leading-snug">
+                <h3 className={cn(
+                  "font-bold text-sm sm:text-base group-hover:text-accent transition-colors leading-snug",
+                  isLight ? "text-slate-900" : "text-white"
+                )}>
                   {blueprint.title}
                 </h3>
 
                 {/* Target Persona */}
-                <div className="p-2.5 rounded-lg border border-white/5 bg-black/20 text-[11px] text-text-secondary">
-                  <span className="text-[9px] font-bold text-text-muted uppercase block mb-0.5">
+                <div
+                  className={cn(
+                    "p-2.5 rounded-lg border text-[11px]",
+                    isLight ? "border-slate-200 bg-slate-50 text-slate-600" : "border-white/5 bg-black/20 text-text-secondary"
+                  )}
+                >
+                  <span className={cn("text-[9px] font-bold uppercase block mb-0.5", isLight ? "text-slate-500" : "text-text-muted")}>
                     Target Operator:
                   </span>
                   <p className="line-clamp-2 leading-relaxed font-sans">{blueprint.targetAudience}</p>
                 </div>
 
                 {/* Killer Widget Spotlight */}
-                <div className="p-3 rounded-lg border border-accent/20 bg-accent/5 space-y-1">
+                <div
+                  className={cn(
+                    "p-3 rounded-lg border space-y-1",
+                    isLight ? "border-sky-200 bg-sky-50/70" : "border-accent/20 bg-accent/5"
+                  )}
+                >
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-accent flex items-center gap-1">
+                    <span className={cn("text-[9px] font-bold uppercase tracking-wider flex items-center gap-1", isLight ? "text-sky-700" : "text-accent")}>
                       <Zap className="w-3 h-3" />
                       KILLER WIDGET
                     </span>
-                    <span className="text-[8px] font-bold px-1.5 py-0.2 rounded bg-accent/20 text-accent uppercase">
+                    <span className={cn("text-[8px] font-bold px-1.5 py-0.2 rounded uppercase", isLight ? "bg-sky-100 text-sky-800" : "bg-accent/20 text-accent")}>
                       {blueprint.killerWidget.badge}
                     </span>
                   </div>
-                  <div className="font-bold text-white text-xs">{blueprint.killerWidget.name}</div>
-                  <p className="text-[10px] text-text-muted line-clamp-2 font-sans">
+                  <div className={cn("font-bold text-xs", isLight ? "text-slate-900" : "text-white")}>{blueprint.killerWidget.name}</div>
+                  <p className={cn("text-[10px] line-clamp-2 font-sans", isLight ? "text-slate-600" : "text-text-muted")}>
                     {blueprint.killerWidget.description}
                   </p>
                 </div>
 
                 {/* Specs Pill Summary */}
-                <div className="flex items-center justify-between text-[10px] text-text-muted border-t border-white/5 pt-2">
+                <div className={cn("flex items-center justify-between text-[10px] border-t pt-2", isLight ? "border-slate-200 text-slate-500" : "border-white/5 text-text-muted")}>
                   <span>Latency: {blueprint.specs.latencyRequirement.split("/")[0]}</span>
                   <span className="truncate max-w-[140px] text-right">
                     {blueprint.specs.keyMetrics[0]}
@@ -258,14 +248,24 @@ export const ArchitectureMatrix: React.FC<ArchitectureMatrixProps> = ({
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setActiveModalBlueprint(blueprint)}
-                    className="px-2.5 py-1.5 rounded-lg border border-white/10 hover:border-accent text-white font-bold text-[10px] uppercase hover:bg-white/5 transition-all flex items-center gap-1"
+                    className={cn(
+                      "px-2.5 py-1.5 rounded-lg border font-bold text-[10px] uppercase transition-all flex items-center gap-1",
+                      isLight
+                        ? "border-slate-300 bg-white hover:bg-slate-100 text-slate-800 hover:border-slate-400"
+                        : "border-white/10 hover:border-accent text-white hover:bg-white/5"
+                    )}
                   >
                     <span>TEST WIDGET</span>
-                    <ChevronRight className="w-3 h-3 text-accent" />
+                    <ChevronRight className={cn("w-3 h-3", isLight ? "text-sky-600" : "text-accent")} />
                   </button>
                   <Link
-                    href={`/?archetype=${blueprint.id}&tier=${blueprint.recommendedTier}#dashboard-lab`}
-                    className="px-2.5 py-1.5 rounded-lg border border-accent/30 text-accent hover:bg-accent/10 font-bold text-[10px] uppercase transition-all flex items-center gap-1"
+                    href={`/?archetype=${blueprint.id}#dashboard-lab`}
+                    className={cn(
+                      "px-2.5 py-1.5 rounded-lg border font-bold text-[10px] uppercase transition-all flex items-center gap-1",
+                      isLight
+                        ? "border-sky-300 text-sky-700 bg-sky-50 hover:bg-sky-100"
+                        : "border-accent/30 text-accent hover:bg-accent/10"
+                    )}
                     title="Launch in Dashboard Lab"
                   >
                     <Sliders className="w-3 h-3" />
@@ -277,9 +277,14 @@ export const ArchitectureMatrix: React.FC<ArchitectureMatrixProps> = ({
                   href={productTier.whopCheckoutUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-accent text-black font-bold text-[10px] uppercase hover:bg-accent/80 transition-all flex items-center gap-1 shadow-md shadow-accent/10"
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase transition-all flex items-center gap-1 shadow-md",
+                    isLight
+                      ? "bg-slate-900 text-white hover:bg-slate-800"
+                      : "bg-accent text-black hover:bg-accent/80 shadow-accent/10"
+                  )}
                 >
-                  <span>DEPLOY {productTier.name.toUpperCase()}</span>
+                  <span>GET STRATDESK PRO</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
@@ -298,7 +303,6 @@ export const ArchitectureMatrix: React.FC<ArchitectureMatrixProps> = ({
           <button
             onClick={() => {
               setSelectedCategory("all");
-              setSelectedTier("all");
               setSearchQuery("");
             }}
             className="px-4 py-2 rounded-lg bg-white/10 text-white font-bold text-xs uppercase hover:bg-white/20 transition-all"

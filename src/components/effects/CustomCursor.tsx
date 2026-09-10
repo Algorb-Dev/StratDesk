@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export const CustomCursor: React.FC = () => {
-  const [position, setPosition] = useState<{ x: number; y: number }>({ x: -100, y: -100 });
+  const dotRef = useRef<HTMLDivElement>(null);
   const [isPointer, setIsPointer] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -20,13 +20,24 @@ export const CustomCursor: React.FC = () => {
     setIsDesktop(true);
 
     const handleMouseMove = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-      if (!isVisible) setIsVisible(true);
+      const x = e.clientX;
+      const y = e.clientY;
+
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -50%)`;
+      }
+
+      if (!isVisible) {
+        setIsVisible(true);
+      }
 
       const target = e.target as HTMLElement | null;
       if (target) {
-        const clickable = target.closest("button, a, input, [role='button'], [tabindex='0']");
-        setIsPointer(!!clickable);
+        const clickable = target.closest(
+          "button, a, input, select, textarea, [role='button'], [tabindex='0'], label, summary, [data-clickable='true']"
+        );
+        const shouldBePointer = Boolean(clickable);
+        setIsPointer((prev) => (prev !== shouldBePointer ? shouldBePointer : prev));
       }
     };
 
@@ -47,29 +58,15 @@ export const CustomCursor: React.FC = () => {
   if (!isDesktop || !isVisible) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden transition-opacity duration-300">
+    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
       {/* Precision Crosshair Dot */}
       <div
-        className="fixed -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent pointer-events-none transition-transform duration-75 ease-out"
-        style={{
-          left: `${position.x}px`,
-          top: `${position.y}px`,
-          width: isPointer ? "6px" : "4px",
-          height: isPointer ? "6px" : "4px",
-          boxShadow: "0 0 10px rgba(0, 240, 255, 0.8)",
-        }}
-      />
-      {/* Subtle Trailing Reticle Ring */}
-      <div
-        className="fixed -translate-x-1/2 -translate-y-1/2 rounded-full border border-accent/40 pointer-events-none transition-all duration-200 ease-out"
-        style={{
-          left: `${position.x}px`,
-          top: `${position.y}px`,
-          width: isPointer ? "36px" : "22px",
-          height: isPointer ? "36px" : "22px",
-          transform: `translate(-50%, -50%) scale(${isPointer ? 1.15 : 1})`,
-          borderColor: isPointer ? "rgba(0, 240, 255, 0.7)" : "rgba(0, 240, 255, 0.3)",
-        }}
+        ref={dotRef}
+        className={`fixed top-0 left-0 rounded-full pointer-events-none will-change-transform transition-[width,height,box-shadow,opacity] duration-150 ease-out ${
+          isPointer
+            ? "w-2.5 h-2.5 bg-accent shadow-[0_0_12px_rgba(0,240,255,1),0_0_4px_rgba(255,255,255,0.9)]"
+            : "w-1.5 h-1.5 bg-accent shadow-[0_0_8px_rgba(0,240,255,0.85)]"
+        }`}
       />
     </div>
   );

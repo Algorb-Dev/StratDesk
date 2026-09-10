@@ -5,7 +5,19 @@ export interface FeatureItem {
   tagline: string;
   description: string;
   category: "TELEMETRY" | "RISK" | "EXECUTION" | "SYSTEM" | "CONTROL";
-  interactiveDemoType: "equity" | "risk" | "positions" | "execution" | "strategies" | "health" | "control" | "mobile";
+  interactiveDemoType:
+    | "equity"
+    | "risk"
+    | "positions"
+    | "execution"
+    | "strategies"
+    | "health"
+    | "control"
+    | "mobile"
+    | "csvexport"
+    | "shortcuts"
+    | "multibot"
+    | "alerts";
   technicalSpecs: string[];
 }
 
@@ -73,7 +85,7 @@ export const FEATURES: FeatureItem[] = [
   {
     id: "control",
     title: "Command Bus & Kill-Switch",
-    badge: "ALGORB CONTROL ONLY",
+    badge: "STRATDESK PRO",
     tagline: "Emergency stop and active runtime parameters at your fingertips.",
     description: "Flatten risk in one click. Disengage failing models, cancel resting limit orders, and adjust max exposure caps without editing configuration files or restarting your daemon.",
     category: "CONTROL",
@@ -89,5 +101,45 @@ export const FEATURES: FeatureItem[] = [
     category: "SYSTEM",
     interactiveDemoType: "mobile",
     technicalSpecs: ["Touch-optimized kill-switches", "Tailscale VPN mobile friendly", "Hardware-accelerated CSS rendering"],
+  },
+  {
+    id: "csvexport",
+    title: "Forensic Ledger & CSV",
+    badge: "INSTITUTIONAL AUDIT",
+    tagline: "Generate cryptographic proof-of-fill records and tax-ready CSVs.",
+    description: "Instantly export full execution histories with timestamps, fee tiers, and R-multiples. Watermarked forensic receipts ready for investor scrutiny or tax accounting.",
+    category: "EXECUTION",
+    interactiveDemoType: "csvexport",
+    technicalSpecs: ["RFC-4180 compliant CSV export", "SHA-256 batch report hashes", "Realized R-multiple accounting"],
+  },
+  {
+    id: "shortcuts",
+    title: "Quant Keyboard Hotkeys",
+    badge: "SUB-10MS ACTION",
+    tagline: "Navigate archetypes, toggle positions, and arm kill-switch via keys.",
+    description: "Engineered for rapid response under volatility. Instant hotkeys (Ctrl+K, Esc, Space to pause, Shift+X to flatten) allow rapid hands-free operation.",
+    category: "CONTROL",
+    interactiveDemoType: "shortcuts",
+    technicalSpecs: ["Zero event loop blocking", "Hardware keyboard debounce", "Custom keybinding profiles"],
+  },
+  {
+    id: "multibot",
+    title: "Multi-Bot Topology Hub",
+    badge: "FLEET MANAGEMENT",
+    tagline: "Monitor multiple independent bot daemons in a unified view.",
+    description: "Aggregate telemetry from cross-exchange market makers, DEX snipers, and grid bots simultaneously. Reconcile margin utilization across accounts in real time.",
+    category: "SYSTEM",
+    interactiveDemoType: "multibot",
+    technicalSpecs: ["Pooled portfolio VaR", "Isolated IPC channels", "Multi-venue heartbeat tracker"],
+  },
+  {
+    id: "alerts",
+    title: "Live Volatility Radar",
+    badge: "AUDIO & VISUAL",
+    tagline: "Immediate visual & audio pings when risk limits or fills breach thresholds.",
+    description: "Configurable threshold alerts for unexpected drawdown, slippage spikes, or WebSocket disconnects. Streamlined sound synthesis and visual flashes keep you vigilant.",
+    category: "RISK",
+    interactiveDemoType: "alerts",
+    technicalSpecs: ["Low-latency WebAudio synthesized beeps", "Webhook notification dispatch", "Configurable drawdown triggers"],
   },
 ];

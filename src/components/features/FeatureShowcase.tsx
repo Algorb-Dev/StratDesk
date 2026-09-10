@@ -13,6 +13,10 @@ import {
   Power,
   Smartphone,
   CheckCircle2,
+  FileSpreadsheet,
+  Keyboard,
+  Network,
+  Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,13 +33,17 @@ export const FeatureShowcase: React.FC = () => {
     health: Activity,
     control: Power,
     mobile: Smartphone,
+    csvexport: FileSpreadsheet,
+    shortcuts: Keyboard,
+    multibot: Network,
+    alerts: Bell,
   };
 
   const renderMiniDemo = (item: FeatureItem) => {
     switch (item.interactiveDemoType) {
       case "equity":
         return (
-          <div className="w-full h-32 p-3 bg-black/40 rounded-lg border border-white/5 flex flex-col justify-between font-mono">
+          <div data-terminal="true" className="w-full h-32 p-3 bg-slate-950 dark:bg-black/40 rounded-lg border border-slate-800 dark:border-white/5 flex flex-col justify-between font-mono text-white">
             <div className="flex justify-between text-[10px] text-text-muted">
               <span>NAV SMOOTHED</span>
               <span className="text-success font-bold">+148.2%</span>
@@ -60,7 +68,7 @@ export const FeatureShowcase: React.FC = () => {
 
       case "risk":
         return (
-          <div className="w-full h-32 p-3 bg-black/40 rounded-lg border border-white/5 flex flex-col justify-between font-mono">
+          <div data-terminal="true" className="w-full h-32 p-3 bg-slate-950 dark:bg-black/40 rounded-lg border border-slate-800 dark:border-white/5 flex flex-col justify-between font-mono text-white">
             <div className="flex justify-between text-[10px] text-text-muted">
               <span>DRAWDOWN LIMIT</span>
               <span className="text-warning font-bold">4.21% / 10.0%</span>
@@ -90,7 +98,7 @@ export const FeatureShowcase: React.FC = () => {
 
       case "positions":
         return (
-          <div className="w-full h-32 p-2.5 bg-black/40 rounded-lg border border-white/5 flex flex-col justify-around font-mono text-[10px] overflow-hidden">
+          <div data-terminal="true" className="w-full h-32 p-2.5 bg-slate-950 dark:bg-black/40 rounded-lg border border-slate-800 dark:border-white/5 flex flex-col justify-around font-mono text-[10px] overflow-hidden text-white">
             <div className="flex items-center justify-between p-1.5 rounded bg-white/5 min-w-0 gap-1.5">
               <div className="flex items-center gap-1.5 min-w-0 truncate">
                 <span className="px-1 text-[8px] bg-success/20 text-success rounded font-bold shrink-0">L</span>
@@ -110,7 +118,7 @@ export const FeatureShowcase: React.FC = () => {
 
       case "execution":
         return (
-          <div className="w-full h-32 p-3 bg-black/40 rounded-lg border border-white/5 flex flex-col justify-between font-mono text-[10px]">
+          <div data-terminal="true" className="w-full h-32 p-3 bg-slate-950 dark:bg-black/40 rounded-lg border border-slate-800 dark:border-white/5 flex flex-col justify-between font-mono text-[10px] text-white">
             <div className="flex justify-between text-text-muted">
               <span>DISPATCH WATERFALL</span>
               <span className="text-accent font-bold">AVG 11.4ms</span>
@@ -137,7 +145,7 @@ export const FeatureShowcase: React.FC = () => {
 
       case "strategies":
         return (
-          <div className="w-full h-32 p-3 bg-black/40 rounded-lg border border-white/5 flex flex-col justify-between font-mono text-[10px]">
+          <div data-terminal="true" className="w-full h-32 p-3 bg-slate-950 dark:bg-black/40 rounded-lg border border-slate-800 dark:border-white/5 flex flex-col justify-between font-mono text-[10px] text-white">
             <div className="flex justify-between text-text-muted">
               <span>ALPHA ALLOCATION</span>
               <span className="text-white font-bold">3 ACTIVE</span>
@@ -162,7 +170,7 @@ export const FeatureShowcase: React.FC = () => {
 
       case "health":
         return (
-          <div className="w-full h-32 p-3 bg-black/40 rounded-lg border border-white/5 flex flex-col justify-between font-mono text-[10px]">
+          <div data-terminal="true" className="w-full h-32 p-3 bg-slate-950 dark:bg-black/40 rounded-lg border border-slate-800 dark:border-white/5 flex flex-col justify-between font-mono text-[10px] text-white">
             <div className="flex justify-between items-center text-text-muted">
               <span>RUNTIME OBSERVER</span>
               <span className="flex items-center gap-1 text-success font-bold">
@@ -213,7 +221,7 @@ export const FeatureShowcase: React.FC = () => {
 
       case "mobile":
         return (
-          <div className="w-full h-32 p-2 bg-black/40 rounded-lg border border-white/5 flex items-center justify-center font-mono">
+          <div data-terminal="true" className="w-full h-32 p-2 bg-slate-950 dark:bg-black/40 rounded-lg border border-slate-800 dark:border-white/5 flex items-center justify-center font-mono text-white">
             {/* Mini Smartphone Frame */}
             <div className="w-24 h-28 rounded-lg border-2 border-white/20 bg-surface p-1 flex flex-col justify-between text-[6px]">
               <div className="w-4 h-0.5 rounded-full bg-white/30 mx-auto" />
@@ -229,29 +237,130 @@ export const FeatureShowcase: React.FC = () => {
           </div>
         );
 
+      case "csvexport":
+        return (
+          <div data-terminal="true" className="w-full h-32 p-2.5 bg-slate-950 dark:bg-black/40 rounded-lg border border-slate-800 dark:border-white/5 flex flex-col justify-between font-mono text-white text-[10px]">
+            <div className="flex justify-between items-center text-[9px] text-text-muted">
+              <span>LEDGER EXPORT</span>
+              <span className="text-success font-bold">SHA-256 OK</span>
+            </div>
+            <div className="p-1.5 rounded bg-white/5 border border-white/5 space-y-1 text-[9px]">
+              <div className="flex justify-between text-text-muted">
+                <span>File:</span>
+                <span className="text-white font-bold">fills_2026_q3.csv</span>
+              </div>
+              <div className="flex justify-between text-text-muted">
+                <span>Records:</span>
+                <span className="text-accent font-bold">142 Trades (R: +3.2)</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-[8px] text-success border-t border-white/5 pt-1">
+              <span>✓ WATERMARK VERIFIED</span>
+              <span className="text-text-muted">RFC-4180</span>
+            </div>
+          </div>
+        );
+
+      case "shortcuts":
+        return (
+          <div data-terminal="true" className="w-full h-32 p-2.5 bg-slate-950 dark:bg-black/40 rounded-lg border border-slate-800 dark:border-white/5 flex flex-col justify-between font-mono text-white text-[10px]">
+            <div className="flex justify-between text-[9px] text-text-muted">
+              <span>KEYBOARD HOTKEYS</span>
+              <span className="text-accent font-bold">&lt;1ms DISPATCH</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5 py-1 text-[9px]">
+              <div className="p-1 rounded bg-white/5 border border-white/10 flex items-center justify-between">
+                <span className="text-warning font-bold">[Shift+X]</span>
+                <span className="text-text-muted text-[8px]">Flatten</span>
+              </div>
+              <div className="p-1 rounded bg-white/5 border border-white/10 flex items-center justify-between">
+                <span className="text-accent font-bold">[Space]</span>
+                <span className="text-text-muted text-[8px]">Pause</span>
+              </div>
+              <div className="p-1 rounded bg-white/5 border border-white/10 flex items-center justify-between">
+                <span className="text-sky-400 font-bold">[Ctrl+K]</span>
+                <span className="text-text-muted text-[8px]">Search</span>
+              </div>
+              <div className="p-1 rounded bg-white/5 border border-white/10 flex items-center justify-between">
+                <span className="text-emerald-400 font-bold">[1 - 6]</span>
+                <span className="text-text-muted text-[8px]">Themes</span>
+              </div>
+            </div>
+            <span className="text-[8px] text-text-muted text-center">Hardware debounced • Zero latency</span>
+          </div>
+        );
+
+      case "multibot":
+        return (
+          <div data-terminal="true" className="w-full h-32 p-2.5 bg-slate-950 dark:bg-black/40 rounded-lg border border-slate-800 dark:border-white/5 flex flex-col justify-between font-mono text-white text-[10px]">
+            <div className="flex justify-between text-[9px] text-text-muted">
+              <span>POOLED TOPOLOGY</span>
+              <span className="text-success font-bold">3/3 SYNCED</span>
+            </div>
+            <div className="space-y-1 text-[9px]">
+              <div className="flex items-center justify-between px-1.5 py-0.5 rounded bg-white/5">
+                <span className="text-accent font-bold">NODE_01 (Binance MM)</span>
+                <span className="text-success font-mono text-[8px]">0.9ms</span>
+              </div>
+              <div className="flex items-center justify-between px-1.5 py-0.5 rounded bg-white/5">
+                <span className="text-emerald-400 font-bold">NODE_02 (Sol Sniper)</span>
+                <span className="text-success font-mono text-[8px]">1.2ms</span>
+              </div>
+              <div className="flex items-center justify-between px-1.5 py-0.5 rounded bg-white/5">
+                <span className="text-amber-400 font-bold">NODE_03 (Bybit Arb)</span>
+                <span className="text-success font-mono text-[8px]">1.1ms</span>
+              </div>
+            </div>
+            <div className="flex justify-between text-[8px] text-text-muted border-t border-white/5 pt-0.5">
+              <span>COMBINED VaR: $1,420</span>
+              <span className="text-white font-bold">LEVERAGE: 2.8x</span>
+            </div>
+          </div>
+        );
+
+      case "alerts":
+        return (
+          <div data-terminal="true" className="w-full h-32 p-2.5 bg-slate-950 dark:bg-black/40 rounded-lg border border-slate-800 dark:border-white/5 flex flex-col justify-between font-mono text-white text-[10px]">
+            <div className="flex justify-between text-[9px] text-text-muted">
+              <span>RISK RADAR SURVEILLANCE</span>
+              <span className="text-warning font-bold animate-pulse">ARMED</span>
+            </div>
+            <div className="p-2 rounded bg-warning/10 border border-warning/30 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-warning animate-ping" />
+              <div className="text-[9px] text-warning font-bold">
+                ALERT: DD BUFFER REACHED (4.2%)
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-[8px] text-text-muted border-t border-white/5 pt-1">
+              <span>WEBHOOK: TELEGRAM + DISCORD</span>
+              <span className="text-success font-bold">ACK OK</span>
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
   };
 
   return (
-    <section id="features" className="relative py-28 border-b border-white/10 bg-background-secondary">
+    <section id="features" className="relative py-28 border-b border-border bg-background-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <Badge variant="accent" size="sm" className="mb-3">
             TECHNICAL ARCHITECTURE
           </Badge>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight font-sans">
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight font-sans">
             ENGINEERED FOR TELEMETRY. <br />
             <span className="text-text-muted">EVERY METRIC AT MICROSECOND FIDELITY.</span>
           </h2>
           <p className="mt-4 text-base sm:text-lg text-text-secondary">
-            Algorb decouples the visual telemetry interface from your trading logic, delivering instant responsiveness without bogging down your execution event loop.
+            StratDesk decouples the visual telemetry interface from your trading logic, delivering instant responsiveness without bogging down your execution event loop.
           </p>
         </div>
 
-        {/* 8-Card Interactive Grid */}
+        {/* 12-Card Interactive Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {FEATURES.map((feature) => {
             const Icon = iconMap[feature.id] || Zap;
@@ -261,8 +370,8 @@ export const FeatureShowcase: React.FC = () => {
               <div
                 key={feature.id}
                 className={cn(
-                  "rounded-xl bg-surface/90 border p-5 flex flex-col justify-between transition-all duration-200 hover:border-accent/40 group hover:shadow-lg",
-                  isControlOnly ? "border-warning/30 hover:border-warning" : "border-white/10"
+                  "rounded-xl bg-surface border p-5 flex flex-col justify-between transition-all duration-200 hover:border-accent/40 group hover:shadow-lg shadow-sm",
+                  isControlOnly ? "border-warning/40 hover:border-warning" : "border-border"
                 )}
               >
                 <div>
@@ -283,7 +392,7 @@ export const FeatureShowcase: React.FC = () => {
                         "px-1.5 py-0.5 text-[9px] font-mono font-bold rounded uppercase",
                         isControlOnly
                           ? "bg-warning/10 text-warning border border-warning/30"
-                          : "bg-white/5 text-text-muted border border-white/10"
+                          : "bg-slate-100 dark:bg-white/5 text-text-muted border border-border"
                       )}
                     >
                       {feature.badge}
@@ -291,7 +400,7 @@ export const FeatureShowcase: React.FC = () => {
                   </div>
 
                   {/* Title & Description */}
-                  <h3 className="text-base font-bold text-white font-sans group-hover:text-accent transition-colors">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-sans group-hover:text-accent transition-colors">
                     {feature.title}
                   </h3>
                   <p className="mt-1.5 text-xs text-text-secondary font-sans leading-relaxed line-clamp-3">
@@ -300,7 +409,7 @@ export const FeatureShowcase: React.FC = () => {
                 </div>
 
                 {/* Embedded Mini Demonstration Widget */}
-                <div className="mt-5 pt-3 border-t border-white/5">
+                <div className="mt-5 pt-3 border-t border-border">
                   {renderMiniDemo(feature)}
                 </div>
               </div>

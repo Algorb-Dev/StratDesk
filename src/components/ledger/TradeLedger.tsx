@@ -11,14 +11,15 @@ import { LedgerPeriodicity } from "./LedgerPeriodicity";
 import { LedgerPerformanceChart } from "./LedgerPerformanceChart";
 import { LedgerFilters } from "./LedgerFilters";
 import { LedgerTable } from "./LedgerTable";
-import { AlgorbSymbol } from "@/components/ui/Logo";
+import { StratDeskSymbol } from "@/components/ui/Logo";
 import { THEMES } from "@/data/themes";
+import { ThemeId } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
 import { ShieldCheck, BookOpen, Download, Share2, Sparkles, CheckCircle2 } from "lucide-react";
 
 interface TradeLedgerProps {
   className?: string;
-  theme?: "terminal" | "obsidian" | "quant" | "command" | "vector" | "light";
+  theme?: ThemeId;
   isLight?: boolean;
 }
 
@@ -134,14 +135,14 @@ export const TradeLedger: React.FC<TradeLedgerProps> = ({
       {/* Ledger Top Brand Telemetry Header */}
       <div className={cn("flex flex-wrap items-center justify-between gap-3 pb-3 border-b", isLight ? "border-slate-200" : "border-white/10")}>
         <div className="flex items-center gap-3">
-          <AlgorbSymbol size={22} glow={!isLight} />
+          <StratDeskSymbol size={22} glow={!isLight} />
           <div>
             <div className="flex items-center gap-2">
               <span className={cn("font-bold tracking-widest text-sm uppercase", isLight ? "text-slate-900" : "text-white")}>
-                ALGORB CONTROL // TRADE LEDGER
+                STRATDESK PRO // TRADE LEDGER
               </span>
               <span className={cn("px-1.5 py-0.5 text-[9px] font-bold rounded border uppercase", isLight ? "border-amber-300 text-amber-800 bg-amber-50" : "border-warning/30 text-warning bg-warning/10")}>
-                CONTROL EDITION
+                PRO EDITION
               </span>
             </div>
             <span className={cn("text-[10px] hidden sm:inline", isLight ? "text-slate-500" : "text-text-muted")}>
@@ -255,8 +256,8 @@ export const TradeLedger: React.FC<TradeLedgerProps> = ({
       {isScreenshotMode && (
         <div className={cn("p-3 rounded-lg border flex flex-wrap items-center justify-between gap-3 text-[10px]", isLight ? "bg-slate-100 border-slate-200 text-slate-700" : "bg-black/40 border-accent/30 text-text-secondary")}>
           <div className="flex items-center gap-2 font-bold">
-            <AlgorbSymbol size={16} glow={!isLight} />
-            <span>ALGORB CONTROL VERIFIED RUNTIME REPORT</span>
+            <StratDeskSymbol size={16} glow={!isLight} />
+            <span>STRATDESK PRO VERIFIED RUNTIME REPORT</span>
           </div>
           <div>
             <span>Generated: {new Date().toISOString().replace("T", " ").slice(0, 19)} UTC</span>

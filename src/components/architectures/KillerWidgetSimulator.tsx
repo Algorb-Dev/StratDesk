@@ -416,7 +416,7 @@ function MempoolSniperSimulator({ isLight = false }: { isLight?: boolean }) {
 function CliTerminalSimulator({ isLight = false }: { isLight?: boolean }) {
   const [inputVal, setInputVal] = useState("");
   const [history, setHistory] = useState<string[]>([
-    "algorb-daemon v2.4.1 (x86_64-linux)",
+    "stratdesk-daemon v2.4.1 (x86_64-linux)",
     "Type '/help', '/status', '/pnl', or '/kill_bot' to test IPC commands.",
   ]);
 
@@ -457,7 +457,7 @@ function CliTerminalSimulator({ isLight = false }: { isLight?: boolean }) {
       <div className="flex items-center justify-between pb-1 border-b border-white/10 text-[10px]">
         <div className="flex items-center gap-1.5">
           <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="font-bold uppercase tracking-wider">TTY // ALGORB COMMAND INTERPRETER</span>
+          <span className="font-bold uppercase tracking-wider">TTY // STRATDESK COMMAND INTERPRETER</span>
         </div>
         <span className="text-text-muted">IPC: 127.0.0.1:9042</span>
       </div>
