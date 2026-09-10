@@ -28,10 +28,10 @@ export const Navbar: React.FC = () => {
   }, [pathname]);
 
   const navLinks = [
+    { label: "Workstation", href: "/", icon: Cpu },
     { label: "Architectures", href: "/architectures", icon: Compass },
     { label: "Trade Ledger", href: "/ledger", icon: BookOpen },
-    { label: "Dashboard Lab", href: "/lab", icon: Cpu },
-    { label: "Features", href: "/#features", icon: Layers },
+    { label: "Features", href: "/landing#features", icon: Layers },
     { label: "How It Works", href: "/how-it-works", icon: Terminal },
     { label: "FAQ", href: "/faq", icon: HelpCircle },
   ];
@@ -91,14 +91,14 @@ export const Navbar: React.FC = () => {
             </Link>
 
             <Button
-              href="/#dashboard-lab"
+              href="/"
               variant="primary"
               size="sm"
               icon={<ArrowRight className="w-3 h-3" />}
               iconPosition="right"
               glow={true}
             >
-              EXPLORE DASHBOARDS
+              LIVE WORKSTATION
             </Button>
           </div>
 
@@ -162,7 +162,7 @@ export const Navbar: React.FC = () => {
 
           <div className="mt-auto flex flex-col gap-3">
             <Button
-              href="/#dashboard-lab"
+              href="/"
               variant="primary"
               size="lg"
               className="w-full"
@@ -170,7 +170,7 @@ export const Navbar: React.FC = () => {
               iconPosition="right"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              EXPLORE DASHBOARDS
+              LIVE WORKSTATION
             </Button>
             <div className="flex items-center justify-between text-[11px] font-mono text-text-muted pt-2 border-t border-border">
               <span className="flex items-center gap-1.5">

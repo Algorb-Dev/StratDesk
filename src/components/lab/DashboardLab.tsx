@@ -100,8 +100,9 @@ function DashboardLabContent() {
     } else {
       params.delete("archetype");
     }
-    const hash = window.location.hash || "#dashboard-lab";
-    const newUrl = `${window.location.pathname}?${params.toString()}${hash}`;
+    const hash = window.location.hash || "";
+    const query = params.toString();
+    const newUrl = `${window.location.pathname}${query ? `?${query}` : ""}${hash}`;
     window.history.replaceState(null, "", newUrl);
   };
 
@@ -124,19 +125,19 @@ function DashboardLabContent() {
   const isDefault = !selectedArchetype || selectedArchetype === "default";
 
   return (
-    <section id="dashboard-lab" className="relative py-28 border-b border-white/10 bg-background overflow-hidden">
+    <section id="dashboard-lab" className="relative pt-6 pb-20 border-b border-white/10 bg-background overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
+        <div className="text-center max-w-3xl mx-auto mb-10">
           <Badge variant="accent" size="sm" className="mb-3">
-            INTERACTIVE WORKSTATION
+            LIVE DEMO WORKSTATION
           </Badge>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight font-sans">
-            DASHBOARD LAB. <br />
-            <span className="text-text-muted">EXPERIENCE THE RUNTIME BEFORE YOU BUY.</span>
-          </h2>
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight font-sans">
+            STRATDESK PRO COMMAND CENTER. <br />
+            <span className="text-text-muted">INSTITUTIONAL QUANTITATIVE RUNTIME.</span>
+          </h1>
           <p className="mt-4 text-base sm:text-lg text-text-secondary leading-relaxed font-sans">
-            Test drive all 20 specialized bot archetypes and 6 color themes interactively. Switch between live monitoring telemetry and active command bus in real time.
+            Live interactive workstation demo. Test drive all 20 specialized bot blueprints, hot-swap 6 precision themes, simulate exchange telemetry, and test emergency kill-switch overrides in real time.
           </p>
         </div>
 
