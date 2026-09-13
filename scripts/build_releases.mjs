@@ -20,14 +20,6 @@ if (fs.existsSync(STAGING_DIR)) {
 fs.mkdirSync(PRO_STAGING, { recursive: true });
 fs.mkdirSync(PUBLIC_DOWNLOADS_DIR, { recursive: true });
 
-// Clean legacy archives if present
-for (const legacy of ["algorb-core.zip", "algorb-pro.zip"]) {
-  const rPath = path.join(RELEASES_DIR, legacy);
-  const pPath = path.join(PUBLIC_DOWNLOADS_DIR, legacy);
-  if (fs.existsSync(rPath)) fs.unlinkSync(rPath);
-  if (fs.existsSync(pPath)) fs.unlinkSync(pPath);
-}
-
 function writeEnsureDir(filePath, content) {
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
@@ -74,14 +66,14 @@ const GLOBAL_EXCLUDES = [
   ".DS_Store",
 ];
 
-// Common files to copy
-const COMMON_ROOT_FILES = [
+console.log("==> Copying root configuration and AI directives...");
+const ROOT_CONFIG_FILES = [
   "tsconfig.json",
-  "next.config.mjs",
   "tailwind.config.ts",
   "postcss.config.mjs",
   ".eslintrc.json",
   ".gitignore",
+  ".env.example",
   "STRATDESK_SPEC.md",
   "AI_RULES.md",
   ".cursorrules",
@@ -89,10 +81,11 @@ const COMMON_ROOT_FILES = [
   ".windsurfrules",
   "CONVENTIONS.md",
   "START_HERE.md",
+  "README.md",
+  "QUICKSTART.md",
 ];
 
-console.log("==> Copying shared assets and configuration...");
-for (const file of COMMON_ROOT_FILES) {
+for (const file of ROOT_CONFIG_FILES) {
   const srcFile = path.join(ROOT_DIR, file);
   if (fs.existsSync(srcFile)) {
     fs.copyFileSync(srcFile, path.join(PRO_STAGING, file));
@@ -113,102 +106,226 @@ if (fs.existsSync(path.join(ROOT_DIR, ".antigravity", "rules.md"))) {
   );
 }
 
-// Copy public directory (excluding downloads)
-copyRecursive(path.join(ROOT_DIR, "public"), path.join(PRO_STAGING, "public"), [
-  ...GLOBAL_EXCLUDES,
-  "downloads",
-]);
-
-// Copy src directories
-copyRecursive(path.join(ROOT_DIR, "src", "lib"), path.join(PRO_STAGING, "src", "lib"), GLOBAL_EXCLUDES);
-copyRecursive(path.join(ROOT_DIR, "src", "hooks"), path.join(PRO_STAGING, "src", "hooks"), GLOBAL_EXCLUDES);
-copyRecursive(path.join(ROOT_DIR, "src", "data"), path.join(PRO_STAGING, "src", "data"), GLOBAL_EXCLUDES);
-copyRecursive(path.join(ROOT_DIR, "src", "components"), path.join(PRO_STAGING, "src", "components"), GLOBAL_EXCLUDES);
-
-// Copy globals.css, icon.svg, and not-found.tsx
-writeEnsureDir(path.join(PRO_STAGING, "src", "app", "globals.css"), fs.readFileSync(path.join(ROOT_DIR, "src", "app", "globals.css"), "utf-8"));
-
-if (fs.existsSync(path.join(ROOT_DIR, "src", "app", "icon.svg"))) {
-  writeEnsureDir(path.join(PRO_STAGING, "src", "app", "icon.svg"), fs.readFileSync(path.join(ROOT_DIR, "src", "app", "icon.svg"), "utf-8"));
+// Copy minimal public directory (only icon and symbol)
+console.log("==> Copying minimal public assets...");
+if (fs.existsSync(path.join(ROOT_DIR, "public", "logo-symbol.svg"))) {
+  writeEnsureDir(
+    path.join(PRO_STAGING, "public", "logo-symbol.svg"),
+    fs.readFileSync(path.join(ROOT_DIR, "public", "logo-symbol.svg"), "utf-8")
+  );
 }
 
-writeEnsureDir(path.join(PRO_STAGING, "src", "app", "not-found.tsx"), fs.readFileSync(path.join(ROOT_DIR, "src", "app", "not-found.tsx"), "utf-8"));
-
-// Copy sub-pages (architectures, themes, how-it-works, docs, faq, lab, legal)
-const SUB_PAGES = ["architectures", "themes", "how-it-works", "docs", "faq", "lab", "legal"];
-for (const page of SUB_PAGES) {
-  copyRecursive(path.join(ROOT_DIR, "src", "app", page), path.join(PRO_STAGING, "src", "app", page), GLOBAL_EXCLUDES);
-}
-
-// Copy Trade Ledger components, API route, and Python bot adapter
-console.log("==> Configuring StratDesk Pro components & scripts...");
-copyRecursive(path.join(ROOT_DIR, "src", "components", "ledger"), path.join(PRO_STAGING, "src", "components", "ledger"), GLOBAL_EXCLUDES);
-copyRecursive(path.join(ROOT_DIR, "src", "app", "api", "ledger"), path.join(PRO_STAGING, "src", "app", "api", "ledger"), GLOBAL_EXCLUDES);
+// Copy Python adapter script
+console.log("==> Copying Python bot adapter...");
 fs.mkdirSync(path.join(PRO_STAGING, "scripts"), { recursive: true });
-fs.copyFileSync(path.join(ROOT_DIR, "scripts", "bot_adapter.py"), path.join(PRO_STAGING, "scripts", "bot_adapter.py"));
+fs.copyFileSync(
+  path.join(ROOT_DIR, "scripts", "bot_adapter.py"),
+  path.join(PRO_STAGING, "scripts", "bot_adapter.py")
+);
 
-// -----------------------------------------------------------------------------
-// Pro Customizations
-// -----------------------------------------------------------------------------
-console.log("==> Customizing StratDesk Pro package files...");
+// Copy libraries and hooks
+console.log("==> Copying core libraries and hooks...");
+copyRecursive(path.join(ROOT_DIR, "src", "lib"), path.join(PRO_STAGING, "src", "lib"), GLOBAL_EXCLUDES);
 
-const proPackageJson = {
-  name: "stratdesk-pro",
-  version: "1.0.0",
-  private: true,
-  description: "StratDesk Pro — Self-Hosted Institutional Command Center & Execution Terminal",
-  scripts: {
-    dev: "next dev",
-    build: "next build",
-    start: "next start",
-    lint: "next lint",
-    typecheck: "tsc --noEmit"
-  },
-  dependencies: {
-    clsx: "^2.1.1",
-    "lucide-react": "^0.454.0",
-    next: "^14.2.15",
-    react: "^18.3.1",
-    "react-dom": "^18.3.1",
-    "tailwind-merge": "^2.5.4"
-  },
-  devDependencies: {
-    "@types/node": "^20.17.0",
-    "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.1",
-    eslint: "^8.57.1",
-    "eslint-config-next": "^14.2.15",
-    postcss: "^8.4.47",
-    tailwindcss: "^3.4.14",
-    typescript: "^5.6.3"
-  }
-};
-writeEnsureDir(path.join(PRO_STAGING, "package.json"), JSON.stringify(proPackageJson, null, 2) + "\n");
+writeEnsureDir(
+  path.join(PRO_STAGING, "src", "hooks", "useTheme.ts"),
+  fs.readFileSync(path.join(ROOT_DIR, "src", "hooks", "useTheme.ts"), "utf-8")
+);
+writeEnsureDir(
+  path.join(PRO_STAGING, "src", "hooks", "useDashboardArchitecture.ts"),
+  fs.readFileSync(path.join(ROOT_DIR, "src", "hooks", "useDashboardArchitecture.ts"), "utf-8")
+);
 
-const proPageTsx = `import React from "react";
-import { Metadata } from "next";
-import { DashboardPreview } from "@/components/dashboard/DashboardPreview";
+// Copy data files required by dashboard (only dashboard data, no marketing/product/faq data)
+console.log("==> Copying dashboard data models...");
+writeEnsureDir(
+  path.join(PRO_STAGING, "src", "data", "architectures-data.ts"),
+  fs.readFileSync(path.join(ROOT_DIR, "src", "data", "architectures-data.ts"), "utf-8")
+);
+writeEnsureDir(
+  path.join(PRO_STAGING, "src", "data", "themes.ts"),
+  fs.readFileSync(path.join(ROOT_DIR, "src", "data", "themes.ts"), "utf-8")
+);
+writeEnsureDir(
+  path.join(PRO_STAGING, "src", "data", "demo-data.ts"),
+  fs.readFileSync(path.join(ROOT_DIR, "src", "data", "demo-data.ts"), "utf-8")
+);
+writeEnsureDir(
+  path.join(PRO_STAGING, "src", "data", "ledger-data.ts"),
+  fs.readFileSync(path.join(ROOT_DIR, "src", "data", "ledger-data.ts"), "utf-8")
+);
 
-export const metadata: Metadata = {
-  title: "StratDesk Pro // Institutional Command Center",
-  description: "Bidirectional trading command bus, emergency kill-switch, runtime pauses, and forensic audit trade ledger.",
-};
+// Copy UI, effects, ledger, dashboard components
+console.log("==> Copying dashboard UI and telemetry components...");
+copyRecursive(path.join(ROOT_DIR, "src", "components", "effects"), path.join(PRO_STAGING, "src", "components", "effects"), GLOBAL_EXCLUDES);
+copyRecursive(path.join(ROOT_DIR, "src", "components", "ledger"), path.join(PRO_STAGING, "src", "components", "ledger"), GLOBAL_EXCLUDES);
 
-export default function ProDashboardPage() {
+// UI components: Button, Badge, Logo
+writeEnsureDir(
+  path.join(PRO_STAGING, "src", "components", "ui", "Button.tsx"),
+  fs.readFileSync(path.join(ROOT_DIR, "src", "components", "ui", "Button.tsx"), "utf-8")
+);
+writeEnsureDir(
+  path.join(PRO_STAGING, "src", "components", "ui", "Badge.tsx"),
+  fs.readFileSync(path.join(ROOT_DIR, "src", "components", "ui", "Badge.tsx"), "utf-8")
+);
+
+// Logo: set default href = "/"
+let logoContent = fs.readFileSync(path.join(ROOT_DIR, "src", "components", "ui", "Logo.tsx"), "utf-8");
+logoContent = logoContent.replace(/href\s*=\s*"\/home"/g, 'href = "/"');
+writeEnsureDir(path.join(PRO_STAGING, "src", "components", "ui", "Logo.tsx"), logoContent);
+
+// Dashboard components (exclude DashboardLab)
+const DASHBOARD_COMPONENTS = [
+  "ArchitectureSwitcher.tsx",
+  "ControlBar.tsx",
+  "DashboardPreview.tsx",
+  "EquityChart.tsx",
+  "ExecutionLogs.tsx",
+  "MetricCard.tsx",
+  "PositionsTable.tsx",
+  "ThemeSwitcher.tsx",
+];
+for (const comp of DASHBOARD_COMPONENTS) {
+  writeEnsureDir(
+    path.join(PRO_STAGING, "src", "components", "dashboard", comp),
+    fs.readFileSync(path.join(ROOT_DIR, "src", "components", "dashboard", comp), "utf-8")
+  );
+}
+
+// KillerWidgetSimulator for interactive architectures
+writeEnsureDir(
+  path.join(PRO_STAGING, "src", "components", "architectures", "KillerWidgetSimulator.tsx"),
+  fs.readFileSync(path.join(ROOT_DIR, "src", "components", "architectures", "KillerWidgetSimulator.tsx"), "utf-8")
+);
+
+// BlueprintSpecHud sanitized (remove Whop checkout CTA strip and PRODUCTS import)
+let specHudContent = fs.readFileSync(
+  path.join(ROOT_DIR, "src", "components", "architectures", "BlueprintSpecHud.tsx"),
+  "utf-8"
+);
+specHudContent = specHudContent.replace(/import\s*\{\s*PRODUCTS\s*\}\s*from\s*"@\/data\/products";\n?/, "");
+specHudContent = specHudContent.replace(/const productTier = PRODUCTS\[blueprint\.recommendedTier\];\n?/, "");
+specHudContent = specHudContent.replace(/import\s*\{\s*([\s\S]*?)\s*\}\s*from\s*"lucide-react";/, (match, imports) => {
+  const cleaned = imports
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s !== "ExternalLink" && s.length > 0)
+    .join(", ");
+  return `import { ${cleaned} } from "lucide-react";`;
+});
+const checkoutStripRegex = /\{\/\* 5\. Direct Whop Checkout CTA Strip \*\/\}[\s\S]*?<\/div>\s*<\/div>\s*\);\s*\};/m;
+const cleanStatusSection = `{/* 5. Active Blueprint Architecture Status */}
+      <div
+        className={cn(
+          "p-4 rounded-xl border flex flex-col sm:flex-row items-center justify-between gap-4 select-none",
+          isLight
+            ? "bg-slate-50 border-slate-200"
+            : "bg-surface-elevated/70 border-accent/30 shadow-glow-cyan/10"
+        )}
+      >
+        <div className="space-y-1 text-center sm:text-left">
+          <div className="flex items-center justify-center sm:justify-start gap-2">
+            <ShieldCheck className="w-4 h-4 text-success" />
+            <span className="font-bold text-white text-sm">
+              Topology Preset #{blueprint.number}: {blueprint.title}
+            </span>
+          </div>
+          <p className="text-xs text-text-muted font-sans">
+            Architecture active. Stream telemetry, orders, and risk ceilings directly into this layout.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="px-3.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>ACTIVE BLUEPRINT</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};`;
+specHudContent = specHudContent.replace(checkoutStripRegex, cleanStatusSection);
+writeEnsureDir(
+  path.join(PRO_STAGING, "src", "components", "architectures", "BlueprintSpecHud.tsx"),
+  specHudContent
+);
+
+// App Router routes
+console.log("==> Setting up clean App Router routes for dashboard...");
+writeEnsureDir(
+  path.join(PRO_STAGING, "src", "app", "globals.css"),
+  fs.readFileSync(path.join(ROOT_DIR, "src", "app", "globals.css"), "utf-8")
+);
+if (fs.existsSync(path.join(ROOT_DIR, "src", "app", "icon.svg"))) {
+  writeEnsureDir(
+    path.join(PRO_STAGING, "src", "app", "icon.svg"),
+    fs.readFileSync(path.join(ROOT_DIR, "src", "app", "icon.svg"), "utf-8")
+  );
+}
+
+// Clean NotFound component
+const cleanNotFoundTsx = `"use client";
+
+import React from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { StratDeskSymbol } from "@/components/ui/Logo";
+import { TradingGrid } from "@/components/effects/TradingGrid";
+import { GlowField } from "@/components/effects/GlowField";
+import { AlertTriangle, Home, BookOpen } from "lucide-react";
+
+export default function NotFound() {
   return (
-    <div className="pt-24 pb-16 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-      <DashboardPreview
-        product="pro"
-        theme="obsidian"
-        showArchitectureSwitcher={true}
-        showThemeSwitcher={true}
-      />
+    <div className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-24 overflow-hidden bg-background select-none font-mono">
+      <TradingGrid dense={true} fadeEdges={true} />
+      <GlowField color="amber" position="center" />
+
+      <div className="relative z-10 max-w-xl w-full mx-auto text-center space-y-6">
+        <div className="flex justify-center mb-2">
+          <div className="relative">
+            <StratDeskSymbol size={48} glow={true} />
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-red-500/20 border border-red-500/50 flex items-center justify-center text-red-400">
+              <AlertTriangle className="w-3 h-3 text-red-500 animate-pulse" />
+            </div>
+          </div>
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-bold tracking-wider uppercase">
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+          <span>404 // ROUTE NOT FOUND</span>
+        </div>
+
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white font-sans tracking-tight">
+            ENDPOINT UNREACHABLE
+          </h1>
+          <p className="mt-2 text-xs sm:text-sm text-text-secondary font-sans max-w-md mx-auto">
+            The requested route does not exist in this self-hosted StratDesk Pro workstation.
+          </p>
+        </div>
+
+        <div className="pt-2 flex items-center justify-center gap-3">
+          <Button href="/" variant="primary" size="md" icon={<Home className="w-4 h-4" />}>
+            COMMAND CENTER
+          </Button>
+          <Button href="/ledger" variant="outline" size="md" icon={<BookOpen className="w-4 h-4" />}>
+            TRADE LEDGER
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
 `;
-writeEnsureDir(path.join(PRO_STAGING, "src", "app", "page.tsx"), proPageTsx);
+writeEnsureDir(path.join(PRO_STAGING, "src", "app", "not-found.tsx"), cleanNotFoundTsx);
 
+// API Routes (Ledger & Command Bus)
+copyRecursive(path.join(ROOT_DIR, "src", "app", "api", "ledger"), path.join(PRO_STAGING, "src", "app", "api", "ledger"), GLOBAL_EXCLUDES);
+copyRecursive(path.join(ROOT_DIR, "src", "app", "api", "command"), path.join(PRO_STAGING, "src", "app", "api", "command"), GLOBAL_EXCLUDES);
+
+// Clean Trade Ledger Page
 const proLedgerPageTsx = `import React from "react";
 import { Metadata } from "next";
 import { TradeLedger } from "@/components/ledger/TradeLedger";
@@ -228,6 +345,32 @@ export default function LedgerPage() {
 `;
 writeEnsureDir(path.join(PRO_STAGING, "src", "app", "ledger", "page.tsx"), proLedgerPageTsx);
 
+// Clean Root Page (The Dashboard HUD!)
+const proPageTsx = `import React from "react";
+import { Metadata } from "next";
+import { DashboardPreview } from "@/components/dashboard/DashboardPreview";
+
+export const metadata: Metadata = {
+  title: "StratDesk Pro // Institutional Command Center",
+  description: "Bidirectional trading command bus, emergency kill-switch, runtime pauses, and forensic audit trade ledger.",
+};
+
+export default function ProDashboardPage() {
+  return (
+    <div className="pt-20 pb-16 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+      <DashboardPreview
+        product="pro"
+        theme="obsidian"
+        showArchitectureSwitcher={true}
+        showThemeSwitcher={true}
+      />
+    </div>
+  );
+}
+`;
+writeEnsureDir(path.join(PRO_STAGING, "src", "app", "page.tsx"), proPageTsx);
+
+// Clean Root Layout (NO Whop Pixel, NO Vercel Analytics, NO marketing scripts)
 const proLayoutTsx = `import type { Metadata, Viewport } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -243,7 +386,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "StratDesk Pro | Institutional Command Center & Execution Terminal",
+    default: "StratDesk Pro | Institutional Command Center",
     template: "%s | StratDesk Pro",
   },
   description: "Self-hosted, institutional-grade React command center with bidirectional HMAC command bus and forensic trade ledger.",
@@ -268,6 +411,7 @@ export default function RootLayout({
 `;
 writeEnsureDir(path.join(PRO_STAGING, "src", "app", "layout.tsx"), proLayoutTsx);
 
+// Minimal HUD Navbar (No marketing links, only Dashboard and Trade Ledger)
 const proNavbarTsx = `"use client";
 
 import React, { useState, useEffect } from "react";
@@ -275,7 +419,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
-import { Menu, X, Terminal, Compass, BookOpen, HelpCircle, FileText, Sliders } from "lucide-react";
+import { Menu, X, Terminal, BookOpen } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -295,13 +439,8 @@ export const Navbar: React.FC = () => {
   }, [pathname]);
 
   const navLinks = [
-    { label: "Command Center", href: "/", icon: Terminal },
-    { label: "Audit Ledger", href: "/ledger", icon: FileText },
-    { label: "Lab", href: "/lab", icon: Sliders },
-    { label: "Architectures", href: "/architectures", icon: Compass },
-    { label: "Integration", href: "/how-it-works", icon: Terminal },
-    { label: "Docs", href: "/docs", icon: BookOpen },
-    { label: "FAQ", href: "/faq", icon: HelpCircle },
+    { label: "Dashboard", href: "/", icon: Terminal },
+    { label: "Trade Ledger", href: "/ledger", icon: BookOpen },
   ];
 
   return (
@@ -309,42 +448,44 @@ export const Navbar: React.FC = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-40 transition-all duration-300 select-none",
         isScrolled
-          ? "py-2.5 bg-background/85 backdrop-blur-md border-b border-border shadow-md dark:shadow-black/50"
-          : "py-4 bg-transparent border-b border-transparent"
+          ? "py-2.5 bg-background/90 backdrop-blur-md border-b border-border shadow-md"
+          : "py-3 bg-background/70 backdrop-blur-sm border-b border-white/5"
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Logo size="md" glow={true} />
+          <Logo size="md" glow={true} href="/" />
           <span className="hidden sm:inline-block px-2 py-0.5 text-[9px] font-mono font-bold tracking-wider rounded border border-warning/40 text-warning bg-warning/10 uppercase">
             PRO COMMAND BUS
           </span>
         </div>
 
-        <nav className="hidden md:flex items-center gap-1 font-mono text-xs font-medium">
+        <nav className="hidden md:flex items-center gap-2 font-mono text-xs font-medium">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
+            const Icon = link.icon;
             return (
               <Link
                 key={link.label}
                 href={link.href}
                 className={cn(
-                  "px-3.5 py-1.5 rounded transition-all duration-150 uppercase tracking-wider",
+                  "px-3.5 py-1.5 rounded-lg transition-all duration-150 uppercase tracking-wider flex items-center gap-2",
                   isActive
-                    ? "text-warning bg-warning/10 font-semibold"
-                    : "text-text-secondary hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.03]"
+                    ? "text-warning bg-warning/10 font-semibold border border-warning/30"
+                    : "text-text-secondary hover:text-white hover:bg-white/[0.04]"
                 )}
               >
-                {link.label}
+                <Icon className="w-3.5 h-3.5" />
+                <span>{link.label}</span>
               </Link>
             );
           })}
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-warning/40 bg-warning/10 text-warning font-mono text-[10px] font-bold">
-            <span className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse" />
-            <span>COMMAND BUS ARMED</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>LOCAL IPC ACTIVE • PORT 3000</span>
           </div>
         </div>
 
@@ -352,7 +493,7 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-            className="p-2 rounded bg-surface border border-border text-text-secondary hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="p-2 rounded bg-surface border border-border text-text-secondary hover:text-white transition-colors"
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -363,16 +504,18 @@ export const Navbar: React.FC = () => {
         <div className="md:hidden bg-background/95 backdrop-blur-xl border-b border-border px-4 py-4 space-y-2 font-mono text-xs">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
+            const Icon = link.icon;
             return (
               <Link
                 key={link.label}
                 href={link.href}
                 className={cn(
-                  "block px-3 py-2 rounded uppercase font-medium",
+                  "flex items-center gap-2 px-3 py-2 rounded uppercase font-medium",
                   isActive ? "text-warning bg-warning/10" : "text-text-secondary"
                 )}
               >
-                {link.label}
+                <Icon className="w-4 h-4" />
+                <span>{link.label}</span>
               </Link>
             );
           })}
@@ -384,51 +527,33 @@ export const Navbar: React.FC = () => {
 `;
 writeEnsureDir(path.join(PRO_STAGING, "src", "components", "layout", "Navbar.tsx"), proNavbarTsx);
 
+// Minimal Terminal Footer (No marketing links, no SEO text)
 const proFooterTsx = `"use client";
 
 import React from "react";
-import Link from "next/link";
-import { Logo, StratDeskSymbol } from "@/components/ui/Logo";
+import { Logo } from "@/components/ui/Logo";
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="w-full border-t border-border bg-background pt-12 pb-8 select-none">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          <div className="space-y-4 md:col-span-2">
-            <Logo size="md" />
-            <p className="text-xs text-text-secondary font-sans leading-relaxed max-w-sm">
-              StratDesk Pro: Self-hosted institutional command center and bidirectional trading terminal. Includes HMAC-signed emergency kill switches, strategy pauses, and forensic audit trade ledger.
-            </p>
-            <div className="flex items-center gap-2 text-[10px] font-mono text-warning">
-              <span className="w-2 h-2 rounded-full bg-warning animate-pulse" />
-              <span>PERPETUAL LICENSE // PRO COMMAND EDITION</span>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2.5 font-mono text-xs">
-            <span className="font-bold text-white uppercase tracking-widest text-[11px] mb-1">Navigation</span>
-            <Link href="/" className="text-text-secondary hover:text-accent transition-colors">Command Center HUD</Link>
-            <Link href="/ledger" className="text-text-secondary hover:text-accent transition-colors">Audit Trade Ledger</Link>
-            <Link href="/lab" className="text-text-secondary hover:text-accent transition-colors">Dashboard Lab</Link>
-            <Link href="/architectures" className="text-text-secondary hover:text-accent transition-colors">20 Architectures</Link>
-          </div>
-
-          <div className="flex flex-col gap-2.5 font-mono text-xs">
-            <span className="font-bold text-white uppercase tracking-widest text-[11px] mb-1">Developer & Support</span>
-            <Link href="/docs" className="text-text-secondary hover:text-accent transition-colors">Developer Specs</Link>
-            <Link href="/how-it-works" className="text-text-secondary hover:text-accent transition-colors">Command Bus Protocol</Link>
-            <Link href="/faq" className="text-text-secondary hover:text-accent transition-colors">Technical FAQ</Link>
-            <a href="mailto:stratdesk.pro@gmail.com" className="text-text-secondary hover:text-accent transition-colors">stratdesk.pro@gmail.com</a>
-          </div>
+    <footer className="w-full border-t border-border/40 bg-[#07090e] py-6 select-none font-mono text-xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-text-muted">
+        <div className="flex items-center gap-3">
+          <Logo size="sm" showWordmark={true} href="/" />
+          <span className="text-text-secondary text-[11px]">
+            // Institutional Trading Command Center (Self-Hosted)
+          </span>
         </div>
-
-        <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-text-muted">
-          <div>© {new Date().getFullYear()} StratDesk. All rights reserved. Self-hosted client software.</div>
-          <div className="flex items-center gap-2">
-            <StratDeskSymbol size={14} />
-            <span>STRATDESK PRO // V1.0.0</span>
-          </div>
+        <div className="flex flex-wrap items-center gap-3 text-[10px] text-text-muted">
+          <span className="flex items-center gap-1.5 text-emerald-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            LOCAL LOOPBACK IPC &lt; 1ms
+          </span>
+          <span>•</span>
+          <span>HMAC-SHA256 COMMAND BUS</span>
+          <span>•</span>
+          <a href="mailto:stratdesk.pro@gmail.com" className="hover:text-accent transition-colors">
+            stratdesk.pro@gmail.com
+          </a>
         </div>
       </div>
     </footer>
@@ -437,142 +562,50 @@ export const Footer: React.FC = () => {
 `;
 writeEnsureDir(path.join(PRO_STAGING, "src", "components", "layout", "Footer.tsx"), proFooterTsx);
 
-const proReadme = `# StratDesk Pro — Institutional Command Center & Execution Terminal
+// Minimal next.config.mjs for the self-hosted dashboard (no marketing redirects)
+const proNextConfig = `/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+};
 
-> Premium, self-hosted bidirectional command center, emergency kill-switch, and forensic trade ledger for algorithmic trading systems.
-
-Welcome to **StratDesk Pro**. Your purchase includes 100% source code access to institutional command-and-control capabilities:
-- **Bidirectional HMAC Command Bus**: Emergency Kill-Switch (\`FLATTEN & HALT\`), runtime strategy pause switches, and parameter reloader.
-- **Forensic Audit Trade Ledger**: R-multiple tracking, slippage analysis, Sharpe ratio, screenshot mode with cryptographic watermark, CSV export.
-- **Automated Trade Ingestion**: Pre-wired \`POST /api/ledger\` server route ready to consume executions.
-- **Python CCXT Adapter**: \`scripts/bot_adapter.py\` ready to integrate into your live bot.
-- **All 20 Architectures Unlocked**: Full access to all specialized topologies.
-- **6 Precision Themes**: \`terminal\`, \`obsidian\`, \`quant\`, \`command\`, \`vector\`, \`light\`.
-
----
-
-## ⚡ Quick Start
-
-\`\`\`bash
-# 1. Install dependencies
-npm install
-
-# 2. Start the command center
-npm run dev
-\`\`\`
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## 🐍 Testing Bot Ingestion (Python)
-
-StratDesk Pro includes an asynchronous Python adapter in \`scripts/bot_adapter.py\`:
-
-\`\`\`bash
-# Run the demo adapter pipeline to push an audited trade to your local dashboard:
-python scripts/bot_adapter.py
-\`\`\`
-
-You will see:
-\`\`\`text
-[1] Prepared Audited Trade Payload...
-[2] Transmitting execution to StratDesk Command Bus (http://localhost:3000/api/ledger)...
-[STRATDESK INGESTION SUCCESS] HTTP 201 — Recorded ID: TRD-2026-0907-143
-[3] Ingestion Confirmed by StratDesk Pro: Trade verified on dashboard.
-\`\`\`
-
-Switch to the **Audit Ledger** tab (or visit \`/ledger\`) to inspect your freshly recorded trade with full forensic metrics!
-
----
-
-## 🛡️ Bidirectional HMAC Command Verification
-
-Dispatched actions (emergency halt, strategy reload) require HMAC-SHA256 signature verification in your bot:
-
-\`\`\`python
-import hmac
-import hashlib
-
-def verify_stratdesk_command(payload_bytes: bytes, signature: str, secret_key: str) -> bool:
-    computed = hmac.new(secret_key.encode(), payload_bytes, hashlib.sha256).hexdigest()
-    return hmac.compare_digest(computed, signature)
-\`\`\`
-
----
-
-## 🤖 Universal AI Integration & Auto-Moulding
-
-StratDesk Pro is engineered with native rules for **every major AI coding assistant**:
-- **Cursor IDE**: Pre-loaded \`.cursorrules\`
-- **Claude Code (Anthropic)**: Pre-loaded \`CLAUDE.md\`
-- **Windsurf (Cascade)**: Pre-loaded \`.windsurfrules\`
-- **GitHub Copilot & Codex**: Pre-loaded \`.github/copilot-instructions.md\`
-- **Google Antigravity & Gemini**: Pre-loaded \`.antigravity/rules.md\`
-- **Aider & Open Code**: Pre-loaded \`CONVENTIONS.md\`
-- **Universal Specification**: \`STRATDESK_SPEC.md\` & \`AI_RULES.md\`
-
-Simply open your extracted StratDesk Pro project in any AI editor alongside your bot and prompt:
-> *"Connect this dashboard to my trading bot."*
-
-The AI assistant will automatically read the embedded directives, preserve the institutional dark HUD terminal layout, mould the 6 metric cards and parameters to your specific bot, and generate a non-invasive bridge adapter.
-
----
-
-## 🔒 Security & Data Privacy
-
-- **100% Client-Side**: No cloud servers ever receive your trading orders, positions, or keys.
-- **Zero Credentials Required**: StratDesk never handles your private exchange API keys.
-- Support: \`stratdesk.pro@gmail.com\`
+export default nextConfig;
 `;
-writeEnsureDir(path.join(PRO_STAGING, "README.md"), proReadme);
-writeEnsureDir(path.join(PRO_STAGING, "QUICKSTART.md"), proReadme);
+writeEnsureDir(path.join(PRO_STAGING, "next.config.mjs"), proNextConfig);
 
-// Sanitize blueprint action buttons in package to load into dashboard
-console.log("==> Sanitizing blueprint action buttons for self-hosted owners...");
-const hudPath = path.join(PRO_STAGING, "src", "components", "architectures", "BlueprintSpecHud.tsx");
-if (fs.existsSync(hudPath)) {
-  let content = fs.readFileSync(hudPath, "utf-8");
-  content = content.replace(
-    /<a[\s\S]*?href=\{productTier\.whopCheckoutUrl\}[\s\S]*?<\/a>/,
-    '<Link href={`/?archetype=${blueprint.id}`} className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-accent text-background font-bold text-xs uppercase tracking-wider hover:bg-accent/80 transition-all flex items-center justify-center gap-2 shadow-lg shadow-accent/20 shrink-0"><span>LOAD IN DASHBOARD</span><Sliders className="w-3.5 h-3.5" /></Link>'
-  );
-  if (!content.includes('import Link from "next/link";')) {
-    content = 'import Link from "next/link";\n' + content;
+// Clean package.json for the self-hosted dashboard
+const proPackageJson = {
+  name: "stratdesk-pro",
+  version: "1.0.0",
+  private: true,
+  description: "StratDesk Pro — Self-Hosted Institutional Command Center & Execution Terminal",
+  scripts: {
+    dev: "next dev",
+    build: "next build",
+    start: "next start",
+    lint: "next lint",
+    typecheck: "tsc --noEmit"
+  },
+  dependencies: {
+    clsx: "^2.1.1",
+    "lucide-react": "^0.454.0",
+    next: "^14.2.15",
+    react: "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.5.4"
+  },
+  devDependencies: {
+    "@types/node": "^20.17.0",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    autoprefixer: "^10.4.20",
+    eslint: "^8.57.1",
+    "eslint-config-next": "^14.2.15",
+    postcss: "^8.4.47",
+    tailwindcss: "^3.4.14",
+    typescript: "^5.6.3"
   }
-  fs.writeFileSync(hudPath, content);
-}
-
-const matrixPath = path.join(PRO_STAGING, "src", "components", "architectures", "ArchitectureMatrix.tsx");
-if (fs.existsSync(matrixPath)) {
-  let content = fs.readFileSync(matrixPath, "utf-8");
-  content = content.replace(
-    /<a[\s\S]*?href=\{productTier\.whopCheckoutUrl\}[\s\S]*?<\/a>/,
-    '<Link href={`/?archetype=${blueprint.id}`} className={cn("px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase transition-all flex items-center gap-1 shadow-md", isLight ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-accent text-black hover:bg-accent/80 shadow-accent/10")}><span>ACTIVATE</span><Sliders className="w-3 h-3" /></Link>'
-  );
-  if (!content.includes('import Link from "next/link";')) {
-    content = 'import Link from "next/link";\n' + content;
-  }
-  fs.writeFileSync(matrixPath, content);
-}
-
-const modalPath = path.join(PRO_STAGING, "src", "components", "architectures", "ArchitectureModal.tsx");
-if (fs.existsSync(modalPath)) {
-  let content = fs.readFileSync(modalPath, "utf-8");
-  content = content.replace(
-    /<a[\s\S]*?href=\{productTier\.whopCheckoutUrl\}[\s\S]*?<\/a>/,
-    '<Link href={`/?archetype=${blueprint.id}`} onClick={onClose} className={cn("px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-lg", isLight ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-accent text-black hover:bg-accent/80 shadow-accent/20")}><span>LOAD IN DASHBOARD</span><Sliders className="w-3.5 h-3.5" /></Link>'
-  );
-  fs.writeFileSync(modalPath, content);
-}
-
-const archPagePath = path.join(PRO_STAGING, "src", "app", "architectures", "page.tsx");
-if (fs.existsSync(archPagePath)) {
-  let content = fs.readFileSync(archPagePath, "utf-8");
-  content = content.replace(/import \{ FinalCta \} from "@\/components\/cta\/FinalCta";\n?/, "");
-  content = content.replace(/<FinalCta \/>\n?/, "");
-  fs.writeFileSync(archPagePath, content);
-}
+};
+writeEnsureDir(path.join(PRO_STAGING, "package.json"), JSON.stringify(proPackageJson, null, 2) + "\n");
 
 // -----------------------------------------------------------------------------
 // Typecheck Staging Distribution
